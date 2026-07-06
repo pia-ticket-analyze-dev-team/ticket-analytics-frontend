@@ -21,7 +21,7 @@ const menuItems = [
   {
     title: "Dashboard",
     icon: <DashboardOutlinedIcon />,
-    path: null,
+    path: "/dashboard",
   },
   {
     title: "Customers",

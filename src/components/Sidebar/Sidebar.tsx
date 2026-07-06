@@ -6,6 +6,7 @@ import {
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
@@ -20,36 +21,39 @@ const menuItems = [
   {
     title: "Dashboard",
     icon: <DashboardOutlinedIcon />,
-    active: false,
+    path: null,
   },
   {
     title: "Customers",
     icon: <GroupsOutlinedIcon />,
-    active: true,
+    path: "/customers",
   },
   {
     title: "Tickets",
     icon: <ConfirmationNumberOutlinedIcon />,
-    active: false,
+    path: "/tickets",
   },
   {
     title: "Analytics",
     icon: <BarChartOutlinedIcon />,
-    active: false,
+    path: null,
   },
   {
     title: "Reports",
     icon: <DescriptionOutlinedIcon />,
-    active: false,
+    path: null,
   },
   {
     title: "Settings",
     icon: <SettingsOutlinedIcon />,
-    active: false,
+    path: null,
   },
 ];
 
 const Sidebar = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
   return (
     <Box
       sx={{
@@ -100,43 +104,44 @@ const Sidebar = () => {
         </Box>
 
         <List sx={{ px: 2 }}>
-          {menuItems.map((item) => (
-            <ListItemButton
-              key={item.title}
-              sx={{
-                mb: 1,
-                borderRadius: "10px",
-                height: 48,
+          {menuItems.map((item) => {
+            const isActive = item.path !== null && location.pathname.startsWith(item.path);
 
-                bgcolor: item.active
-                  ? "#2463FF"
-                  : "transparent",
-
-                "&:hover": {
-                  bgcolor: item.active
-                    ? "#2463FF"
-                    : "rgba(255,255,255,.08)",
-                },
-              }}
-            >
-              <ListItemIcon
+            return (
+              <ListItemButton
+                key={item.title}
+                onClick={() => item.path && navigate(item.path)}
                 sx={{
-                  color: "white",
-                  minWidth: 40,
+                  mb: 1,
+                  borderRadius: "10px",
+                  height: 48,
+
+                  bgcolor: isActive ? "#2463FF" : "transparent",
+
+                  "&:hover": {
+                    bgcolor: isActive ? "#2463FF" : "rgba(255,255,255,.08)",
+                  },
                 }}
               >
-                {item.icon}
-              </ListItemIcon>
+                <ListItemIcon
+                  sx={{
+                    color: "white",
+                    minWidth: 40,
+                  }}
+                >
+                  {item.icon}
+                </ListItemIcon>
 
-              <ListItemText
-                primary={item.title}
-                primaryTypographyProps={{
-                  fontSize: 15,
-                  fontWeight: item.active ? 600 : 500,
-                }}
-              />
-            </ListItemButton>
-          ))}
+                <ListItemText
+                  primary={item.title}
+                  primaryTypographyProps={{
+                    fontSize: 15,
+                    fontWeight: isActive ? 600 : 500,
+                  }}
+                />
+              </ListItemButton>
+            );
+          })}
         </List>
       </Box>
 

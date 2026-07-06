@@ -75,6 +75,12 @@ const TicketPage = () => {
         const wantsBreached = filters.slaBreached === "Yes";
         if (ticket.slaBreached !== wantsBreached) return false;
       }
+      if (filters.assignedAgent !== "All") {
+        const wantsUnassigned = filters.assignedAgent === "Unassigned";
+        if (wantsUnassigned ? ticket.assignedAgent !== null : ticket.assignedAgent !== filters.assignedAgent) {
+          return false;
+        }
+      }
       if (ticket.createdAt < dateRange.start || ticket.createdAt > dateRange.end) {
         return false;
       }

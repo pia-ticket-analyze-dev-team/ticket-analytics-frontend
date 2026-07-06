@@ -23,6 +23,7 @@ export interface DateRange {
 export interface TicketUpdate {
   issueTopic: string;
   department: string;
+  city: string;
   priority: TicketPriority;
   status: TicketStatus;
 }
@@ -34,6 +35,7 @@ export interface TicketFilterState {
   department: string;
   city: string;
   slaBreached: string;
+  assignedAgent: string;
 }
 
 export const defaultTicketFilters: TicketFilterState = {
@@ -43,4 +45,5 @@ export const defaultTicketFilters: TicketFilterState = {
   department: "All",
   city: "All",
   slaBreached: "All",
+  assignedAgent: "All",
 };

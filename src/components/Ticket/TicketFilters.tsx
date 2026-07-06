@@ -9,6 +9,7 @@ import {
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import {
+  agentOptions,
   cityOptions,
   departmentOptions,
   issueTopicOptions,
@@ -24,8 +25,17 @@ interface FilterFieldProps {
 }
 
 const FilterField = ({ label, value, options, onChange }: FilterFieldProps) => (
-  <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75, minWidth: 150 }}>
-    <Typography sx={{ fontSize: 13, color: "#6B7280", fontWeight: 500 }}>
+  <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75, flex: "1 1 0", minWidth: 0 }}>
+    <Typography
+      sx={{
+        fontSize: 13,
+        color: "#6B7280",
+        fontWeight: 500,
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+      }}
+    >
       {label}
     </Typography>
 
@@ -85,7 +95,7 @@ const TicketFilters = ({
         gap: 2.5,
       }}
     >
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2.5 }}>
+      <Box sx={{ display: "flex", flexWrap: "nowrap", gap: 2, overflowX: "auto", pb: 0.5 }}>
         <FilterField
           label="Status"
           value={filters.status}
@@ -126,6 +136,13 @@ const TicketFilters = ({
           value={filters.slaBreached}
           options={["All", "Yes", "No"]}
           onChange={setField("slaBreached")}
+        />
+
+        <FilterField
+          label="Assigned Agent"
+          value={filters.assignedAgent}
+          options={["All", "Unassigned", ...agentOptions]}
+          onChange={setField("assignedAgent")}
         />
       </Box>
 

@@ -18,7 +18,7 @@ import {
   Typography,
   type SelectChangeEvent,
 } from "@mui/material";
-import SwapHorizOutlinedIcon from "@mui/icons-material/SwapHorizOutlined";
+import SupportAgentOutlinedIcon from "@mui/icons-material/SupportAgentOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import CheckIcon from "@mui/icons-material/Check";
@@ -31,7 +31,12 @@ import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import PersonOffOutlinedIcon from "@mui/icons-material/PersonOffOutlined";
 import type { Ticket, TicketPriority, TicketStatus, TicketUpdate } from "../../types/ticket";
 import { formatDateTime } from "../../utils/date";
-import { agentOptions, departmentOptions, issueTopicOptions } from "../../data/mockTickets";
+import {
+  agentOptions,
+  cityOptions,
+  departmentOptions,
+  issueTopicOptions,
+} from "../../data/mockTickets";
 
 const priorityOptions: TicketPriority[] = ["HIGH", "MEDIUM", "LOW"];
 const statusOptions: TicketStatus[] = ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"];
@@ -98,6 +103,7 @@ const TicketTable = ({
     setDraft({
       issueTopic: ticket.issueTopic,
       department: ticket.department,
+      city: ticket.city,
       priority: ticket.priority,
       status: ticket.status,
     });
@@ -260,7 +266,27 @@ const TicketTable = ({
                   )}
                 </TableCell>
 
-                <TableCell sx={{ fontSize: 14, color: "#374151" }}>{ticket.city}</TableCell>
+                <TableCell sx={{ fontSize: 14, color: "#374151", minWidth: 130 }}>
+                  {isEditing && draft ? (
+                    <Select
+                      size="small"
+                      fullWidth
+                      value={draft.city}
+                      onChange={(e: SelectChangeEvent) =>
+                        setDraft({ ...draft, city: e.target.value })
+                      }
+                      sx={editSelectSx}
+                    >
+                      {cityOptions.map((option) => (
+                        <MenuItem key={option} value={option} sx={{ fontSize: 14 }}>
+                          {option}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  ) : (
+                    ticket.city
+                  )}
+                </TableCell>
 
                 <TableCell sx={{ minWidth: 110 }}>
                   {isEditing && draft ? (
@@ -361,7 +387,7 @@ const TicketTable = ({
                           }
                         >
                           <IconButton size="small" onClick={(e) => openAgentMenu(e, ticket)}>
-                            <SwapHorizOutlinedIcon sx={{ fontSize: 19, color: "#6B7280" }} />
+                            <SupportAgentOutlinedIcon sx={{ fontSize: 19, color: "#6B7280" }} />
                           </IconButton>
                         </Tooltip>
 

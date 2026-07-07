@@ -12,10 +12,6 @@ export function fetchTicketsByStatus() {
   return apiGet("/api/dashboard/charts/status");
 }
 
-export function fetchTicketsByRegion() {
-  return apiGet("/api/dashboard/charts/region");
-}
-
 export function fetchTopIssueTopics() {
   return apiGet("/api/dashboard/charts/topics");
 }

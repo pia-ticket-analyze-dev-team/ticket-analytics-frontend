@@ -8,18 +8,22 @@ import TicketStatusDonut from "../../components/Dashboard/TicketStatusDonut";
 import HorizontalBarChart from "../../components/Dashboard/HorizontalBarChart";
 import SlaBreachGauge from "../../components/Dashboard/SlaBreachGauge";
 import VerticalBarChart from "../../components/Dashboard/VerticalBarChart";
-import { slaStatTile, type StatTileData } from "../../data/mockDashboard";
+import type { StatTileData } from "../../data/mockDashboard";
 import { useKpiSummary } from "../../hooks/useKpiSummary";
 import { useTicketVolume } from "../../hooks/useTicketVolume";
 import { useTicketsByStatus } from "../../hooks/useTicketsByStatus";
-import { useTicketsByRegion } from "../../hooks/useTicketsByRegion";
+import { useServiceTypeTrend } from "../../hooks/useServiceTypeTrend";
 import { useTopIssueTopics } from "../../hooks/useTopIssueTopics";
 import { useDepartmentWorkload } from "../../hooks/useDepartmentWorkload";
+import { useSlaTargetRate } from "../../hooks/useSlaTargetRate";
 import {
   buildKpiStatTiles,
   buildLabeledCounts,
+  buildServiceTypeCounts,
+  buildSlaBreachTile,
   buildTicketStatusBreakdown,
   buildTicketVolumeSeries,
+  computeSlaBreachRate,
 } from "../../utils/dashboardStats";
 
 const unavailableTile = (label: string): StatTileData => ({
@@ -36,15 +40,17 @@ const DashboardPage = () => {
 
   const volume = useTicketVolume();
   const status = useTicketsByStatus();
-  const region = useTicketsByRegion();
+  const serviceType = useServiceTypeTrend();
   const topics = useTopIssueTopics();
   const departments = useDepartmentWorkload();
+  const sla = useSlaTargetRate();
+  const slaTile = sla.data ? buildSlaBreachTile(sla.data) : null;
 
   const tilePositions: (StatTileData | "loading")[] = [
     kpiTiles?.[0] ?? (loading ? "loading" : unavailableTile("Total Customers")),
     kpiTiles?.[1] ?? (loading ? "loading" : unavailableTile("Total Tickets")),
     kpiTiles?.[2] ?? (loading ? "loading" : unavailableTile("Open Tickets")),
-    slaStatTile,
+    slaTile ?? (sla.loading ? "loading" : unavailableTile("SLA Breach Rate")),
     kpiTiles?.[3] ?? (loading ? "loading" : unavailableTile("Avg. Resolution Time")),
     kpiTiles?.[4] ?? (loading ? "loading" : unavailableTile("Customer Satisfaction")),
   ];
@@ -116,18 +122,19 @@ const DashboardPage = () => {
           </ChartAsyncContent>
         </ChartCard>
 
-        <ChartCard
-          title="Tickets by Region"
-          rangeOptions={["Last 30 Days", "Last 7 Days", "Last 90 Days"]}
-        >
+        <ChartCard title="Tickets by Service Type">
           <ChartAsyncContent
-            loading={region.loading}
-            error={region.error}
-            data={region.data}
+            loading={serviceType.loading}
+            error={serviceType.error}
+            data={serviceType.data}
             skeletonHeight={200}
           >
             {(items) => (
-              <HorizontalBarChart data={buildLabeledCounts(items)} showAxis labelWidth={70} />
+              <HorizontalBarChart
+                data={buildServiceTypeCounts(items)}
+                showAxis
+                labelWidth={100}
+              />
             )}
           </ChartAsyncContent>
         </ChartCard>
@@ -141,7 +148,14 @@ const DashboardPage = () => {
         }}
       >
         <ChartCard title="SLA Breach Rate">
-          <SlaBreachGauge />
+          <ChartAsyncContent
+            loading={sla.loading}
+            error={sla.error}
+            data={sla.data}
+            skeletonHeight={150}
+          >
+            {(data) => <SlaBreachGauge value={computeSlaBreachRate(data)} />}
+          </ChartAsyncContent>
         </ChartCard>
 
         <ChartCard title="Top 5 Issue Topics">

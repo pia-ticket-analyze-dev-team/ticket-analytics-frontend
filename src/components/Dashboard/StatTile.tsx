@@ -11,6 +11,7 @@ interface StatTileProps {
 }
 
 const StatTile = ({ tile }: StatTileProps) => {
+  const hasDelta = tile.delta.trim().length > 0;
   const isUp = tile.delta.trim().startsWith("+");
   const color = tile.deltaGood ? GOOD_COLOR : BAD_COLOR;
 
@@ -45,13 +46,16 @@ const StatTile = ({ tile }: StatTileProps) => {
       </Typography>
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-        {isUp ? (
-          <ArrowUpwardIcon sx={{ fontSize: 15, color }} />
-        ) : (
-          <ArrowDownwardIcon sx={{ fontSize: 15, color }} />
-        )}
+        {hasDelta &&
+          (isUp ? (
+            <ArrowUpwardIcon sx={{ fontSize: 15, color }} />
+          ) : (
+            <ArrowDownwardIcon sx={{ fontSize: 15, color }} />
+          ))}
 
-        <Typography sx={{ fontSize: 13, fontWeight: 600, color }}>{tile.delta}</Typography>
+        {hasDelta && (
+          <Typography sx={{ fontSize: 13, fontWeight: 600, color }}>{tile.delta}</Typography>
+        )}
 
         <Typography
           sx={{

@@ -6,6 +6,7 @@ import type {
   StatusCount,
   TicketStatusKey,
 } from "../types/dashboard";
+import type { ServiceTypeTrend, SlaTargetRate } from "../types/analytics";
 
 const formatSignedPercent = (value: number) =>
   `${value >= 0 ? "+" : ""}${value.toFixed(2)}%`;
@@ -89,3 +90,20 @@ export const buildTicketStatusBreakdown = (statuses: StatusCount[]): TicketStatu
 
 export const buildLabeledCounts = (items: NamedCount[]) =>
   items.map((item) => ({ label: item.name, value: item.ticketCount }));
+
+export const buildServiceTypeCounts = (items: ServiceTypeTrend[]) =>
+  items.map((item) => ({ label: item.serviceTypeName, value: item.ticketCount }));
+
+// The backend's `slaTargetRate` field is the percentage of tickets that met
+// SLA (the inverse of what we want) — compute the breach rate from the raw
+// counts instead of subtracting from a value that's already been rounded.
+export const computeSlaBreachRate = (sla: SlaTargetRate): number =>
+  sla.totalTicketCount === 0 ? 0 : (sla.breachedTicketCount / sla.totalTicketCount) * 100;
+
+export const buildSlaBreachTile = (sla: SlaTargetRate): StatTileData => ({
+  label: "SLA Breach Rate",
+  value: `${computeSlaBreachRate(sla).toFixed(2)}%`,
+  delta: "",
+  deltaGood: true,
+  comparisonLabel: "Last 30 days",
+});

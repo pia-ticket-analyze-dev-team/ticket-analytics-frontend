@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Box,
   Button,
@@ -6,29 +7,86 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+
+import { createCustomer } from "../../../api/customers/customers.js";
 
 interface CustomerFormProps {
   isEdit?: boolean;
+  onCancel?: () => void;
+  onSuccess?: () => void;
 }
 
-const CustomerForm = ({ isEdit = false }: CustomerFormProps) => {
-  const customer = isEdit
-    ? {
-        name: "Ahmet Yılmaz",
-        email: "ahmet@example.com",
-        phone: "532 123 45 67",
-        segment: "Individual",
-        city: "İstanbul",
-        address: "Kadıköy / İstanbul",
-      }
-    : {
-        name: "",
-        email: "",
-        phone: "",
-        segment: "",
-        city: "",
-        address: "",
-      };
+interface CustomerFormState {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  segment: string;
+  address: string;
+  birthdate: string;
+}
+
+const emptyForm: CustomerFormState = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
+  segment: "",
+  address: "",
+  birthdate: "",
+};
+
+const editMockForm: CustomerFormState = {
+  firstName: "Ahmet",
+  lastName: "Yılmaz",
+  email: "ahmet@example.com",
+  phone: "532 123 45 67",
+  segment: "Individual",
+  address: "Kadıköy / İstanbul",
+  birthdate: "1990-01-01",
+};
+
+const CustomerForm = ({ isEdit = false, onCancel, onSuccess }: CustomerFormProps) => {
+  const navigate = useNavigate();
+  const handleCancel = onCancel ?? (() => navigate("/customers"));
+
+  const [form, setForm] = useState<CustomerFormState>(isEdit ? editMockForm : emptyForm);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const setField = (field: keyof CustomerFormState) => (value: string) =>
+    setForm((prev) => ({ ...prev, [field]: value }));
+
+  const isValid =
+    form.firstName.trim() !== "" &&
+    form.lastName.trim() !== "" &&
+    form.email.trim() !== "" &&
+    form.address.trim() !== "";
+
+  const handleSubmit = () => {
+    if (!isValid || submitting) return;
+
+    setSubmitting(true);
+    setError(null);
+
+    createCustomer({
+      firstName: form.firstName.trim(),
+      lastName: form.lastName.trim(),
+      email: form.email.trim(),
+      phone: form.phone.trim() || null,
+      segment: form.segment || null,
+      address: form.address.trim(),
+      birthdate: form.birthdate || null,
+    })
+      .then(() => {
+        setForm(emptyForm);
+        onSuccess?.();
+        handleCancel();
+      })
+      .catch(() => setError("Couldn't create customer. Please try again."))
+      .finally(() => setSubmitting(false));
+  };
 
   return (
     <Paper
@@ -64,27 +122,38 @@ const CustomerForm = ({ isEdit = false }: CustomerFormProps) => {
         }}
       >
         <TextField
-          label="Customer Name"
-          defaultValue={customer.name}
+          label="First Name"
+          value={form.firstName}
+          onChange={(e) => setField("firstName")(e.target.value)}
+          fullWidth
+        />
+
+        <TextField
+          label="Last Name"
+          value={form.lastName}
+          onChange={(e) => setField("lastName")(e.target.value)}
           fullWidth
         />
 
         <TextField
           label="Email"
-          defaultValue={customer.email}
+          value={form.email}
+          onChange={(e) => setField("email")(e.target.value)}
           fullWidth
         />
 
         <TextField
           label="Phone"
-          defaultValue={customer.phone}
+          value={form.phone}
+          onChange={(e) => setField("phone")(e.target.value)}
           fullWidth
         />
 
         <TextField
           select
           label="Segment"
-          defaultValue={customer.segment}
+          value={form.segment}
+          onChange={(e) => setField("segment")(e.target.value)}
           fullWidth
         >
           <MenuItem value="Individual">Individual</MenuItem>
@@ -92,20 +161,14 @@ const CustomerForm = ({ isEdit = false }: CustomerFormProps) => {
           <MenuItem value="SME">SME</MenuItem>
         </TextField>
 
-        <Box
-          sx={{
-            gridColumn: {
-              xs: "span 1",
-              md: "span 2",
-            },
-          }}
-        >
-          <TextField
-            label="City"
-            defaultValue={customer.city}
-            fullWidth
-          />
-        </Box>
+        <TextField
+          label="Birthdate"
+          type="date"
+          value={form.birthdate}
+          onChange={(e) => setField("birthdate")(e.target.value)}
+          slotProps={{ inputLabel: { shrink: true } }}
+          fullWidth
+        />
 
         <Box
           sx={{
@@ -117,13 +180,23 @@ const CustomerForm = ({ isEdit = false }: CustomerFormProps) => {
         >
           <TextField
             label="Address"
-            defaultValue={customer.address}
+            value={form.address}
+            onChange={(e) => setField("address")(e.target.value)}
             multiline
             minRows={4}
             fullWidth
           />
         </Box>
       </Box>
+
+      {error && (
+        <Typography
+          color="error"
+          sx={{ mt: 3 }}
+        >
+          {error}
+        </Typography>
+      )}
 
       <Box
         sx={{
@@ -135,6 +208,7 @@ const CustomerForm = ({ isEdit = false }: CustomerFormProps) => {
       >
         <Button
           variant="outlined"
+          onClick={handleCancel}
           sx={{
             minWidth: 140,
             height: 46,
@@ -147,6 +221,8 @@ const CustomerForm = ({ isEdit = false }: CustomerFormProps) => {
 
         <Button
           variant="contained"
+          onClick={isEdit ? undefined : handleSubmit}
+          disabled={!isEdit && (!isValid || submitting)}
           sx={{
             minWidth: 180,
             height: 46,
@@ -159,7 +235,7 @@ const CustomerForm = ({ isEdit = false }: CustomerFormProps) => {
             },
           }}
         >
-          {isEdit ? "Save Changes" : "Create Customer"}
+          {isEdit ? "Save Changes" : submitting ? "Creating..." : "Create Customer"}
         </Button>
       </Box>
     </Paper>

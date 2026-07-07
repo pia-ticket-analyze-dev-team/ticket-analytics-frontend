@@ -6,7 +6,6 @@ import {
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
-import { useLocation, useNavigate } from "react-router-dom";
 
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
@@ -21,39 +20,36 @@ const menuItems = [
   {
     title: "Dashboard",
     icon: <DashboardOutlinedIcon />,
-    path: "/dashboard",
+    active: false,
   },
   {
     title: "Customers",
     icon: <GroupsOutlinedIcon />,
-    path: "/customers",
+    active: true,
   },
   {
     title: "Tickets",
     icon: <ConfirmationNumberOutlinedIcon />,
-    path: "/tickets",
+    active: false,
   },
   {
-    title: "Agent Analytics",
+    title: "Analytics",
     icon: <BarChartOutlinedIcon />,
-    path: "/analytics",
+    active: false,
   },
   {
     title: "Reports",
     icon: <DescriptionOutlinedIcon />,
-    path: null,
+    active: false,
   },
   {
     title: "Settings",
     icon: <SettingsOutlinedIcon />,
-    path: null,
+    active: false,
   },
 ];
 
 const Sidebar = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-
   return (
     <Box
       sx={{
@@ -104,44 +100,43 @@ const Sidebar = () => {
         </Box>
 
         <List sx={{ px: 2 }}>
-          {menuItems.map((item) => {
-            const isActive = item.path !== null && location.pathname.startsWith(item.path);
+          {menuItems.map((item) => (
+            <ListItemButton
+              key={item.title}
+              sx={{
+                mb: 1,
+                borderRadius: "10px",
+                height: 48,
 
-            return (
-              <ListItemButton
-                key={item.title}
-                onClick={() => item.path && navigate(item.path)}
+                bgcolor: item.active
+                  ? "#2463FF"
+                  : "transparent",
+
+                "&:hover": {
+                  bgcolor: item.active
+                    ? "#2463FF"
+                    : "rgba(255,255,255,.08)",
+                },
+              }}
+            >
+              <ListItemIcon
                 sx={{
-                  mb: 1,
-                  borderRadius: "10px",
-                  height: 48,
-
-                  bgcolor: isActive ? "#2463FF" : "transparent",
-
-                  "&:hover": {
-                    bgcolor: isActive ? "#2463FF" : "rgba(255,255,255,.08)",
-                  },
+                  color: "white",
+                  minWidth: 40,
                 }}
               >
-                <ListItemIcon
-                  sx={{
-                    color: "white",
-                    minWidth: 40,
-                  }}
-                >
-                  {item.icon}
-                </ListItemIcon>
+                {item.icon}
+              </ListItemIcon>
 
-                <ListItemText
-                  primary={item.title}
-                  primaryTypographyProps={{
-                    fontSize: 15,
-                    fontWeight: isActive ? 600 : 500,
-                  }}
-                />
-              </ListItemButton>
-            );
-          })}
+              <ListItemText
+                primary={item.title}
+                primaryTypographyProps={{
+                  fontSize: 15,
+                  fontWeight: item.active ? 600 : 500,
+                }}
+              />
+            </ListItemButton>
+          ))}
         </List>
       </Box>
 

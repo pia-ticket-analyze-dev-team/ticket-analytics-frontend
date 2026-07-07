@@ -12,38 +12,14 @@ const customer = {
 };
 
 const info = [
-  {
-    label: "Name",
-    value: customer.name,
-  },
-  {
-    label: "Email",
-    value: customer.email,
-  },
-  {
-    label: "Phone",
-    value: customer.phone,
-  },
-  {
-    label: "Segment",
-    value: customer.segment,
-  },
-  {
-    label: "City",
-    value: customer.city,
-  },
-  {
-    label: "Address",
-    value: customer.address,
-  },
-  {
-    label: "Registration Date",
-    value: customer.registrationDate,
-  },
-  {
-    label: "Customer ID",
-    value: customer.customerId,
-  },
+  { label: "Name", value: customer.name },
+  { label: "Email", value: customer.email },
+  { label: "Phone", value: customer.phone },
+  { label: "Segment", value: customer.segment },
+  { label: "City", value: customer.city },
+  { label: "Address", value: customer.address },
+  { label: "Registration Date", value: customer.registrationDate },
+  { label: "Customer ID", value: customer.customerId },
 ];
 
 const CustomerInfoCard = () => {
@@ -51,20 +27,21 @@ const CustomerInfoCard = () => {
     <Paper
       elevation={0}
       sx={{
+        width: "100%",
         height: "100%",
-        minHeight: 330,
+        minHeight: 320,
         border: "1px solid #E5E7EB",
-        borderRadius: "20px",
-        p: 3.5,
+        borderRadius: "24px",
+        p: 4,
         backgroundColor: "#FFFFFF",
       }}
     >
       <Typography
         sx={{
-          fontSize: 18,
+          fontSize: 30,
           fontWeight: 700,
           color: "#1F2937",
-          mb: 3,
+          mb: 4,
         }}
       >
         Customer Information
@@ -75,15 +52,15 @@ const CustomerInfoCard = () => {
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: "120px 1fr",
+              gridTemplateColumns: "170px 1fr",
               alignItems: "center",
-              py: 1.3,
+              py: 1.5,
               columnGap: 2,
             }}
           >
             <Typography
               sx={{
-                fontSize: 14,
+                fontSize: 16,
                 color: "#6B7280",
               }}
             >
@@ -92,11 +69,10 @@ const CustomerInfoCard = () => {
 
             <Typography
               sx={{
-                fontSize: 14,
+                fontSize: 16,
                 fontWeight: 500,
                 color: "#1F2937",
                 textAlign: "right",
-                wordBreak: "break-word",
               }}
             >
               {item.value}

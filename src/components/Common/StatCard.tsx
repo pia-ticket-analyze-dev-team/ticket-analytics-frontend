@@ -1,24 +1,27 @@
-import { Paper, Typography } from "@mui/material";
+import { Box, Paper, Typography } from "@mui/material";
+import type { ReactNode } from "react";
 
 interface StatCardProps {
   title: string;
   value: string | number;
   color?: string;
+  icon?: ReactNode;
 }
 
 const StatCard = ({
   title,
   value,
   color = "#111827",
+  icon,
 }: StatCardProps) => {
   return (
     <Paper
       elevation={0}
       sx={{
-        height: 200,
+        height: "100%",
         border: "1px solid #E5E7EB",
-        borderRadius: "30px",
-        p: 3,
+        borderRadius: "20px",
+        p: 2.5,
         backgroundColor: "#FFFFFF",
 
         display: "flex",
@@ -32,19 +35,48 @@ const StatCard = ({
         },
       }}
     >
-      <Typography
+      <Box
         sx={{
-          fontSize: 16,
-          fontWeight: 500,
-          color: "#6B7280",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
         }}
       >
-        {title}
-      </Typography>
+        <Typography
+          sx={{
+            fontSize: 15,
+            fontWeight: 500,
+            color: "#6B7280",
+          }}
+        >
+          {title}
+        </Typography>
+
+        {icon && (
+          <Box
+            sx={{
+              width: 42,
+              height: 42,
+              borderRadius: "50%",
+              bgcolor: "#F3F4F6",
+
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+
+              "& svg": {
+                fontSize: 24,
+              },
+            }}
+          >
+            {icon}
+          </Box>
+        )}
+      </Box>
 
       <Typography
         sx={{
-          fontSize: 42,
+          fontSize: 34,
           fontWeight: 700,
           color,
           lineHeight: 1,

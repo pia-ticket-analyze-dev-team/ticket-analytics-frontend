@@ -15,6 +15,8 @@ import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
 import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
 import KeyboardArrowLeftOutlinedIcon from "@mui/icons-material/KeyboardArrowLeftOutlined";
 import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
+import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+import TrendingDownOutlinedIcon from "@mui/icons-material/TrendingDownOutlined";
 
 const menuItems = [
   {
@@ -33,9 +35,19 @@ const menuItems = [
     path: "/tickets",
   },
   {
-    title: "Analytics",
+    title: "My Tickets",
+    icon: <AssignmentOutlinedIcon />,
+    path: "/my-tickets",
+  },
+  {
+    title: "Agent Analytics",
     icon: <BarChartOutlinedIcon />,
-    path: "/analytics",
+    path: "/agent-analytics",
+  },
+  {
+    title: "Customer Churn",
+    icon: <TrendingDownOutlinedIcon />,
+    path: "/churn-analysis",
   },
   {
     title: "Regional Insights",

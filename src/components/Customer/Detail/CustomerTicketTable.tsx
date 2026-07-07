@@ -1,6 +1,4 @@
 import {
-  Chip,
-  IconButton,
   Paper,
   Table,
   TableBody,
@@ -11,196 +9,205 @@ import {
   Typography,
 } from "@mui/material";
 
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import { useState } from "react";
 
-import { useNavigate } from "react-router-dom";
+import CustomerEditableStatus from "./CustomerEditableStatus";
+import CustomerEditablePriority from "./CustomerEditablePriority";
+import CustomerEditableActions from "./CustomerEditableActions";
+import CustomerDeleteTicketDialog from "./CustomerDeleteTicketDialog";
 
-interface Ticket {
-  id: string;
-  issue: string;
-  status: string;
-  priority: string;
-  department: string;
-  createdAt: string;
-}
+import type {
+  CustomerTicket,
+  CustomerTicketPriority,
+  CustomerTicketStatus,
+} from "./customerTicket.types";
 
 interface CustomerTicketTableProps {
-  tickets: Ticket[];
+  tickets: CustomerTicket[];
 }
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "OPEN":
-      return {
-        bgcolor: "#FFF7ED",
-        color: "#EA580C",
-      };
-
-    case "RESOLVED":
-      return {
-        bgcolor: "#ECFDF5",
-        color: "#16A34A",
-      };
-
-    case "IN_PROGRESS":
-      return {
-        bgcolor: "#EFF6FF",
-        color: "#2563EB",
-      };
-
-    default:
-      return {
-        bgcolor: "#F3F4F6",
-        color: "#4B5563",
-      };
-  }
-};
-
-const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case "HIGH":
-      return {
-        bgcolor: "#FEF2F2",
-        color: "#DC2626",
-      };
-
-    case "MEDIUM":
-      return {
-        bgcolor: "#FFF7ED",
-        color: "#D97706",
-      };
-
-    default:
-      return {
-        bgcolor: "#ECFDF5",
-        color: "#16A34A",
-      };
-  }
-};
 
 const CustomerTicketTable = ({
   tickets,
 }: CustomerTicketTableProps) => {
-  const navigate = useNavigate();
+  const [tableData, setTableData] =
+    useState<CustomerTicket[]>(tickets);
 
-  const handleDelete = (ticketId: string) => {
-    const confirmed = window.confirm(
-      `Are you sure you want to delete ${ticketId}?`
+  const [editingId, setEditingId] =
+    useState<string | null>(null);
+
+  const [editedStatus, setEditedStatus] =
+    useState<CustomerTicketStatus>("OPEN");
+
+  const [editedPriority, setEditedPriority] =
+    useState<CustomerTicketPriority>("LOW");
+
+  const [deleteTicket, setDeleteTicket] =
+    useState<CustomerTicket | null>(null);
+
+  const handleEdit = (ticket: CustomerTicket) => {
+    setEditingId(ticket.id);
+    setEditedStatus(ticket.status);
+    setEditedPriority(ticket.priority);
+  };
+
+  const handleCancel = () => {
+    setEditingId(null);
+  };
+
+  const handleSave = (id: string) => {
+    setTableData((prev) =>
+      prev.map((ticket) =>
+        ticket.id === id
+          ? {
+              ...ticket,
+              status: editedStatus,
+              priority: editedPriority,
+            }
+          : ticket
+      )
     );
 
-    if (confirmed) {
-      console.log("Deleted:", ticketId);
+    setEditingId(null);
+  };
 
-      // Backend geldiğinde burada API çağrısı olacak.
-    }
+  const handleDelete = () => {
+    if (!deleteTicket) return;
+
+    setTableData((prev) =>
+      prev.filter(
+        (ticket) => ticket.id !== deleteTicket.id
+      )
+    );
+
+    setDeleteTicket(null);
   };
 
   return (
-    <TableContainer
-      component={Paper}
-      sx={{
-        borderRadius: 3,
-        boxShadow: "0 2px 12px rgba(0,0,0,.06)",
-      }}
-    >
-      <Typography
+    <>
+      <TableContainer
+        component={Paper}
         sx={{
-          px: 3,
-          pt: 3,
-          pb: 2,
-          fontSize: 18,
-          fontWeight: 600,
+          borderRadius: 3,
+          boxShadow: "0 2px 12px rgba(0,0,0,.06)",
         }}
       >
-        Customer Tickets
-      </Typography>
+        <Typography
+          sx={{
+            px: 3,
+            pt: 3,
+            pb: 2,
+            fontSize: 18,
+            fontWeight: 600,
+          }}
+        >
+          Customer Tickets
+        </Typography>
 
-      <Table>
-        <TableHead>
-          <TableRow sx={{ background: "#F8FAFC" }}>
-            <TableCell sx={{ fontWeight: 700 }}>Ticket No</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Issue</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Priority</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Department</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Created At</TableCell>
-            <TableCell
-              align="center"
-              sx={{ fontWeight: 700 }}
-            >
-              Actions
-            </TableCell>
-          </TableRow>
-        </TableHead>
-
-        <TableBody>
-          {tickets.map((ticket) => (
-            <TableRow
-              key={ticket.id}
-              hover
-            >
-              <TableCell>{ticket.id}</TableCell>
-
-              <TableCell>{ticket.issue}</TableCell>
-
-              <TableCell>
-                <Chip
-                  label={ticket.status}
-                  size="small"
-                  sx={{
-                    fontWeight: 600,
-                    ...getStatusColor(ticket.status),
-                  }}
-                />
+        <Table>
+          <TableHead>
+            <TableRow sx={{ background: "#F8FAFC" }}>
+              <TableCell sx={{ fontWeight: 700 }}>
+                Ticket No
               </TableCell>
 
-              <TableCell>
-                <Chip
-                  label={ticket.priority}
-                  size="small"
-                  sx={{
-                    fontWeight: 600,
-                    ...getPriorityColor(ticket.priority),
-                  }}
-                />
+              <TableCell sx={{ fontWeight: 700 }}>
+                Issue
               </TableCell>
 
-              <TableCell>{ticket.department}</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>
+                Status
+              </TableCell>
 
-              <TableCell>{ticket.createdAt}</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>
+                Priority
+              </TableCell>
 
-              <TableCell align="center">
-                <IconButton
-                  size="small"
-                  onClick={() => navigate(`/tickets/${ticket.id}`)}
-                >
-                  <VisibilityOutlinedIcon fontSize="small" />
-                </IconButton>
+              <TableCell sx={{ fontWeight: 700 }}>
+                Department
+              </TableCell>
 
-                <IconButton
-                  size="small"
-                  onClick={() =>
-                    navigate(`/tickets/${ticket.id}/edit`)
-                  }
-                >
-                  <EditOutlinedIcon fontSize="small" />
-                </IconButton>
+              <TableCell sx={{ fontWeight: 700 }}>
+                Created At
+              </TableCell>
 
-                <IconButton
-                  size="small"
-                  color="error"
-                  onClick={() => handleDelete(ticket.id)}
-                >
-                  <DeleteOutlineOutlinedIcon fontSize="small" />
-                </IconButton>
+              <TableCell
+                align="center"
+                sx={{ fontWeight: 700 }}
+              >
+                Actions
               </TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableHead>
+
+          <TableBody>
+            {tableData.map((ticket) => {
+              const editing =
+                editingId === ticket.id;
+
+              return (
+                <TableRow
+                  key={ticket.id}
+                  hover
+                >
+                  <TableCell>
+                    {ticket.id}
+                  </TableCell>
+
+                  <TableCell>
+                    {ticket.issue}
+                  </TableCell>
+
+                  <TableCell sx={{ width: 180 }}>
+                    <CustomerEditableStatus
+                      value={ticket.status}
+                      editing={editing}
+                      onChange={setEditedStatus}
+                    />
+                  </TableCell>
+
+                  <TableCell sx={{ width: 180 }}>
+                    <CustomerEditablePriority
+                      value={ticket.priority}
+                      editing={editing}
+                      onChange={setEditedPriority}
+                    />
+                  </TableCell>
+
+                  <TableCell>
+                    {ticket.department}
+                  </TableCell>
+
+                  <TableCell>
+                    {ticket.createdAt}
+                  </TableCell>
+
+                  <TableCell align="center">
+                    <CustomerEditableActions
+                      editing={editing}
+                      onEdit={() => handleEdit(ticket)}
+                      onSave={() =>
+                        handleSave(ticket.id)
+                      }
+                      onCancel={handleCancel}
+                      onDelete={() =>
+                        setDeleteTicket(ticket)
+                      }
+                    />
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <CustomerDeleteTicketDialog
+        open={!!deleteTicket}
+        ticketNo={deleteTicket?.id ?? ""}
+        onClose={() => setDeleteTicket(null)}
+        onDelete={handleDelete}
+      />
+    </>
   );
 };
 

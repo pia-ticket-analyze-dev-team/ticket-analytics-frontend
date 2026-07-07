@@ -8,10 +8,10 @@ const CustomerOverview = () => {
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: "520px 1fr",
+        gridTemplateColumns: "3fr 1fr",
         gap: 3,
-        alignItems: "stretch",
         mb: 4,
+        alignItems: "stretch",
       }}
     >
       <CustomerInfoCard />
@@ -19,8 +19,9 @@ const CustomerOverview = () => {
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: "repeat(2, minmax(160px, 1fr))",
-          gap: 3,
+          gridTemplateColumns: "repeat(2,1fr)",
+          gridAutoRows: "160px",
+          gap: 2,
         }}
       >
         <CustomerStats />

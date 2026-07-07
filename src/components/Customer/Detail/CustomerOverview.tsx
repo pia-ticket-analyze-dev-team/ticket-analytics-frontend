@@ -2,8 +2,13 @@ import { Box } from "@mui/material";
 
 import CustomerInfoCard from "./CustomerInfoCard";
 import CustomerStats from "./CustomerStats";
+import type { Customer } from "../customer.types";
 
-const CustomerOverview = () => {
+type CustomerOverviewProps = {
+  customer: Customer;
+};
+
+const CustomerOverview = ({ customer }: CustomerOverviewProps) => {
   return (
     <Box
       sx={{
@@ -14,7 +19,7 @@ const CustomerOverview = () => {
         mb: 4,
       }}
     >
-      <CustomerInfoCard />
+      <CustomerInfoCard customer={customer} />
 
       <Box
         sx={{

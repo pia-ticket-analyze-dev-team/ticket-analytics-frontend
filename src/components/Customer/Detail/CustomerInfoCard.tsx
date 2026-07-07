@@ -1,52 +1,47 @@
 import { Box, Divider, Paper, Typography } from "@mui/material";
 
-const customer = {
-  name: "Ahmet Yılmaz",
-  email: "ahmet@example.com",
-  phone: "532 123 45 67",
-  segment: "Bireysel",
-  city: "İstanbul",
-  address: "Kadıköy, İstanbul, Türkiye",
-  registrationDate: "12.06.2024",
-  customerId: "CUST-000123",
+import type { Customer } from "../customer.types";
+
+type CustomerInfoCardProps = {
+  customer: Customer;
 };
 
-const info = [
-  {
-    label: "Name",
-    value: customer.name,
-  },
-  {
-    label: "Email",
-    value: customer.email,
-  },
-  {
-    label: "Phone",
-    value: customer.phone,
-  },
-  {
-    label: "Segment",
-    value: customer.segment,
-  },
-  {
-    label: "City",
-    value: customer.city,
-  },
-  {
-    label: "Address",
-    value: customer.address,
-  },
-  {
-    label: "Registration Date",
-    value: customer.registrationDate,
-  },
-  {
-    label: "Customer ID",
-    value: customer.customerId,
-  },
-];
+const CustomerInfoCard = ({ customer }: CustomerInfoCardProps) => {
+  const info = [
+    {
+      label: "Name",
+      value: `${customer.firstName} ${customer.lastName}`,
+    },
+    {
+      label: "Email",
+      value: customer.email,
+    },
+    {
+      label: "Phone",
+      value: customer.phone,
+    },
+    {
+      label: "Segment",
+      value: customer.segment,
+    },
+    {
+      label: "Address",
+      value: customer.address,
+    },
+    {
+      label: "Birthdate",
+      value: customer.birthdate ?? "-",
+    },
+    {
+      label: "Registration Date",
+      value: customer.createdAt,
+    },
+    {
+      label: "Customer ID",
+      value: customer.id,
+    },
+  ];
 
-const CustomerInfoCard = () => {
   return (
     <Paper
       elevation={0}

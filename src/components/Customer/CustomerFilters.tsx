@@ -11,6 +11,30 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 
+const CITIES = [
+  "Adana",
+  "Ankara",
+  "Antalya",
+  "Aydın",
+  "Bursa",
+  "Diyarbakır",
+  "Erzurum",
+  "Eskişehir",
+  "Gaziantep",
+  "Istanbul",
+  "Izmir",
+  "Kocaeli",
+  "Konya",
+  "Manisa",
+  "Mersin",
+  "Muğla",
+  "Samsun",
+  "Tekirdağ",
+  "Trabzon",
+  "Van",
+  "Şanlıurfa",
+];
+
 type Props = {
   search: string;
   setSearch: (value: string) => void;
@@ -61,8 +85,9 @@ const CustomerFilters = ({
           onChange={(e) => setSegment(e.target.value)}
         >
           <MenuItem value="All">All</MenuItem>
-          <MenuItem value="Bireysel">Bireysel</MenuItem>
-          <MenuItem value="Kurumsal">Kurumsal</MenuItem>
+          <MenuItem value="Individual">Individual</MenuItem>
+          <MenuItem value="SME">SME</MenuItem>
+          <MenuItem value="Corporate">Corporate</MenuItem>
         </Select>
       </FormControl>
 
@@ -75,11 +100,14 @@ const CustomerFilters = ({
           onChange={(e) => setCity(e.target.value)}
         >
           <MenuItem value="All">All</MenuItem>
-          <MenuItem value="İstanbul">İstanbul</MenuItem>
-          <MenuItem value="Ankara">Ankara</MenuItem>
-          <MenuItem value="İzmir">İzmir</MenuItem>
-          <MenuItem value="Bursa">Bursa</MenuItem>
-          <MenuItem value="Antalya">Antalya</MenuItem>
+          {CITIES.map((cityOption) => (
+            <MenuItem
+              key={cityOption}
+              value={cityOption}
+            >
+              {cityOption}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
 

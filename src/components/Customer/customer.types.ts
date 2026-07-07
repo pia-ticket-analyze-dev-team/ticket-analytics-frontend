@@ -17,3 +17,20 @@ export interface PagedResponse<T> {
   totalElements: number;
   totalPages: number;
 }
+
+export interface CustomerTicket {
+  id: string;
+  ticketNumber: string;
+  issueTopicName: string | null;
+  departmentName: string | null;
+  status: string;
+  priority: string;
+  createdAt: string;
+}
+
+export interface CustomerTicketStats {
+  totalTickets: number;
+  openTickets: number;
+  slaBreachCount: number;
+  averageSatisfactionScore: number;
+}

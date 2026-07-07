@@ -54,26 +54,6 @@ const CustomerDetailHeader = () => {
           View customer information and ticket history.
         </Typography>
       </Box>
-
-      <Button
-        variant="contained"
-        startIcon={<EditOutlinedIcon />}
-        onClick={() => navigate(`/customers/${id}/edit`)}
-        sx={{
-          textTransform: "none",
-          borderRadius: "10px",
-          px: 3,
-          py: 1.2,
-          fontWeight: 600,
-          boxShadow: "none",
-
-          "&:hover": {
-            boxShadow: "none",
-          },
-        }}
-      >
-        Edit Customer
-      </Button>
     </Box>
   );
 };

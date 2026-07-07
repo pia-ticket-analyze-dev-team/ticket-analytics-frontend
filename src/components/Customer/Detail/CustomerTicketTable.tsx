@@ -1,5 +1,6 @@
 import {
   Chip,
+  CircularProgress,
   IconButton,
   Paper,
   Table,
@@ -17,17 +18,12 @@ import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined
 
 import { useNavigate } from "react-router-dom";
 
-interface Ticket {
-  id: string;
-  issue: string;
-  status: string;
-  priority: string;
-  department: string;
-  createdAt: string;
-}
+import type { CustomerTicket } from "../customer.types";
 
 interface CustomerTicketTableProps {
-  tickets: Ticket[];
+  tickets: CustomerTicket[];
+  loading: boolean;
+  error: string | null;
 }
 
 const getStatusColor = (status: string) => {
@@ -59,7 +55,7 @@ const getStatusColor = (status: string) => {
 };
 
 const getPriorityColor = (priority: string) => {
-  switch (priority) {
+  switch (priority.toUpperCase()) {
     case "HIGH":
       return {
         bgcolor: "#FEF2F2",
@@ -80,9 +76,20 @@ const getPriorityColor = (priority: string) => {
   }
 };
 
-const CustomerTicketTable = ({
-  tickets,
-}: CustomerTicketTableProps) => {
+const formatDateTime = (value: string) => {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? value
+    : date.toLocaleString(undefined, {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+};
+
+const CustomerTicketTable = ({ tickets, loading, error }: CustomerTicketTableProps) => {
   const navigate = useNavigate();
 
   const handleDelete = (ticketId: string) => {
@@ -136,68 +143,106 @@ const CustomerTicketTable = ({
         </TableHead>
 
         <TableBody>
-          {tickets.map((ticket) => (
-            <TableRow
-              key={ticket.id}
-              hover
-            >
-              <TableCell>{ticket.id}</TableCell>
-
-              <TableCell>{ticket.issue}</TableCell>
-
-              <TableCell>
-                <Chip
-                  label={ticket.status}
-                  size="small"
-                  sx={{
-                    fontWeight: 600,
-                    ...getStatusColor(ticket.status),
-                  }}
-                />
-              </TableCell>
-
-              <TableCell>
-                <Chip
-                  label={ticket.priority}
-                  size="small"
-                  sx={{
-                    fontWeight: 600,
-                    ...getPriorityColor(ticket.priority),
-                  }}
-                />
-              </TableCell>
-
-              <TableCell>{ticket.department}</TableCell>
-
-              <TableCell>{ticket.createdAt}</TableCell>
-
-              <TableCell align="center">
-                <IconButton
-                  size="small"
-                  onClick={() => navigate(`/tickets/${ticket.id}`)}
-                >
-                  <VisibilityOutlinedIcon fontSize="small" />
-                </IconButton>
-
-                <IconButton
-                  size="small"
-                  onClick={() =>
-                    navigate(`/tickets/${ticket.id}/edit`)
-                  }
-                >
-                  <EditOutlinedIcon fontSize="small" />
-                </IconButton>
-
-                <IconButton
-                  size="small"
-                  color="error"
-                  onClick={() => handleDelete(ticket.id)}
-                >
-                  <DeleteOutlineOutlinedIcon fontSize="small" />
-                </IconButton>
+          {loading && (
+            <TableRow>
+              <TableCell
+                colSpan={7}
+                align="center"
+                sx={{ py: 4 }}
+              >
+                <CircularProgress size={28} />
               </TableCell>
             </TableRow>
-          ))}
+          )}
+
+          {!loading && error && (
+            <TableRow>
+              <TableCell
+                colSpan={7}
+                align="center"
+                sx={{ py: 4 }}
+              >
+                <Typography color="error">{error}</Typography>
+              </TableCell>
+            </TableRow>
+          )}
+
+          {!loading && !error && tickets.length === 0 && (
+            <TableRow>
+              <TableCell
+                colSpan={7}
+                align="center"
+                sx={{ py: 4 }}
+              >
+                <Typography color="text.secondary">No tickets found.</Typography>
+              </TableCell>
+            </TableRow>
+          )}
+
+          {!loading &&
+            !error &&
+            tickets.map((ticket) => (
+              <TableRow
+                key={ticket.id}
+                hover
+              >
+                <TableCell>{ticket.ticketNumber}</TableCell>
+
+                <TableCell>{ticket.issueTopicName ?? "—"}</TableCell>
+
+                <TableCell>
+                  <Chip
+                    label={ticket.status}
+                    size="small"
+                    sx={{
+                      fontWeight: 600,
+                      ...getStatusColor(ticket.status),
+                    }}
+                  />
+                </TableCell>
+
+                <TableCell>
+                  <Chip
+                    label={ticket.priority}
+                    size="small"
+                    sx={{
+                      fontWeight: 600,
+                      ...getPriorityColor(ticket.priority),
+                    }}
+                  />
+                </TableCell>
+
+                <TableCell>{ticket.departmentName ?? "—"}</TableCell>
+
+                <TableCell>{formatDateTime(ticket.createdAt)}</TableCell>
+
+                <TableCell align="center">
+                  <IconButton
+                    size="small"
+                    onClick={() => navigate(`/tickets/${ticket.id}`)}
+                  >
+                    <VisibilityOutlinedIcon fontSize="small" />
+                  </IconButton>
+
+                  <IconButton
+                    size="small"
+                    onClick={() =>
+                      navigate(`/tickets/${ticket.id}/edit`)
+                    }
+                  >
+                    <EditOutlinedIcon fontSize="small" />
+                  </IconButton>
+
+                  <IconButton
+                    size="small"
+                    color="error"
+                    onClick={() => handleDelete(ticket.id)}
+                  >
+                    <DeleteOutlineOutlinedIcon fontSize="small" />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
         </TableBody>
       </Table>
     </TableContainer>

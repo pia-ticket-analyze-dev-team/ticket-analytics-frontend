@@ -53,6 +53,7 @@ const buildTicket = (index: number): Ticket => {
   return {
     ticketNo: `TCKT-2024-${pad(index + 1, 4)}`,
     customer: customers[index % customers.length],
+    description: `${issueTopics[index % issueTopics.length]} reported by ${customers[index % customers.length]}.`,
     issueTopic: issueTopics[index % issueTopics.length],
     department: departments[index % departments.length],
     city: cities[index % cities.length],

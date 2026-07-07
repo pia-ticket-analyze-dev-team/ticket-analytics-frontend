@@ -22,6 +22,7 @@ import type { TicketPriority, TicketStatus } from "../../types/ticket";
 
 export interface NewTicketInput {
   customer: string;
+  description: string;
   issueTopic: string;
   department: string;
   city: string;
@@ -32,15 +33,9 @@ export interface NewTicketInput {
 
 const priorityOptions: TicketPriority[] = ["HIGH", "MEDIUM", "LOW"];
 
-const statusOptions: { value: TicketStatus; label: string }[] = [
-  { value: "OPEN", label: "Open" },
-  { value: "IN_PROGRESS", label: "In Progress" },
-  { value: "RESOLVED", label: "Resolved" },
-  { value: "CLOSED", label: "Closed" },
-];
-
 const emptyForm: NewTicketInput = {
   customer: "",
+  description: "",
   issueTopic: issueTopicOptions[0],
   department: departmentOptions[0],
   city: cityOptions[0],
@@ -85,6 +80,18 @@ const AddTicketDialog = ({ open, onClose, onSubmit }: AddTicketDialogProps) => {
             placeholder="Customer name"
             value={form.customer}
             onChange={(e) => setForm({ ...form, customer: e.target.value })}
+          />
+        </Box>
+
+        <Box sx={fieldSx}>
+          <Typography sx={labelSx}>Description</Typography>
+          <TextField
+            size="small"
+            multiline
+            minRows={3}
+            placeholder="Describe the issue (optional)"
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
         </Box>
 
@@ -157,18 +164,10 @@ const AddTicketDialog = ({ open, onClose, onSubmit }: AddTicketDialogProps) => {
 
           <Box sx={{ ...fieldSx, flex: 1 }}>
             <Typography sx={labelSx}>Status</Typography>
-            <Select
-              size="small"
-              value={form.status}
-              onChange={(e: SelectChangeEvent) =>
-                setForm({ ...form, status: e.target.value as TicketStatus })
-              }
-            >
-              {statusOptions.map((option) => (
-                <MenuItem key={option.value} value={option.value} sx={{ fontSize: 14 }}>
-                  {option.label}
-                </MenuItem>
-              ))}
+            <Select size="small" value={form.status} disabled>
+              <MenuItem value="OPEN" sx={{ fontSize: 14 }}>
+                Open
+              </MenuItem>
             </Select>
           </Box>
         </Box>

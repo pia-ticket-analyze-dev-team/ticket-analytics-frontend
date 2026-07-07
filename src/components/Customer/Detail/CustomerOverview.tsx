@@ -2,13 +2,16 @@ import { Box } from "@mui/material";
 
 import CustomerInfoCard from "./CustomerInfoCard";
 import CustomerStats from "./CustomerStats";
-import type { Customer } from "../customer.types";
+import type { Customer, CustomerTicketStats } from "../customer.types";
 
 type CustomerOverviewProps = {
   customer: Customer;
+  stats: CustomerTicketStats;
 };
 
-const CustomerOverview = ({ customer }: CustomerOverviewProps) => {
+const CustomerOverview = ({ customer, stats }: CustomerOverviewProps) => {
+  const slaBreachRate = stats.totalTickets > 0 ? (stats.slaBreachCount / stats.totalTickets) * 100 : 0;
+
   return (
     <Box
       sx={{
@@ -28,7 +31,12 @@ const CustomerOverview = ({ customer }: CustomerOverviewProps) => {
           gap: 3,
         }}
       >
-        <CustomerStats />
+        <CustomerStats
+          totalTickets={stats.totalTickets}
+          openTickets={stats.openTickets}
+          slaBreachRate={slaBreachRate}
+          averageSatisfactionScore={stats.averageSatisfactionScore}
+        />
       </Box>
     </Box>
   );

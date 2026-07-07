@@ -1,28 +1,40 @@
 import StatCard from "../../Common/StatCard";
 
-const CustomerStats = () => {
+type CustomerStatsProps = {
+  totalTickets: number;
+  openTickets: number;
+  slaBreachRate: number;
+  averageSatisfactionScore: number;
+};
+
+const CustomerStats = ({
+  totalTickets,
+  openTickets,
+  slaBreachRate,
+  averageSatisfactionScore,
+}: CustomerStatsProps) => {
   return (
     <>
       <StatCard
         title="Total Tickets"
-        value={5}
+        value={totalTickets}
       />
 
       <StatCard
         title="Open Tickets"
-        value={2}
+        value={openTickets}
         color="#F59E0B"
       />
 
       <StatCard
-        title="SLA Breaches"
-        value={0}
+        title="SLA Breach Rate"
+        value={`${slaBreachRate.toFixed(1)}%`}
         color="#EF4444"
       />
 
       <StatCard
         title="Avg. Satisfaction"
-        value="4.6 / 5"
+        value={`${averageSatisfactionScore.toFixed(1)} / 5`}
         color="#10B981"
       />
     </>

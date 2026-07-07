@@ -25,3 +25,22 @@ export function updateCustomer(id, customer) {
 export function deleteCustomer(id) {
   return apiDelete(`/api/customers/${id}`);
 }
+
+export function fetchCustomerTickets(id, { page = 0, size = 10 } = {}) {
+  const params = new URLSearchParams({ page: String(page), size: String(size) });
+  return apiGet(`/api/customers/${id}/tickets?${params.toString()}`);
+}
+
+export function fetchCustomerTicketStats(id) {
+  return Promise.all([
+    apiGet(`/api/customers/${id}/tickets/total-count`),
+    apiGet(`/api/customers/${id}/tickets/open-count`),
+    apiGet(`/api/customers/${id}/tickets/sla-breach-count`),
+    apiGet(`/api/customers/${id}/tickets/avg-satisfaction`),
+  ]).then(([totalTickets, openTickets, slaBreachCount, averageSatisfactionScore]) => ({
+    totalTickets,
+    openTickets,
+    slaBreachCount,
+    averageSatisfactionScore,
+  }));
+}

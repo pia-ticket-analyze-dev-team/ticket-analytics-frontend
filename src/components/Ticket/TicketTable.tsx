@@ -31,20 +31,19 @@ import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import PersonOffOutlinedIcon from "@mui/icons-material/PersonOffOutlined";
 import type { Ticket, TicketPriority, TicketStatus, TicketUpdate } from "../../types/ticket";
 import { formatDateTime } from "../../utils/date";
-import {
-  agentOptions,
-  cityOptions,
-  departmentOptions,
-  issueTopicOptions,
-} from "../../data/mockTickets";
+import { useAgents } from "../../hooks/useAgents";
+import { useDepartments } from "../../hooks/useDepartments";
+import { useIssueTopics } from "../../hooks/useIssueTopics";
+import { useRegions } from "../../hooks/useRegions";
 
-const priorityOptions: TicketPriority[] = ["HIGH", "MEDIUM", "LOW"];
+const priorityOptions: TicketPriority[] = ["High", "Medium", "Low"];
 const statusOptions: TicketStatus[] = ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"];
 
 const priorityColors: Record<TicketPriority, string> = {
-  HIGH: "#DC2626",
-  MEDIUM: "#D97706",
-  LOW: "#6B7280",
+  High: "#DC2626",
+  Medium: "#D97706",
+  Low: "#6B7280",
+  Critical: "#960a0a",
 };
 
 const statusStyles: Record<TicketStatus, { bg: string; color: string; label: string }> = {
@@ -76,9 +75,9 @@ type SortOrder = "asc" | "desc" | null;
 
 interface TicketTableProps {
   tickets: Ticket[];
-  onUpdateTicket: (ticketNo: string, updates: TicketUpdate) => void;
-  onDeleteTicket: (ticketNo: string) => void;
-  onAssignTicket: (ticketNo: string, agent: string | null) => void;
+  onUpdateTicket: (ticketId: string, updates: TicketUpdate) => void;
+  onDeleteTicket: (ticketId: string) => void;
+  onAssignTicket: (ticketId: string, agent: string | null) => void;
   sortOrder: SortOrder;
   onToggleSort: () => void;
 }
@@ -91,7 +90,12 @@ const TicketTable = ({
   sortOrder,
   onToggleSort,
 }: TicketTableProps) => {
-  const [editingTicketNo, setEditingTicketNo] = useState<string | null>(null);
+  const { data: issueTopics } = useIssueTopics();
+  const { data: departments } = useDepartments();
+  const { data: regions } = useRegions();
+  const { data: agents } = useAgents();
+
+  const [editingTicketId, setEditingTicketId] = useState<string | null>(null);
   const [draft, setDraft] = useState<TicketUpdate | null>(null);
   const [deleteAnchor, setDeleteAnchor] = useState<HTMLElement | null>(null);
   const [deletingTicket, setDeletingTicket] = useState<Ticket | null>(null);
@@ -99,24 +103,24 @@ const TicketTable = ({
   const [assigningTicket, setAssigningTicket] = useState<Ticket | null>(null);
 
   const startEdit = (ticket: Ticket) => {
-    setEditingTicketNo(ticket.ticketNo);
+    setEditingTicketId(ticket.id);
     setDraft({
-      issueTopic: ticket.issueTopic,
-      department: ticket.department,
-      city: ticket.city,
+      issueTopic: ticket.issueTopicName ?? "",
+      department: ticket.departmentName ?? "",
+      city: ticket.city ?? "",
       priority: ticket.priority,
       status: ticket.status,
     });
   };
 
   const cancelEdit = () => {
-    setEditingTicketNo(null);
+    setEditingTicketId(null);
     setDraft(null);
   };
 
   const saveEdit = () => {
-    if (editingTicketNo && draft) {
-      onUpdateTicket(editingTicketNo, draft);
+    if (editingTicketId && draft) {
+      onUpdateTicket(editingTicketId, draft);
     }
     cancelEdit();
   };
@@ -133,7 +137,7 @@ const TicketTable = ({
 
   const confirmDelete = () => {
     if (deletingTicket) {
-      onDeleteTicket(deletingTicket.ticketNo);
+      onDeleteTicket(deletingTicket.id);
     }
     closeDeleteConfirm();
   };
@@ -150,7 +154,7 @@ const TicketTable = ({
 
   const handleAssign = (agent: string | null) => {
     if (assigningTicket) {
-      onAssignTicket(assigningTicket.ticketNo, agent);
+      onAssignTicket(assigningTicket.id, agent);
     }
     closeAgentMenu();
   };
@@ -204,22 +208,22 @@ const TicketTable = ({
           <TableBody>
             {tickets.map((ticket) => {
             const status = statusStyles[ticket.status];
-            const isEditing = editingTicketNo === ticket.ticketNo;
+            const isEditing = editingTicketId === ticket.id;
 
             return (
               <TableRow
-                key={ticket.ticketNo}
+                key={ticket.id}
                 sx={{
                   "&:last-child td": { borderBottom: 0 },
                   "&:hover": { backgroundColor: "#F9FAFB" },
                 }}
               >
                 <TableCell sx={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>
-                  {ticket.ticketNo}
+                  {ticket.ticketNumber}
                 </TableCell>
 
                 <TableCell sx={{ fontSize: 14, color: "#111827" }}>
-                  {ticket.customer}
+                  {ticket.customerName}
                 </TableCell>
 
                 <TableCell sx={{ fontSize: 14, color: "#374151", minWidth: 180 }}>
@@ -233,14 +237,14 @@ const TicketTable = ({
                       }
                       sx={editSelectSx}
                     >
-                      {issueTopicOptions.map((option) => (
-                        <MenuItem key={option} value={option} sx={{ fontSize: 14 }}>
-                          {option}
+                      {(issueTopics ?? []).map((option) => (
+                        <MenuItem key={option.id} value={option.name} sx={{ fontSize: 14 }}>
+                          {option.name}
                         </MenuItem>
                       ))}
                     </Select>
                   ) : (
-                    ticket.issueTopic
+                    ticket.issueTopicName
                   )}
                 </TableCell>
 
@@ -255,14 +259,14 @@ const TicketTable = ({
                       }
                       sx={editSelectSx}
                     >
-                      {departmentOptions.map((option) => (
-                        <MenuItem key={option} value={option} sx={{ fontSize: 14 }}>
-                          {option}
+                      {(departments ?? []).map((option) => (
+                        <MenuItem key={option.id} value={option.name} sx={{ fontSize: 14 }}>
+                          {option.name}
                         </MenuItem>
                       ))}
                     </Select>
                   ) : (
-                    ticket.department
+                    ticket.departmentName
                   )}
                 </TableCell>
 
@@ -277,9 +281,9 @@ const TicketTable = ({
                       }
                       sx={editSelectSx}
                     >
-                      {cityOptions.map((option) => (
-                        <MenuItem key={option} value={option} sx={{ fontSize: 14 }}>
-                          {option}
+                      {(regions ?? []).map((option) => (
+                        <MenuItem key={option.id} value={option.name} sx={{ fontSize: 14 }}>
+                          {option.name}
                         </MenuItem>
                       ))}
                     </Select>
@@ -362,7 +366,7 @@ const TicketTable = ({
                 </TableCell>
 
                 <TableCell sx={{ fontSize: 13, color: "#6B7280", whiteSpace: "nowrap" }}>
-                  {formatDateTime(ticket.createdAt)}
+                  {formatDateTime(new Date(ticket.createdAt))}
                 </TableCell>
 
                 <TableCell>
@@ -381,8 +385,8 @@ const TicketTable = ({
                       <>
                         <Tooltip
                           title={
-                            ticket.assignedAgent
-                              ? `Assigned to ${ticket.assignedAgent}`
+                            ticket.assignedAgentName
+                              ? `Assigned to ${ticket.assignedAgentName}`
                               : "Assign agent"
                           }
                         >
@@ -429,7 +433,7 @@ const TicketTable = ({
       >
         <Box sx={{ p: 2.5, width: 260, display: "flex", flexDirection: "column", gap: 2 }}>
           <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>
-            Delete {deletingTicket?.ticketNo}?
+            Delete {deletingTicket?.ticketNumber}?
           </Typography>
 
           <Typography sx={{ fontSize: 13, color: "#6B7280" }}>
@@ -465,7 +469,7 @@ const TicketTable = ({
         <MenuItem
           onClick={() => handleAssign(null)}
           sx={{ fontSize: 14 }}
-          selected={assigningTicket?.assignedAgent === null}
+          selected={assigningTicket?.assignedAgentName === null}
         >
           <ListItemIcon>
             <PersonOffOutlinedIcon sx={{ fontSize: 18, color: "#6B7280" }} />
@@ -473,19 +477,19 @@ const TicketTable = ({
           Unassigned
         </MenuItem>
 
-        {agentOptions.map((agent) => (
+        {(agents ?? []).map((agent) => (
           <MenuItem
-            key={agent}
-            onClick={() => handleAssign(agent)}
+            key={agent.id}
+            onClick={() => handleAssign(agent.name)}
             sx={{ fontSize: 14 }}
-            selected={assigningTicket?.assignedAgent === agent}
+            selected={assigningTicket?.assignedAgentName === agent.name}
           >
             <ListItemIcon>
-              {assigningTicket?.assignedAgent === agent && (
+              {assigningTicket?.assignedAgentName === agent.name && (
                 <CheckIcon sx={{ fontSize: 18, color: "#2463FF" }} />
               )}
             </ListItemIcon>
-            {agent}
+            {agent.name}
           </MenuItem>
         ))}
       </Menu>

@@ -22,3 +22,6 @@ export const endOfDay = (date: Date) => {
   d.setHours(23, 59, 59, 999);
   return d;
 };
+
+export const toApiDateTime = (date: Date) =>
+  `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;

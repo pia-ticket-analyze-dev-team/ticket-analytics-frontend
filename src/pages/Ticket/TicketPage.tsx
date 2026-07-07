@@ -8,7 +8,12 @@ import TicketPagination from "../../components/Ticket/TicketPagination";
 import AddTicketDialog, {
   type NewTicketInput,
 } from "../../components/Ticket/AddTicketDialog";
-import { mockTickets } from "../../data/mockTickets";
+import { useTickets } from "../../hooks/useTickets";
+import { useIssueTopics } from "../../hooks/useIssueTopics";
+import { useDepartments } from "../../hooks/useDepartments";
+import { useRegions } from "../../hooks/useRegions";
+import { useAgents } from "../../hooks/useAgents";
+import { toApiDateTime } from "../../utils/date";
 import {
   defaultTicketFilters,
   type DateRange,
@@ -17,17 +22,15 @@ import {
   type TicketUpdate,
 } from "../../types/ticket";
 
-const defaultDateRange: DateRange = {
-  start: new Date(2024, 5, 1),
-  end: new Date(2024, 5, 30, 23, 59, 59),
-};
+const UNASSIGNED_SENTINEL_ID = "00000000-0000-0000-0000-000000000000";
 
-const generateTicketNo = (existing: Ticket[]) => {
-  const maxNum = existing.reduce((max, ticket) => {
-    const num = parseInt(ticket.ticketNo.split("-").pop() ?? "0", 10);
-    return Number.isNaN(num) ? max : Math.max(max, num);
-  }, 0);
-  return `TCKT-2024-${String(maxNum + 1).padStart(4, "0")}`;
+const buildDefaultDateRange = (): DateRange => {
+  const end = new Date();
+  end.setHours(23, 59, 59, 999);
+  const start = new Date();
+  start.setFullYear(start.getFullYear() - 5);
+  start.setHours(0, 0, 0, 0);
+  return { start, end };
 };
 
 const statusMap: Record<string, string> = {
@@ -37,77 +40,94 @@ const statusMap: Record<string, string> = {
   Closed: "CLOSED",
 };
 
-const priorityMap: Record<string, string> = {
-  High: "HIGH",
-  Medium: "MEDIUM",
-  Low: "LOW",
-};
-
 type SortOrder = "asc" | "desc" | null;
 
 const TicketPage = () => {
-  const [tickets, setTickets] = useState<Ticket[]>(mockTickets);
   const [filters, setFilters] = useState<TicketFilterState>(defaultTicketFilters);
-  const [dateRange, setDateRange] = useState<DateRange>(defaultDateRange);
+  const [dateRange, setDateRange] = useState<DateRange>(buildDefaultDateRange);
   const [sortOrder, setSortOrder] = useState<SortOrder>(null);
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
-  const filteredTickets = useMemo(() => {
-    return tickets.filter((ticket) => {
-      if (filters.status !== "All" && ticket.status !== statusMap[filters.status]) {
-        return false;
-      }
-      if (filters.priority !== "All" && ticket.priority !== priorityMap[filters.priority]) {
-        return false;
-      }
-      if (filters.issueTopic !== "All" && ticket.issueTopic !== filters.issueTopic) {
-        return false;
-      }
-      if (filters.department !== "All" && ticket.department !== filters.department) {
-        return false;
-      }
-      if (filters.city !== "All" && ticket.city !== filters.city) {
-        return false;
-      }
-      if (filters.slaBreached !== "All") {
-        const wantsBreached = filters.slaBreached === "Yes";
-        if (ticket.slaBreached !== wantsBreached) return false;
-      }
-      if (filters.assignedAgent !== "All") {
-        const wantsUnassigned = filters.assignedAgent === "Unassigned";
-        if (wantsUnassigned ? ticket.assignedAgent !== null : ticket.assignedAgent !== filters.assignedAgent) {
-          return false;
-        }
-      }
-      if (ticket.createdAt < dateRange.start || ticket.createdAt > dateRange.end) {
-        return false;
-      }
-      return true;
-    });
-  }, [tickets, filters, dateRange]);
+  const [localOverrides, setLocalOverrides] = useState<Record<string, TicketUpdate>>({});
+  const [localAssignments, setLocalAssignments] = useState<Record<string, string | null>>({});
+  const [localDeletedIds, setLocalDeletedIds] = useState<Set<string>>(new Set());
+  const [localAdditions, setLocalAdditions] = useState<Ticket[]>([]);
 
-  const sortedTickets = useMemo(() => {
-    if (!sortOrder) return filteredTickets;
+  const { data: issueTopics } = useIssueTopics();
+  const { data: departments } = useDepartments();
+  const { data: regions } = useRegions();
+  const { data: agents } = useAgents();
 
-    return [...filteredTickets].sort((a, b) =>
-      sortOrder === "asc"
-        ? a.createdAt.getTime() - b.createdAt.getTime()
-        : b.createdAt.getTime() - a.createdAt.getTime()
-    );
-  }, [filteredTickets, sortOrder]);
+  const topicId =
+    filters.issueTopic === "All"
+      ? undefined
+      : issueTopics?.find((t) => t.name === filters.issueTopic)?.id;
 
-  const totalEntries = sortedTickets.length;
-  const totalPages = Math.max(1, Math.ceil(totalEntries / rowsPerPage));
-  const safePage = Math.min(page, totalPages);
-  const rangeStart = totalEntries === 0 ? 0 : (safePage - 1) * rowsPerPage + 1;
-  const rangeEnd = Math.min(safePage * rowsPerPage, totalEntries);
+  const departmentId =
+    filters.department === "All"
+      ? undefined
+      : departments?.find((d) => d.name === filters.department)?.id;
 
-  const paginatedTickets = sortedTickets.slice(
-    (safePage - 1) * rowsPerPage,
-    safePage * rowsPerPage
-  );
+  const regionId =
+    filters.city === "All" ? undefined : regions?.find((r) => r.name === filters.city)?.id;
+
+  const agentId =
+    filters.assignedAgent === "All"
+      ? undefined
+      : filters.assignedAgent === "Unassigned"
+        ? UNASSIGNED_SENTINEL_ID
+        : agents?.find((a) => a.name === filters.assignedAgent)?.id;
+
+  const slaBreached =
+    filters.slaBreached === "All" ? undefined : filters.slaBreached === "Yes";
+
+  const { data, loading, error } = useTickets({
+    page: page - 1,
+    size: rowsPerPage,
+    status: filters.status === "All" ? undefined : statusMap[filters.status],
+    priority: filters.priority === "All" ? undefined : filters.priority,
+    topicId,
+    departmentId,
+    regionId,
+    slaBreached,
+    agentId,
+    startDate: toApiDateTime(dateRange.start),
+    endDate: toApiDateTime(dateRange.end),
+  });
+
+  const displayedTickets = useMemo(() => {
+    const remote = (data?.content ?? [])
+      .filter((ticket) => !localDeletedIds.has(ticket.id))
+      .map((ticket) => {
+        const override = localOverrides[ticket.id];
+        const assignment = localAssignments[ticket.id];
+
+        return {
+          ...ticket,
+          ...(override
+            ? {
+                issueTopicName: override.issueTopic,
+                departmentName: override.department,
+                city: override.city,
+                priority: override.priority,
+                status: override.status,
+              }
+            : {}),
+          ...(ticket.id in localAssignments ? { assignedAgentName: assignment ?? null } : {}),
+        };
+      });
+
+    const combined = [...localAdditions, ...remote];
+
+    return sortOrder === "asc" ? [...combined].reverse() : combined;
+  }, [data, localOverrides, localAssignments, localDeletedIds, localAdditions, sortOrder]);
+
+  const totalEntries = data?.totalElements ?? 0;
+  const totalPages = data?.totalPages ?? 0;
+  const rangeStart = totalEntries === 0 ? 0 : (page - 1) * rowsPerPage + 1;
+  const rangeEnd = Math.min(page * rowsPerPage, totalEntries);
 
   const handleFiltersChange = (next: TicketFilterState) => {
     setFilters(next);
@@ -116,14 +136,13 @@ const TicketPage = () => {
 
   const handleClearFilters = () => {
     setFilters(defaultTicketFilters);
-    setDateRange(defaultDateRange);
+    setDateRange(buildDefaultDateRange());
     setSortOrder(null);
     setPage(1);
   };
 
   const handleToggleSort = () => {
     setSortOrder((prev) => (prev === "asc" ? "desc" : prev === "desc" ? null : "asc"));
-    setPage(1);
   };
 
   const handleDateRangeChange = (range: DateRange) => {
@@ -131,53 +150,51 @@ const TicketPage = () => {
     setPage(1);
   };
 
-  const handleUpdateTicket = (ticketNo: string, updates: TicketUpdate) => {
-    setTickets((prev) =>
-      prev.map((ticket) => (ticket.ticketNo === ticketNo ? { ...ticket, ...updates } : ticket))
-    );
+  const handleUpdateTicket = (ticketId: string, updates: TicketUpdate) => {
+    setLocalOverrides((prev) => ({ ...prev, [ticketId]: updates }));
   };
 
-  const handleDeleteTicket = (ticketNo: string) => {
-    setTickets((prev) => prev.filter((ticket) => ticket.ticketNo !== ticketNo));
+  const handleDeleteTicket = (ticketId: string) => {
+    setLocalDeletedIds((prev) => new Set(prev).add(ticketId));
   };
 
-  const handleAssignTicket = (ticketNo: string, agent: string | null) => {
-    setTickets((prev) =>
-      prev.map((ticket) =>
-        ticket.ticketNo === ticketNo ? { ...ticket, assignedAgent: agent } : ticket
-      )
-    );
+  const handleAssignTicket = (ticketId: string, agent: string | null) => {
+    setLocalAssignments((prev) => ({ ...prev, [ticketId]: agent }));
   };
 
   const handleAddTicket = (input: NewTicketInput) => {
     const createdAt = new Date();
 
     const newTicket: Ticket = {
-      ticketNo: generateTicketNo(tickets),
-      customer: input.customer,
-      description: input.description,
-      issueTopic: input.issueTopic,
-      department: input.department,
+      id: `local-${createdAt.getTime()}`,
+      ticketNumber: `LOCAL-${createdAt.getTime()}`,
+      customerId: null,
+      customerName: input.customer,
+      topicId: null,
+      issueTopicName: input.issueTopic,
+      currentDepartmentId: null,
+      departmentName: input.department,
+      regionId: null,
       city: input.city,
-      priority: input.priority,
+      agentId: null,
+      assignedAgentName: input.assignedAgent,
+      serviceTypeId: null,
+      serviceTypeName: null,
+      infrastructureTypeId: null,
+      infrastructureTypeName: null,
+      description: input.description,
       status: input.status,
-      slaBreached: input.priority === "HIGH" && input.status === "OPEN",
-      createdAt,
-      assignedAgent: input.assignedAgent,
+      priority: input.priority,
+      slaBreached: input.priority === "High" && input.status === "OPEN",
+      resolutionTimeHours: null,
+      customerSatisfactionScore: null,
+      createdAt: createdAt.toISOString(),
+      resolvedAt: null,
+      creationSource: "CALL_CENTER",
     };
 
-    setTickets((prev) => [newTicket, ...prev]);
-
-    if (createdAt > dateRange.end) {
-      setDateRange((prev) => ({ ...prev, end: createdAt }));
-    }
-
+    setLocalAdditions((prev) => [newTicket, ...prev]);
     setIsAddDialogOpen(false);
-    setPage(1);
-  };
-
-  const handleExport = () => {
-    console.log("Exporting tickets", filteredTickets);
   };
 
   return (
@@ -227,11 +244,14 @@ const TicketPage = () => {
         dateRange={dateRange}
         onDateRangeChange={handleDateRangeChange}
         onClear={handleClearFilters}
-        onExport={handleExport}
       />
 
+      {error && (
+        <Typography sx={{ fontSize: 13, color: "#d03b3b", mb: 1.5 }}>{error}</Typography>
+      )}
+
       <TicketTable
-        tickets={paginatedTickets}
+        tickets={loading ? [] : displayedTickets}
         onUpdateTicket={handleUpdateTicket}
         onDeleteTicket={handleDeleteTicket}
         onAssignTicket={handleAssignTicket}
@@ -240,7 +260,7 @@ const TicketPage = () => {
       />
 
       <TicketPagination
-        page={safePage}
+        page={page}
         totalPages={totalPages}
         totalEntries={totalEntries}
         rangeStart={rangeStart}

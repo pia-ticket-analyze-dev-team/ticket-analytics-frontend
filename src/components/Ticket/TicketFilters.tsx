@@ -6,14 +6,11 @@ import {
   Typography,
   type SelectChangeEvent,
 } from "@mui/material";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import {
-  agentOptions,
-  cityOptions,
-  departmentOptions,
-  issueTopicOptions,
-} from "../../data/mockTickets";
+import { useAgents } from "../../hooks/useAgents";
+import { useDepartments } from "../../hooks/useDepartments";
+import { useIssueTopics } from "../../hooks/useIssueTopics";
+import { useRegions } from "../../hooks/useRegions";
 import type { DateRange, TicketFilterState } from "../../types/ticket";
 import DateRangePicker from "./DateRangePicker";
 
@@ -68,7 +65,6 @@ interface TicketFiltersProps {
   dateRange: DateRange;
   onDateRangeChange: (range: DateRange) => void;
   onClear: () => void;
-  onExport: () => void;
 }
 
 const TicketFilters = ({
@@ -77,8 +73,12 @@ const TicketFilters = ({
   dateRange,
   onDateRangeChange,
   onClear,
-  onExport,
 }: TicketFiltersProps) => {
+  const { data: issueTopics } = useIssueTopics();
+  const { data: departments } = useDepartments();
+  const { data: regions } = useRegions();
+  const { data: agents } = useAgents();
+
   const setField = (field: keyof TicketFilterState) => (value: string) =>
     onChange({ ...filters, [field]: value });
 
@@ -106,28 +106,28 @@ const TicketFilters = ({
         <FilterField
           label="Priority"
           value={filters.priority}
-          options={["All", "High", "Medium", "Low"]}
+          options={["All", "High", "Medium", "Low", "Critical"]}
           onChange={setField("priority")}
         />
 
         <FilterField
           label="Issue Topic"
           value={filters.issueTopic}
-          options={["All", ...issueTopicOptions]}
+          options={["All", ...(issueTopics ?? []).map((topic) => topic.name)]}
           onChange={setField("issueTopic")}
         />
 
         <FilterField
           label="Department"
           value={filters.department}
-          options={["All", ...departmentOptions]}
+          options={["All", ...(departments ?? []).map((department) => department.name)]}
           onChange={setField("department")}
         />
 
         <FilterField
           label="City"
           value={filters.city}
-          options={["All", ...cityOptions]}
+          options={["All", ...(regions ?? []).map((region) => region.name)]}
           onChange={setField("city")}
         />
 
@@ -141,7 +141,7 @@ const TicketFilters = ({
         <FilterField
           label="Assigned Agent"
           value={filters.assignedAgent}
-          options={["All", "Unassigned", ...agentOptions]}
+          options={["All", "Unassigned", ...(agents ?? []).map((agent) => agent.name)]}
           onChange={setField("assignedAgent")}
         />
       </Box>
@@ -174,26 +174,6 @@ const TicketFilters = ({
             }}
           >
             Clear Filters
-          </Button>
-
-          <Button
-            onClick={onExport}
-            variant="outlined"
-            startIcon={<FileDownloadOutlinedIcon />}
-            sx={{
-              fontSize: 14,
-              fontWeight: 500,
-              textTransform: "none",
-              borderColor: "#E5E7EB",
-              color: "#111827",
-              borderRadius: "8px",
-              "&:hover": {
-                borderColor: "#D1D5DB",
-                backgroundColor: "#F9FAFB",
-              },
-            }}
-          >
-            Export
           </Button>
         </Box>
       </Box>

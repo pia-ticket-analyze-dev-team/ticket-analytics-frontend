@@ -68,10 +68,16 @@ const getPriorityColor = (priority: string) => {
         color: "#D97706",
       };
 
-    default:
+    case "LOW":
       return {
         bgcolor: "#ECFDF5",
         color: "#16A34A",
+      };
+
+    case "CRITICAL":
+      return {
+        bgcolor: "#FEF2F2",
+        color: "#DC2626",
       };
   }
 };

@@ -1,6 +1,7 @@
 import { useRef, useState, type MouseEvent } from "react";
 import { Box, Typography } from "@mui/material";
 import type { TicketVolumePoint } from "../../data/mockDashboard";
+import { formatAxisValue, niceAxisMax } from "../../utils/chartScale";
 import ChartTooltip from "./ChartTooltip";
 
 const WIDTH = 600;
@@ -21,21 +22,6 @@ const MUTED = "#898781";
 const GRID_STEPS = [0, 0.25, 0.5, 0.75, 1];
 const TARGET_TICK_COUNT = 6;
 
-// Rounds a value up to a "nice" number (1/2/5 * 10^n) so axis gridlines land
-// on clean values regardless of the data's magnitude (tens vs. thousands).
-const niceCeil = (value: number) => {
-  if (value <= 0) return 1;
-  const exponent = Math.floor(Math.log10(value));
-  const fraction = value / 10 ** exponent;
-  const niceFraction = fraction <= 1 ? 1 : fraction <= 2 ? 2 : fraction <= 5 ? 5 : 10;
-  return niceFraction * 10 ** exponent;
-};
-
-const formatAxisValue = (v: number) => {
-  if (v === 0) return "0";
-  return v >= 1000 ? `${v / 1000}K` : `${v}`;
-};
-
 interface TicketVolumeChartProps {
   data: TicketVolumePoint[];
 }
@@ -44,8 +30,7 @@ const TicketVolumeChart = ({ data }: TicketVolumeChartProps) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
-  const step = niceCeil(Math.max(...data.map((p) => p.value), 1) / 4);
-  const niceMax = step * 4;
+  const niceMax = niceAxisMax(Math.max(...data.map((p) => p.value)));
   const labelInterval = Math.max(1, Math.ceil(data.length / TARGET_TICK_COUNT));
 
   const xScale = (i: number) => PAD_LEFT + (i / (data.length - 1)) * PLOT_WIDTH;

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Box, Typography } from "@mui/material";
+import { formatAxisValue, niceAxisMax } from "../../utils/chartScale";
 import ChartTooltip from "./ChartTooltip";
 
 interface BarDatum {
@@ -40,7 +41,7 @@ const HorizontalBarChart = ({
 
   const plotWidth = WIDTH - labelWidth - RIGHT_PAD;
   const height = data.length * ROW_HEIGHT + (showAxis ? AXIS_HEIGHT : 4);
-  const niceMax = Math.ceil(Math.max(...data.map((d) => d.value)) / 2000) * 2000;
+  const niceMax = niceAxisMax(Math.max(...data.map((d) => d.value)));
   const gridSteps = [0, 0.25, 0.5, 0.75, 1];
 
   const hovered = hoverIndex !== null ? data[hoverIndex] : null;
@@ -129,7 +130,7 @@ const HorizontalBarChart = ({
                 fill={MUTED}
                 textAnchor="middle"
               >
-                {frac === 0 ? "0" : `${(niceMax * frac) / 1000}K`}
+                {formatAxisValue(niceMax * frac)}
               </text>
             ))}
           </g>

@@ -52,9 +52,10 @@ const TurkeyHeatMap = () => {
           zoomSnap={0}
           zoomDelta={0.1}
           attributionControl={false}
-          scrollWheelZoom={false}
-          dragging={false}
-          doubleClickZoom={false}
+          scrollWheelZoom={true}
+          dragging={true}
+          doubleClickZoom={true}
+          zoomControl={true}
           style={{
             width: "100%",
             height: "100%",
@@ -79,21 +80,19 @@ const TurkeyHeatMap = () => {
             onEachFeature={(feature, layer) => {
               const city =
                 feature.properties?.name ||
-                feature.properties?.NAME_1;
+                feature.properties?.NAME_1 ||
+                "";
 
               const info = cityMap[city];
-
-              const tickets = info?.tickets ?? 0;
-              const resolution = info?.avgResolution ?? "N/A";
 
               layer.bindTooltip(
                 `
                   <div style="padding:4px">
                     <strong style="font-size:14px">${city}</strong>
                     <br/>
-                    🎫 Tickets: ${tickets}
+                    🎫 Tickets: ${info?.tickets ?? 0}
                     <br/>
-                    ⏱ Avg Resolution: ${resolution}
+                    ⏱ Avg Resolution: ${info?.avgResolution ?? "N/A"}
                   </div>
                 `,
                 {

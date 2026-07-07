@@ -11,3 +11,27 @@ export const cityData: CityStat[] = [
   { city: "Bursa", tickets: 58, avgResolution: "3.0 h" },
   { city: "Antalya", tickets: 47, avgResolution: "3.2 h" },
 ];
+
+export interface RegionStat {
+  region: string;
+  tickets: number;
+  avgResolution: string;
+}
+
+export const topRegions: RegionStat[] = [
+  {
+    region: "Marmara",
+    tickets: 2418,
+    avgResolution: "2.1 h",
+  },
+  {
+    region: "Central Anatolia",
+    tickets: 1985,
+    avgResolution: "2.3 h",
+  },
+  {
+    region: "Aegean",
+    tickets: 1584,
+    avgResolution: "2.5 h",
+  },
+];

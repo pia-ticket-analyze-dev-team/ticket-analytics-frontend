@@ -15,48 +15,20 @@ import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 
-const tickets = [
-  {
-    id: "TCKT-2004-0001",
-    issue: "İnternet Bağlantı Sorunu",
-    status: "OPEN",
-    priority: "HIGH",
-    department: "Technical Support",
-    createdAt: "12.06.2024 10:15",
-  },
-  {
-    id: "TCKT-2004-0002",
-    issue: "Fatura İtirazı",
-    status: "RESOLVED",
-    priority: "MEDIUM",
-    department: "Billing",
-    createdAt: "13.06.2024 14:30",
-  },
-  {
-    id: "TCKT-2004-0003",
-    issue: "Hız Problemi",
-    status: "IN_PROGRESS",
-    priority: "HIGH",
-    department: "Technical Support",
-    createdAt: "14.06.2024 09:20",
-  },
-  {
-    id: "TCKT-2004-0004",
-    issue: "Modem Arızası",
-    status: "RESOLVED",
-    priority: "LOW",
-    department: "Field Operations",
-    createdAt: "15.06.2024 11:45",
-  },
-  {
-    id: "TCKT-2004-0005",
-    issue: "Nakil İşlemleri",
-    status: "CLOSED",
-    priority: "LOW",
-    department: "Customer Services",
-    createdAt: "16.06.2024 16:10",
-  },
-];
+import { useNavigate } from "react-router-dom";
+
+interface Ticket {
+  id: string;
+  issue: string;
+  status: string;
+  priority: string;
+  department: string;
+  createdAt: string;
+}
+
+interface CustomerTicketTableProps {
+  tickets: Ticket[];
+}
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -108,7 +80,23 @@ const getPriorityColor = (priority: string) => {
   }
 };
 
-const CustomerTicketTable = () => {
+const CustomerTicketTable = ({
+  tickets,
+}: CustomerTicketTableProps) => {
+  const navigate = useNavigate();
+
+  const handleDelete = (ticketId: string) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${ticketId}?`
+    );
+
+    if (confirmed) {
+      console.log("Deleted:", ticketId);
+
+      // Backend geldiğinde burada API çağrısı olacak.
+    }
+  };
+
   return (
     <TableContainer
       component={Paper}
@@ -149,7 +137,10 @@ const CustomerTicketTable = () => {
 
         <TableBody>
           {tickets.map((ticket) => (
-            <TableRow key={ticket.id} hover>
+            <TableRow
+              key={ticket.id}
+              hover
+            >
               <TableCell>{ticket.id}</TableCell>
 
               <TableCell>{ticket.issue}</TableCell>
@@ -181,17 +172,26 @@ const CustomerTicketTable = () => {
               <TableCell>{ticket.createdAt}</TableCell>
 
               <TableCell align="center">
-                <IconButton size="small">
+                <IconButton
+                  size="small"
+                  onClick={() => navigate(`/tickets/${ticket.id}`)}
+                >
                   <VisibilityOutlinedIcon fontSize="small" />
                 </IconButton>
 
-                <IconButton size="small">
+                <IconButton
+                  size="small"
+                  onClick={() =>
+                    navigate(`/tickets/${ticket.id}/edit`)
+                  }
+                >
                   <EditOutlinedIcon fontSize="small" />
                 </IconButton>
 
                 <IconButton
                   size="small"
                   color="error"
+                  onClick={() => handleDelete(ticket.id)}
                 >
                   <DeleteOutlineOutlinedIcon fontSize="small" />
                 </IconButton>

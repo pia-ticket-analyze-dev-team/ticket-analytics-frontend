@@ -68,8 +68,32 @@ const customers = [
   },
 ];
 
-const CustomerTable = () => {
+type CustomerTableProps = {
+  search: string;
+  segment: string;
+  city: string;
+};
+
+const CustomerTable = ({
+  search,
+  segment,
+  city,
+}: CustomerTableProps) => {
   const navigate = useNavigate();
+
+  const filteredCustomers = customers.filter((customer) => {
+    const matchesSearch =
+      customer.name.toLowerCase().includes(search.toLowerCase()) ||
+      customer.email.toLowerCase().includes(search.toLowerCase());
+
+    const matchesSegment =
+      segment === "All" || customer.segment === segment;
+
+    const matchesCity =
+      city === "All" || customer.city === city;
+
+    return matchesSearch && matchesSegment && matchesCity;
+  });
 
   return (
     <TableContainer
@@ -105,7 +129,7 @@ const CustomerTable = () => {
         </TableHead>
 
         <TableBody>
-          {customers.map((customer) => (
+          {filteredCustomers.map((customer) => (
             <TableRow
               key={customer.id}
               hover

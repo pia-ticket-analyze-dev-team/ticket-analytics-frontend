@@ -1,0 +1,496 @@
+import { useState, type MouseEvent } from "react";
+import {
+  Box,
+  Button,
+  IconButton,
+  ListItemIcon,
+  Menu,
+  MenuItem,
+  Popover,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography,
+  type SelectChangeEvent,
+} from "@mui/material";
+import SupportAgentOutlinedIcon from "@mui/icons-material/SupportAgentOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ErrorIcon from "@mui/icons-material/Error";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
+import PersonOffOutlinedIcon from "@mui/icons-material/PersonOffOutlined";
+import type { Ticket, TicketPriority, TicketStatus, TicketUpdate } from "../../types/ticket";
+import { formatDateTime } from "../../utils/date";
+import {
+  agentOptions,
+  cityOptions,
+  departmentOptions,
+  issueTopicOptions,
+} from "../../data/mockTickets";
+
+const priorityOptions: TicketPriority[] = ["HIGH", "MEDIUM", "LOW"];
+const statusOptions: TicketStatus[] = ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"];
+
+const priorityColors: Record<TicketPriority, string> = {
+  HIGH: "#DC2626",
+  MEDIUM: "#D97706",
+  LOW: "#6B7280",
+};
+
+const statusStyles: Record<TicketStatus, { bg: string; color: string; label: string }> = {
+  OPEN: { bg: "#FEF3C7", color: "#B45309", label: "Open" },
+  IN_PROGRESS: { bg: "#DBEAFE", color: "#1D4ED8", label: "In Progress" },
+  RESOLVED: { bg: "#D1FAE5", color: "#047857", label: "Resolved" },
+  CLOSED: { bg: "#F3F4F6", color: "#4B5563", label: "Closed" },
+};
+
+const columns = [
+  "Ticket No",
+  "Customer",
+  "Issue Topic",
+  "Department",
+  "City",
+  "Priority",
+  "Status",
+  "SLA",
+  "Created At",
+  "Action",
+];
+
+const editSelectSx = {
+  fontSize: 13,
+  "& .MuiSelect-select": { py: 0.6 },
+};
+
+type SortOrder = "asc" | "desc" | null;
+
+interface TicketTableProps {
+  tickets: Ticket[];
+  onUpdateTicket: (ticketNo: string, updates: TicketUpdate) => void;
+  onDeleteTicket: (ticketNo: string) => void;
+  onAssignTicket: (ticketNo: string, agent: string | null) => void;
+  sortOrder: SortOrder;
+  onToggleSort: () => void;
+}
+
+const TicketTable = ({
+  tickets,
+  onUpdateTicket,
+  onDeleteTicket,
+  onAssignTicket,
+  sortOrder,
+  onToggleSort,
+}: TicketTableProps) => {
+  const [editingTicketNo, setEditingTicketNo] = useState<string | null>(null);
+  const [draft, setDraft] = useState<TicketUpdate | null>(null);
+  const [deleteAnchor, setDeleteAnchor] = useState<HTMLElement | null>(null);
+  const [deletingTicket, setDeletingTicket] = useState<Ticket | null>(null);
+  const [agentMenuAnchor, setAgentMenuAnchor] = useState<HTMLElement | null>(null);
+  const [assigningTicket, setAssigningTicket] = useState<Ticket | null>(null);
+
+  const startEdit = (ticket: Ticket) => {
+    setEditingTicketNo(ticket.ticketNo);
+    setDraft({
+      issueTopic: ticket.issueTopic,
+      department: ticket.department,
+      city: ticket.city,
+      priority: ticket.priority,
+      status: ticket.status,
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditingTicketNo(null);
+    setDraft(null);
+  };
+
+  const saveEdit = () => {
+    if (editingTicketNo && draft) {
+      onUpdateTicket(editingTicketNo, draft);
+    }
+    cancelEdit();
+  };
+
+  const openDeleteConfirm = (e: MouseEvent<HTMLElement>, ticket: Ticket) => {
+    setDeleteAnchor(e.currentTarget);
+    setDeletingTicket(ticket);
+  };
+
+  const closeDeleteConfirm = () => {
+    setDeleteAnchor(null);
+    setDeletingTicket(null);
+  };
+
+  const confirmDelete = () => {
+    if (deletingTicket) {
+      onDeleteTicket(deletingTicket.ticketNo);
+    }
+    closeDeleteConfirm();
+  };
+
+  const openAgentMenu = (e: MouseEvent<HTMLElement>, ticket: Ticket) => {
+    setAgentMenuAnchor(e.currentTarget);
+    setAssigningTicket(ticket);
+  };
+
+  const closeAgentMenu = () => {
+    setAgentMenuAnchor(null);
+    setAssigningTicket(null);
+  };
+
+  const handleAssign = (agent: string | null) => {
+    if (assigningTicket) {
+      onAssignTicket(assigningTicket.ticketNo, agent);
+    }
+    closeAgentMenu();
+  };
+
+  return (
+    <>
+      <TableContainer
+        sx={{
+          backgroundColor: "#fff",
+          borderRadius: "12px",
+          border: "1px solid #E5E7EB",
+        }}
+      >
+        <Table>
+          <TableHead>
+            <TableRow sx={{ "& th": { borderBottom: "1px solid #E5E7EB" } }}>
+              {columns.map((col) => (
+                <TableCell
+                  key={col}
+                  sx={{ fontSize: 13, fontWeight: 600, color: "#6B7280", py: 1.75 }}
+                >
+                  {col === "Created At" ? (
+                    <Box
+                      onClick={onToggleSort}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                        cursor: "pointer",
+                        userSelect: "none",
+                        width: "fit-content",
+                      }}
+                    >
+                      {col}
+                      {sortOrder === "asc" ? (
+                        <ArrowUpwardIcon sx={{ fontSize: 15, color: "#2463FF" }} />
+                      ) : sortOrder === "desc" ? (
+                        <ArrowDownwardIcon sx={{ fontSize: 15, color: "#2463FF" }} />
+                      ) : (
+                        <UnfoldMoreIcon sx={{ fontSize: 15, color: "#9CA3AF" }} />
+                      )}
+                    </Box>
+                  ) : (
+                    col
+                  )}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+
+          <TableBody>
+            {tickets.map((ticket) => {
+            const status = statusStyles[ticket.status];
+            const isEditing = editingTicketNo === ticket.ticketNo;
+
+            return (
+              <TableRow
+                key={ticket.ticketNo}
+                sx={{
+                  "&:last-child td": { borderBottom: 0 },
+                  "&:hover": { backgroundColor: "#F9FAFB" },
+                }}
+              >
+                <TableCell sx={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>
+                  {ticket.ticketNo}
+                </TableCell>
+
+                <TableCell sx={{ fontSize: 14, color: "#111827" }}>
+                  {ticket.customer}
+                </TableCell>
+
+                <TableCell sx={{ fontSize: 14, color: "#374151", minWidth: 180 }}>
+                  {isEditing && draft ? (
+                    <Select
+                      size="small"
+                      fullWidth
+                      value={draft.issueTopic}
+                      onChange={(e: SelectChangeEvent) =>
+                        setDraft({ ...draft, issueTopic: e.target.value })
+                      }
+                      sx={editSelectSx}
+                    >
+                      {issueTopicOptions.map((option) => (
+                        <MenuItem key={option} value={option} sx={{ fontSize: 14 }}>
+                          {option}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  ) : (
+                    ticket.issueTopic
+                  )}
+                </TableCell>
+
+                <TableCell sx={{ fontSize: 14, color: "#374151", minWidth: 160 }}>
+                  {isEditing && draft ? (
+                    <Select
+                      size="small"
+                      fullWidth
+                      value={draft.department}
+                      onChange={(e: SelectChangeEvent) =>
+                        setDraft({ ...draft, department: e.target.value })
+                      }
+                      sx={editSelectSx}
+                    >
+                      {departmentOptions.map((option) => (
+                        <MenuItem key={option} value={option} sx={{ fontSize: 14 }}>
+                          {option}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  ) : (
+                    ticket.department
+                  )}
+                </TableCell>
+
+                <TableCell sx={{ fontSize: 14, color: "#374151", minWidth: 130 }}>
+                  {isEditing && draft ? (
+                    <Select
+                      size="small"
+                      fullWidth
+                      value={draft.city}
+                      onChange={(e: SelectChangeEvent) =>
+                        setDraft({ ...draft, city: e.target.value })
+                      }
+                      sx={editSelectSx}
+                    >
+                      {cityOptions.map((option) => (
+                        <MenuItem key={option} value={option} sx={{ fontSize: 14 }}>
+                          {option}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  ) : (
+                    ticket.city
+                  )}
+                </TableCell>
+
+                <TableCell sx={{ minWidth: 110 }}>
+                  {isEditing && draft ? (
+                    <Select
+                      size="small"
+                      fullWidth
+                      value={draft.priority}
+                      onChange={(e: SelectChangeEvent) =>
+                        setDraft({ ...draft, priority: e.target.value as TicketPriority })
+                      }
+                      sx={editSelectSx}
+                    >
+                      {priorityOptions.map((option) => (
+                        <MenuItem key={option} value={option} sx={{ fontSize: 14 }}>
+                          {option}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  ) : (
+                    <Typography
+                      sx={{
+                        fontSize: 13,
+                        fontWeight: 700,
+                        color: priorityColors[ticket.priority],
+                      }}
+                    >
+                      {ticket.priority}
+                    </Typography>
+                  )}
+                </TableCell>
+
+                <TableCell sx={{ minWidth: 150 }}>
+                  {isEditing && draft ? (
+                    <Select
+                      size="small"
+                      fullWidth
+                      value={draft.status}
+                      onChange={(e: SelectChangeEvent) =>
+                        setDraft({ ...draft, status: e.target.value as TicketStatus })
+                      }
+                      sx={editSelectSx}
+                    >
+                      {statusOptions.map((option) => (
+                        <MenuItem key={option} value={option} sx={{ fontSize: 14 }}>
+                          {statusStyles[option].label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  ) : (
+                    <Box
+                      sx={{
+                        display: "inline-block",
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: status.color,
+                        backgroundColor: status.bg,
+                        borderRadius: "999px",
+                        px: 1.5,
+                        py: 0.4,
+                      }}
+                    >
+                      {status.label}
+                    </Box>
+                  )}
+                </TableCell>
+
+                <TableCell>
+                  {ticket.slaBreached ? (
+                    <ErrorIcon sx={{ fontSize: 19, color: "#D97706" }} />
+                  ) : (
+                    <CheckCircleIcon sx={{ fontSize: 19, color: "#059669" }} />
+                  )}
+                </TableCell>
+
+                <TableCell sx={{ fontSize: 13, color: "#6B7280", whiteSpace: "nowrap" }}>
+                  {formatDateTime(ticket.createdAt)}
+                </TableCell>
+
+                <TableCell>
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    {isEditing ? (
+                      <>
+                        <IconButton size="small" onClick={saveEdit}>
+                          <CheckIcon sx={{ fontSize: 19, color: "#059669" }} />
+                        </IconButton>
+
+                        <IconButton size="small" onClick={cancelEdit}>
+                          <CloseIcon sx={{ fontSize: 19, color: "#DC2626" }} />
+                        </IconButton>
+                      </>
+                    ) : (
+                      <>
+                        <Tooltip
+                          title={
+                            ticket.assignedAgent
+                              ? `Assigned to ${ticket.assignedAgent}`
+                              : "Assign agent"
+                          }
+                        >
+                          <IconButton size="small" onClick={(e) => openAgentMenu(e, ticket)}>
+                            <SupportAgentOutlinedIcon sx={{ fontSize: 19, color: "#6B7280" }} />
+                          </IconButton>
+                        </Tooltip>
+
+                        <IconButton size="small" onClick={() => startEdit(ticket)}>
+                          <EditOutlinedIcon sx={{ fontSize: 19, color: "#6B7280" }} />
+                        </IconButton>
+
+                        <IconButton size="small" onClick={(e) => openDeleteConfirm(e, ticket)}>
+                          <DeleteOutlineIcon sx={{ fontSize: 19, color: "#6B7280" }} />
+                        </IconButton>
+                      </>
+                    )}
+                  </Box>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+
+          {tickets.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={columns.length} sx={{ textAlign: "center", py: 6 }}>
+                <Typography sx={{ fontSize: 14, color: "#6B7280" }}>
+                  No tickets match the selected filters.
+                </Typography>
+              </TableCell>
+            </TableRow>
+          )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Popover
+        open={Boolean(deleteAnchor)}
+        anchorEl={deleteAnchor}
+        onClose={closeDeleteConfirm}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+        slotProps={{ paper: { sx: { mt: 1 } } }}
+      >
+        <Box sx={{ p: 2.5, width: 260, display: "flex", flexDirection: "column", gap: 2 }}>
+          <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>
+            Delete {deletingTicket?.ticketNo}?
+          </Typography>
+
+          <Typography sx={{ fontSize: 13, color: "#6B7280" }}>
+            This ticket will be permanently removed from the list.
+          </Typography>
+
+          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
+            <Button
+              onClick={closeDeleteConfirm}
+              sx={{ textTransform: "none", fontSize: 13, color: "#6B7280" }}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              onClick={confirmDelete}
+              variant="contained"
+              sx={{
+                textTransform: "none",
+                fontSize: 13,
+                backgroundColor: "#DC2626",
+                boxShadow: "none",
+                "&:hover": { backgroundColor: "#B91C1C", boxShadow: "none" },
+              }}
+            >
+              Delete
+            </Button>
+          </Box>
+        </Box>
+      </Popover>
+
+      <Menu anchorEl={agentMenuAnchor} open={Boolean(agentMenuAnchor)} onClose={closeAgentMenu}>
+        <MenuItem
+          onClick={() => handleAssign(null)}
+          sx={{ fontSize: 14 }}
+          selected={assigningTicket?.assignedAgent === null}
+        >
+          <ListItemIcon>
+            <PersonOffOutlinedIcon sx={{ fontSize: 18, color: "#6B7280" }} />
+          </ListItemIcon>
+          Unassigned
+        </MenuItem>
+
+        {agentOptions.map((agent) => (
+          <MenuItem
+            key={agent}
+            onClick={() => handleAssign(agent)}
+            sx={{ fontSize: 14 }}
+            selected={assigningTicket?.assignedAgent === agent}
+          >
+            <ListItemIcon>
+              {assigningTicket?.assignedAgent === agent && (
+                <CheckIcon sx={{ fontSize: 18, color: "#2463FF" }} />
+              )}
+            </ListItemIcon>
+            {agent}
+          </MenuItem>
+        ))}
+      </Menu>
+    </>
+  );
+};
+
+export default TicketTable;

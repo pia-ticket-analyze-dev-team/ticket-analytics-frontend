@@ -6,6 +6,7 @@ import {
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
+import { NavLink, useLocation } from "react-router-dom";
 
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
@@ -14,8 +15,6 @@ import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
 import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
 import KeyboardArrowLeftOutlinedIcon from "@mui/icons-material/KeyboardArrowLeftOutlined";
 import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
-
-import { NavLink, useLocation } from "react-router-dom";
 
 const menuItems = [
   {
@@ -52,8 +51,7 @@ const Sidebar = () => {
     <Box
       sx={{
         width: 245,
-        background:
-          "linear-gradient(180deg,#071B4D 0%,#05163E 100%)",
+        background: "linear-gradient(180deg,#071B4D 0%,#05163E 100%)",
         color: "#fff",
         display: "flex",
         flexDirection: "column",
@@ -110,11 +108,7 @@ const Sidebar = () => {
                   mb: 1,
                   borderRadius: "10px",
                   height: 48,
-
-                  bgcolor: isActive
-                    ? "#2463FF"
-                    : "transparent",
-
+                  bgcolor: isActive ? "#2463FF" : "transparent",
                   "&:hover": {
                     bgcolor: isActive
                       ? "#2463FF"
@@ -149,7 +143,6 @@ const Sidebar = () => {
           sx={{
             borderRadius: 2,
             color: "white",
-
             "&:hover": {
               bgcolor: "rgba(255,255,255,.08)",
             },

@@ -4,7 +4,7 @@ import MainLayout from "../../components/Layout/MainLayout";
 
 import RegionalStats from "../../components/Map/RegionalStats";
 import TurkeyHeatMap from "../../components/Map/TurkeyHeatMap";
-import TopCitiesCard from "../../components/Map/TopCitiesCard";
+import TopRegionsCard from "../../components/Map/TopRegionsCard";
 import HeatLegend from "../../components/Map/HeatLegend";
 
 const RegionalInsightsPage = () => {
@@ -46,7 +46,7 @@ const RegionalInsightsPage = () => {
               gap: 2,
             }}
           >
-            <TopCitiesCard />
+            <TopRegionsCard />
 
             <HeatLegend />
           </Box>

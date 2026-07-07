@@ -11,7 +11,23 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 
-const CustomerFilters = () => {
+type Props = {
+  search: string;
+  setSearch: (value: string) => void;
+  segment: string;
+  setSegment: (value: string) => void;
+  city: string;
+  setCity: (value: string) => void;
+};
+
+const CustomerFilters = ({
+  search,
+  setSearch,
+  segment,
+  setSegment,
+  city,
+  setCity,
+}: Props) => {
   return (
     <Box
       sx={{
@@ -26,6 +42,8 @@ const CustomerFilters = () => {
       }}
     >
       <OutlinedInput
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
         placeholder="Search..."
         startAdornment={<SearchIcon sx={{ mr: 1, color: "#9CA3AF" }} />}
         sx={{
@@ -38,13 +56,13 @@ const CustomerFilters = () => {
         <InputLabel>Segment</InputLabel>
 
         <Select
-          defaultValue="All"
+          value={segment}
           label="Segment"
+          onChange={(e) => setSegment(e.target.value)}
         >
           <MenuItem value="All">All</MenuItem>
-          <MenuItem value="Individual">Individual</MenuItem>
-          <MenuItem value="Corporate">Corporate</MenuItem>
-          <MenuItem value="SME">SME</MenuItem>
+          <MenuItem value="Bireysel">Bireysel</MenuItem>
+          <MenuItem value="Kurumsal">Kurumsal</MenuItem>
         </Select>
       </FormControl>
 
@@ -52,8 +70,9 @@ const CustomerFilters = () => {
         <InputLabel>City</InputLabel>
 
         <Select
-          defaultValue="All"
+          value={city}
           label="City"
+          onChange={(e) => setCity(e.target.value)}
         >
           <MenuItem value="All">All</MenuItem>
           <MenuItem value="İstanbul">İstanbul</MenuItem>
@@ -68,6 +87,11 @@ const CustomerFilters = () => {
 
       <Button
         startIcon={<RefreshOutlinedIcon />}
+        onClick={() => {
+          setSearch("");
+          setSegment("All");
+          setCity("All");
+        }}
         sx={{
           textTransform: "none",
           fontWeight: 600,

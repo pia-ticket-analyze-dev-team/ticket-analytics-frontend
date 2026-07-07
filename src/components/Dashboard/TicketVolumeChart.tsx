@@ -1,6 +1,6 @@
 import { useRef, useState, type MouseEvent } from "react";
 import { Box, Typography } from "@mui/material";
-import { ticketVolumeSeries } from "../../data/mockDashboard";
+import type { TicketVolumePoint } from "../../data/mockDashboard";
 import ChartTooltip from "./ChartTooltip";
 
 const WIDTH = 600;
@@ -18,20 +18,40 @@ const AREA_COLOR = "rgba(42, 120, 214, 0.1)";
 const GRID_COLOR = "#e1e0d9";
 const MUTED = "#898781";
 
-const niceMax = Math.ceil(Math.max(...ticketVolumeSeries.map((p) => p.value)) / 2000) * 2000;
-const gridSteps = [0, 0.25, 0.5, 0.75, 1];
+const GRID_STEPS = [0, 0.25, 0.5, 0.75, 1];
+const TARGET_TICK_COUNT = 6;
 
-const xScale = (i: number) =>
-  PAD_LEFT + (i / (ticketVolumeSeries.length - 1)) * PLOT_WIDTH;
-const yScale = (v: number) => PAD_TOP + (1 - v / niceMax) * PLOT_HEIGHT;
+// Rounds a value up to a "nice" number (1/2/5 * 10^n) so axis gridlines land
+// on clean values regardless of the data's magnitude (tens vs. thousands).
+const niceCeil = (value: number) => {
+  if (value <= 0) return 1;
+  const exponent = Math.floor(Math.log10(value));
+  const fraction = value / 10 ** exponent;
+  const niceFraction = fraction <= 1 ? 1 : fraction <= 2 ? 2 : fraction <= 5 ? 5 : 10;
+  return niceFraction * 10 ** exponent;
+};
 
-const formatK = (v: number) => (v === 0 ? "0" : `${v / 1000}K`);
+const formatAxisValue = (v: number) => {
+  if (v === 0) return "0";
+  return v >= 1000 ? `${v / 1000}K` : `${v}`;
+};
 
-const TicketVolumeChart = () => {
+interface TicketVolumeChartProps {
+  data: TicketVolumePoint[];
+}
+
+const TicketVolumeChart = ({ data }: TicketVolumeChartProps) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
-  const points = ticketVolumeSeries.map((p, i) => ({ x: xScale(i), y: yScale(p.value), ...p }));
+  const step = niceCeil(Math.max(...data.map((p) => p.value), 1) / 4);
+  const niceMax = step * 4;
+  const labelInterval = Math.max(1, Math.ceil(data.length / TARGET_TICK_COUNT));
+
+  const xScale = (i: number) => PAD_LEFT + (i / (data.length - 1)) * PLOT_WIDTH;
+  const yScale = (v: number) => PAD_TOP + (1 - v / niceMax) * PLOT_HEIGHT;
+
+  const points = data.map((p, i) => ({ x: xScale(i), y: yScale(p.value), ...p }));
   const linePath = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
   const areaPath = `${linePath} L ${points[points.length - 1].x} ${PAD_TOP + PLOT_HEIGHT} L ${points[0].x} ${PAD_TOP + PLOT_HEIGHT} Z`;
 
@@ -41,8 +61,8 @@ const TicketVolumeChart = () => {
     const rect = svg.getBoundingClientRect();
     const svgX = ((e.clientX - rect.left) / rect.width) * WIDTH;
     const ratio = (svgX - PAD_LEFT) / PLOT_WIDTH;
-    const index = Math.round(ratio * (ticketVolumeSeries.length - 1));
-    setHoverIndex(Math.min(Math.max(index, 0), ticketVolumeSeries.length - 1));
+    const index = Math.round(ratio * (data.length - 1));
+    setHoverIndex(Math.min(Math.max(index, 0), data.length - 1));
   };
 
   const hovered = hoverIndex !== null ? points[hoverIndex] : null;
@@ -57,7 +77,7 @@ const TicketVolumeChart = () => {
         preserveAspectRatio="none"
         style={{ display: "block", overflow: "visible" }}
       >
-        {gridSteps.map((frac) => {
+        {GRID_STEPS.map((frac) => {
           const y = PAD_TOP + (1 - frac) * PLOT_HEIGHT;
           return (
             <g key={frac}>
@@ -70,14 +90,14 @@ const TicketVolumeChart = () => {
                 strokeWidth={1}
               />
               <text x={PAD_LEFT - 8} y={y + 4} fontSize={11} fill={MUTED} textAnchor="end">
-                {formatK(niceMax * frac)}
+                {formatAxisValue(niceMax * frac)}
               </text>
             </g>
           );
         })}
 
-        {ticketVolumeSeries.map((p, i) =>
-          i % 2 === 0 ? (
+        {data.map((p, i) =>
+          i % labelInterval === 0 ? (
             <text
               key={p.label}
               x={xScale(i)}
@@ -92,7 +112,14 @@ const TicketVolumeChart = () => {
         )}
 
         <path d={areaPath} fill={AREA_COLOR} stroke="none" />
-        <path d={linePath} fill="none" stroke={LINE_COLOR} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+        <path
+          d={linePath}
+          fill="none"
+          stroke={LINE_COLOR}
+          strokeWidth={2}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
 
         {points.map((p, i) => (
           <circle

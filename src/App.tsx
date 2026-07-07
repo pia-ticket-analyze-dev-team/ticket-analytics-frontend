@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import DashboardPage from "./pages/Dashboard/DashboardPage";
 import CustomerPage from "./pages/Customer/CustomerPage";
 import TicketPage from "./pages/Ticket/TicketPage";
+import Analytics from "./pages/Analytics/Analytics";
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/tickets" element={<TicketPage />} />
       <Route path="/customers" element={<CustomerPage />} />
+      <Route path="/analytics" element={<Analytics />} />
     </Routes>
   );
 }

@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import type { StatTileData } from "../../data/mockDashboard";
+import type { StatTileData } from "../../types/dashboard";
 
 const GOOD_COLOR = "#0ca30c";
 const BAD_COLOR = "#d03b3b";

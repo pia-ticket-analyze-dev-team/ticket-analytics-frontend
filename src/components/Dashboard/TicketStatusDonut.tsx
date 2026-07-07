@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Box, Typography } from "@mui/material";
-import type { TicketStatusSlice } from "../../data/mockDashboard";
+import type { TicketStatusSlice } from "../../types/dashboard";
 import ChartTooltip from "./ChartTooltip";
 
 const SIZE = 220;

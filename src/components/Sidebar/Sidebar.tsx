@@ -34,9 +34,9 @@ const menuItems = [
     path: "/tickets",
   },
   {
-    title: "Analytics",
+    title: "Agent Analytics",
     icon: <BarChartOutlinedIcon />,
-    path: null,
+    path: "/analytics",
   },
   {
     title: "Reports",

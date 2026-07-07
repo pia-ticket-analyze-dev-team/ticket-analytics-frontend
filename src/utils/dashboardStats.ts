@@ -1,4 +1,4 @@
-import type { StatTileData, TicketStatusSlice, TicketVolumePoint } from "../data/mockDashboard";
+import type { StatTileData, TicketStatusSlice, TicketVolumePoint } from "../types/dashboard";
 import type {
   DailyTicketVolume,
   KpiSummary,

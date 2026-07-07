@@ -1,6 +1,6 @@
 import { useRef, useState, type MouseEvent } from "react";
 import { Box, Typography } from "@mui/material";
-import type { TicketVolumePoint } from "../../data/mockDashboard";
+import type { TicketVolumePoint } from "../../types/dashboard";
 import { formatAxisValue, niceAxisMax } from "../../utils/chartScale";
 import ChartTooltip from "./ChartTooltip";
 

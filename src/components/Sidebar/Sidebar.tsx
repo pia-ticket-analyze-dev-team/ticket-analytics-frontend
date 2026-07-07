@@ -11,45 +11,43 @@ import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import ConfirmationNumberOutlinedIcon from "@mui/icons-material/ConfirmationNumberOutlined";
 import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
-import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
 import KeyboardArrowLeftOutlinedIcon from "@mui/icons-material/KeyboardArrowLeftOutlined";
 import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
+
+import { NavLink, useLocation } from "react-router-dom";
 
 const menuItems = [
   {
     title: "Dashboard",
     icon: <DashboardOutlinedIcon />,
-    active: false,
+    path: "/dashboard",
   },
   {
     title: "Customers",
     icon: <GroupsOutlinedIcon />,
-    active: true,
+    path: "/customers",
   },
   {
     title: "Tickets",
     icon: <ConfirmationNumberOutlinedIcon />,
-    active: false,
+    path: "/tickets",
   },
   {
     title: "Analytics",
     icon: <BarChartOutlinedIcon />,
-    active: false,
+    path: "/analytics",
   },
   {
-    title: "Reports",
-    icon: <DescriptionOutlinedIcon />,
-    active: false,
-  },
-  {
-    title: "Settings",
-    icon: <SettingsOutlinedIcon />,
-    active: false,
+    title: "Regional Insights",
+    icon: <PublicOutlinedIcon />,
+    path: "/regional-insights",
   },
 ];
 
 const Sidebar = () => {
+  const location = useLocation();
+
   return (
     <Box
       sx={{
@@ -90,7 +88,7 @@ const Sidebar = () => {
             <Typography
               sx={{
                 fontSize: 11,
-                opacity: .75,
+                opacity: 0.75,
                 letterSpacing: 1,
               }}
             >
@@ -100,43 +98,49 @@ const Sidebar = () => {
         </Box>
 
         <List sx={{ px: 2 }}>
-          {menuItems.map((item) => (
-            <ListItemButton
-              key={item.title}
-              sx={{
-                mb: 1,
-                borderRadius: "10px",
-                height: 48,
+          {menuItems.map((item) => {
+            const isActive = location.pathname === item.path;
 
-                bgcolor: item.active
-                  ? "#2463FF"
-                  : "transparent",
-
-                "&:hover": {
-                  bgcolor: item.active
-                    ? "#2463FF"
-                    : "rgba(255,255,255,.08)",
-                },
-              }}
-            >
-              <ListItemIcon
+            return (
+              <ListItemButton
+                key={item.title}
+                component={NavLink}
+                to={item.path}
                 sx={{
-                  color: "white",
-                  minWidth: 40,
+                  mb: 1,
+                  borderRadius: "10px",
+                  height: 48,
+
+                  bgcolor: isActive
+                    ? "#2463FF"
+                    : "transparent",
+
+                  "&:hover": {
+                    bgcolor: isActive
+                      ? "#2463FF"
+                      : "rgba(255,255,255,.08)",
+                  },
                 }}
               >
-                {item.icon}
-              </ListItemIcon>
+                <ListItemIcon
+                  sx={{
+                    color: "white",
+                    minWidth: 40,
+                  }}
+                >
+                  {item.icon}
+                </ListItemIcon>
 
-              <ListItemText
-                primary={item.title}
-                primaryTypographyProps={{
-                  fontSize: 15,
-                  fontWeight: item.active ? 600 : 500,
-                }}
-              />
-            </ListItemButton>
-          ))}
+                <ListItemText
+                  primary={item.title}
+                  primaryTypographyProps={{
+                    fontSize: 15,
+                    fontWeight: isActive ? 600 : 500,
+                  }}
+                />
+              </ListItemButton>
+            );
+          })}
         </List>
       </Box>
 

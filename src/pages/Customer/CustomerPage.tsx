@@ -1,12 +1,16 @@
 import MainLayout from "../../components/Layout/MainLayout";
-import { Typography } from "@mui/material";
+import CustomerHeader from "../../components/Customer/CustomerHeader";
+import CustomerFilters from "../../components/Customer/CustomerFilters";
+import CustomerTable from "../../components/Customer/CustomerTable";
+import CustomerPagination from "../../components/Customer/CustomerPagination";
 
 const CustomerPage = () => {
   return (
     <MainLayout>
-      <Typography variant="h4" sx={{ p: 4 }}>
-        Customers
-      </Typography>
+      <CustomerHeader />
+      <CustomerFilters />
+      <CustomerTable />
+      <CustomerPagination />
     </MainLayout>
   );
 };

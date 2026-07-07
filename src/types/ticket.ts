@@ -5,6 +5,7 @@ export type TicketPriority = "HIGH" | "MEDIUM" | "LOW";
 export interface Ticket {
   ticketNo: string;
   customer: string;
+  description: string;
   issueTopic: string;
   department: string;
   city: string;

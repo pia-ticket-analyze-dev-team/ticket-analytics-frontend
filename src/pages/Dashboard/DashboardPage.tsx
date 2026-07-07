@@ -8,7 +8,7 @@ import TicketStatusDonut from "../../components/Dashboard/TicketStatusDonut";
 import HorizontalBarChart from "../../components/Dashboard/HorizontalBarChart";
 import SlaBreachGauge from "../../components/Dashboard/SlaBreachGauge";
 import VerticalBarChart from "../../components/Dashboard/VerticalBarChart";
-import type { StatTileData } from "../../data/mockDashboard";
+import type { StatTileData } from "../../types/dashboard";
 import { useKpiSummary } from "../../hooks/useKpiSummary";
 import { useTicketVolume } from "../../hooks/useTicketVolume";
 import { useTicketsByStatus } from "../../hooks/useTicketsByStatus";

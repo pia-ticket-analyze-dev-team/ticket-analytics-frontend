@@ -11,3 +11,19 @@ export interface ServiceTypeTrend {
   month: string;
   ticketCount: number;
 }
+
+export interface AgentPerformance {
+  agentId: string;
+  agentName: string;
+  resolvedTicketCount: number;
+  averageSatisfactionScore: number;
+  slaSuccessRate: number;
+  averageResolutionHours: number;
+  performanceScore: number;
+}
+
+// Spring Data's Page<T> serializes with several pagination/metadata fields
+// beyond `content` (totalElements, sort, etc.) — only `content` is needed here.
+export interface PageResponse<T> {
+  content: T[];
+}

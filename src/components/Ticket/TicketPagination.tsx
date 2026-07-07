@@ -17,6 +17,7 @@ interface TicketPaginationProps {
   rowsPerPage: number;
   onPageChange: (page: number) => void;
   onRowsPerPageChange: (rowsPerPage: number) => void;
+  rowsPerPageOptions?: number[];
 }
 
 const getPageItems = (page: number, totalPages: number): (number | "...")[] => {
@@ -45,6 +46,7 @@ const TicketPagination = ({
   rowsPerPage,
   onPageChange,
   onRowsPerPageChange,
+  rowsPerPageOptions = [10, 25, 50, 100],
 }: TicketPaginationProps) => {
   const pageItems = getPageItems(page, totalPages);
 
@@ -146,7 +148,7 @@ const TicketPagination = ({
           "& .MuiOutlinedInput-notchedOutline": { borderColor: "#E5E7EB" },
         }}
       >
-        {[10, 25, 50, 100].map((n) => (
+        {rowsPerPageOptions.map((n) => (
           <MenuItem key={n} value={n} sx={{ fontSize: 13 }}>
             {n} / page
           </MenuItem>

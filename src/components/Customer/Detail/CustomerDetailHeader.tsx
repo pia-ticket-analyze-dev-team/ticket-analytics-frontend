@@ -1,9 +1,11 @@
 import { Box, Button, Typography } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import { useNavigate } from "react-router-dom";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
+import { useNavigate, useParams } from "react-router-dom";
 
-const CustomerHeader = () => {
+const CustomerDetailHeader = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
 
   return (
     <Box
@@ -15,6 +17,23 @@ const CustomerHeader = () => {
       }}
     >
       <Box>
+        <Button
+          startIcon={<ArrowBackOutlinedIcon />}
+          onClick={() => navigate("/customers")}
+          sx={{
+            mb: 2,
+            px: 0,
+            textTransform: "none",
+            color: "#6B7280",
+
+            "&:hover": {
+              background: "transparent",
+            },
+          }}
+        >
+          Back to Customers
+        </Button>
+
         <Typography
           variant="h4"
           sx={{
@@ -23,7 +42,7 @@ const CustomerHeader = () => {
             mb: 0.5,
           }}
         >
-          Customers
+          Customer Detail
         </Typography>
 
         <Typography
@@ -32,14 +51,14 @@ const CustomerHeader = () => {
             fontSize: 15,
           }}
         >
-          Manage customer records and account information.
+          View customer information and ticket history.
         </Typography>
       </Box>
 
       <Button
         variant="contained"
-        startIcon={<AddIcon />}
-        onClick={() => navigate("/customers/new")}
+        startIcon={<EditOutlinedIcon />}
+        onClick={() => navigate(`/customers/${id}/edit`)}
         sx={{
           textTransform: "none",
           borderRadius: "10px",
@@ -53,10 +72,10 @@ const CustomerHeader = () => {
           },
         }}
       >
-        Add Customer
+        Edit Customer
       </Button>
     </Box>
   );
 };
 
-export default CustomerHeader;
+export default CustomerDetailHeader;

@@ -9,10 +9,12 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
-import { createCustomer } from "../../../api/customers/customers.js";
+import { createCustomer, updateCustomer } from "../../../api/customers/customers.js";
+import type { Customer } from "../customer.types";
 
 interface CustomerFormProps {
   isEdit?: boolean;
+  customer?: Customer;
   onCancel?: () => void;
   onSuccess?: () => void;
 }
@@ -47,11 +49,22 @@ const editMockForm: CustomerFormState = {
   birthdate: "1990-01-01",
 };
 
-const CustomerForm = ({ isEdit = false, onCancel, onSuccess }: CustomerFormProps) => {
+const customerToForm = (customer: Customer): CustomerFormState => ({
+  firstName: customer.firstName,
+  lastName: customer.lastName,
+  email: customer.email,
+  phone: customer.phone ?? "",
+  segment: customer.segment ?? "",
+  address: customer.address,
+  birthdate: customer.birthdate ?? "",
+});
+
+const CustomerForm = ({ isEdit = false, customer, onCancel, onSuccess }: CustomerFormProps) => {
   const navigate = useNavigate();
   const handleCancel = onCancel ?? (() => navigate("/customers"));
 
-  const [form, setForm] = useState<CustomerFormState>(isEdit ? editMockForm : emptyForm);
+  const initialForm = customer ? customerToForm(customer) : isEdit ? editMockForm : emptyForm;
+  const [form, setForm] = useState<CustomerFormState>(initialForm);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -64,13 +77,17 @@ const CustomerForm = ({ isEdit = false, onCancel, onSuccess }: CustomerFormProps
     form.email.trim() !== "" &&
     form.address.trim() !== "";
 
+  // The full-page /customers/:id/edit route still uses static mock data (isEdit
+  // without a customer), so there's nothing real to save there yet.
+  const canSubmit = customer !== undefined || !isEdit;
+
   const handleSubmit = () => {
-    if (!isValid || submitting) return;
+    if (!isValid || !canSubmit || submitting) return;
 
     setSubmitting(true);
     setError(null);
 
-    createCustomer({
+    const payload = {
       firstName: form.firstName.trim(),
       lastName: form.lastName.trim(),
       email: form.email.trim(),
@@ -78,13 +95,23 @@ const CustomerForm = ({ isEdit = false, onCancel, onSuccess }: CustomerFormProps
       segment: form.segment || null,
       address: form.address.trim(),
       birthdate: form.birthdate || null,
-    })
+    };
+
+    const request = customer ? updateCustomer(customer.id, payload) : createCustomer(payload);
+
+    request
       .then(() => {
-        setForm(emptyForm);
+        if (!customer) setForm(emptyForm);
         onSuccess?.();
         handleCancel();
       })
-      .catch(() => setError("Couldn't create customer. Please try again."))
+      .catch(() =>
+        setError(
+          customer
+            ? "Couldn't save changes. Please try again."
+            : "Couldn't create customer. Please try again."
+        )
+      )
       .finally(() => setSubmitting(false));
   };
 
@@ -221,8 +248,8 @@ const CustomerForm = ({ isEdit = false, onCancel, onSuccess }: CustomerFormProps
 
         <Button
           variant="contained"
-          onClick={isEdit ? undefined : handleSubmit}
-          disabled={!isEdit && (!isValid || submitting)}
+          onClick={handleSubmit}
+          disabled={!canSubmit || !isValid || submitting}
           sx={{
             minWidth: 180,
             height: 46,
@@ -235,7 +262,13 @@ const CustomerForm = ({ isEdit = false, onCancel, onSuccess }: CustomerFormProps
             },
           }}
         >
-          {isEdit ? "Save Changes" : submitting ? "Creating..." : "Create Customer"}
+          {isEdit || customer
+            ? submitting
+              ? "Saving..."
+              : "Save Changes"
+            : submitting
+              ? "Creating..."
+              : "Create Customer"}
         </Button>
       </Box>
     </Paper>

@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from "../base.js";
+import { apiGet, apiPost, apiPut, apiDelete } from "../base.js";
 
 export function fetchCustomers({ page = 0, size = 10, search = "" } = {}) {
   const params = new URLSearchParams({ page: String(page), size: String(size) });
@@ -16,4 +16,12 @@ export function fetchCustomerById(id) {
 
 export function createCustomer(customer) {
   return apiPost("/api/customers", customer);
+}
+
+export function updateCustomer(id, customer) {
+  return apiPut(`/api/customers/${id}`, customer);
+}
+
+export function deleteCustomer(id) {
+  return apiDelete(`/api/customers/${id}`);
 }

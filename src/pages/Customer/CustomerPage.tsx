@@ -7,6 +7,7 @@ import CustomerTable from "../../components/Customer/CustomerTable";
 import CustomerPagination from "../../components/Customer/CustomerPagination";
 import CustomerFormDialog from "../../components/Customer/Form/CustomerFormDialog";
 import { useCustomers } from "../../hooks/useCustomers";
+import type { Customer } from "../../components/Customer/customer.types";
 
 const CustomerPage = () => {
   const [search, setSearch] = useState("");
@@ -15,7 +16,7 @@ const CustomerPage = () => {
   const [city, setCity] = useState("All");
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(10);
-  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [formTarget, setFormTarget] = useState<"create" | Customer | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -31,7 +32,7 @@ const CustomerPage = () => {
 
   return (
     <MainLayout>
-      <CustomerHeader onAddClick={() => setIsAddOpen(true)} />
+      <CustomerHeader onAddClick={() => setFormTarget("create")} />
 
       <CustomerFilters
         search={search}
@@ -48,6 +49,8 @@ const CustomerPage = () => {
         error={error}
         segment={segment}
         city={city}
+        onEdit={setFormTarget}
+        onDeleted={() => setRefreshKey((key) => key + 1)}
       />
 
       <CustomerPagination
@@ -63,9 +66,10 @@ const CustomerPage = () => {
       />
 
       <CustomerFormDialog
-        open={isAddOpen}
-        onClose={() => setIsAddOpen(false)}
-        onCreated={() => setRefreshKey((key) => key + 1)}
+        open={formTarget !== null}
+        onClose={() => setFormTarget(null)}
+        onSaved={() => setRefreshKey((key) => key + 1)}
+        customer={typeof formTarget === "object" && formTarget !== null ? formTarget : undefined}
       />
     </MainLayout>
   );

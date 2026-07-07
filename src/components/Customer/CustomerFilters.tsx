@@ -11,33 +11,9 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 
-const CITIES = [
-  "Adana",
-  "Ankara",
-  "Antalya",
-  "Aydın",
-  "Bursa",
-  "Diyarbakır",
-  "Erzurum",
-  "Eskişehir",
-  "Gaziantep",
-  "Istanbul",
-  "Izmir",
-  "Kocaeli",
-  "Konya",
-  "Manisa",
-  "Mersin",
-  "Muğla",
-  "Samsun",
-  "Tekirdağ",
-  "Trabzon",
-  "Van",
-  "Şanlıurfa",
-];
+import { useRegions } from "../../hooks/useRegions";
 
 type Props = {
-  search: string;
-  setSearch: (value: string) => void;
   segment: string;
   setSegment: (value: string) => void;
   city: string;
@@ -45,13 +21,13 @@ type Props = {
 };
 
 const CustomerFilters = ({
-  search,
-  setSearch,
   segment,
   setSegment,
   city,
   setCity,
 }: Props) => {
+  const { data: regions } = useRegions();
+
   return (
     <Box
       sx={{
@@ -65,17 +41,6 @@ const CustomerFilters = ({
         boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
       }}
     >
-      <OutlinedInput
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="Search..."
-        startAdornment={<SearchIcon sx={{ mr: 1, color: "#9CA3AF" }} />}
-        sx={{
-          width: 280,
-          borderRadius: "12px",
-        }}
-      />
-
       <FormControl sx={{ minWidth: 170 }}>
         <InputLabel>Segment</InputLabel>
 
@@ -100,12 +65,12 @@ const CustomerFilters = ({
           onChange={(e) => setCity(e.target.value)}
         >
           <MenuItem value="All">All</MenuItem>
-          {CITIES.map((cityOption) => (
+          {(regions ?? []).map((region) => (
             <MenuItem
-              key={cityOption}
-              value={cityOption}
+              key={region.id}
+              value={region.name}
             >
-              {cityOption}
+              {region.name}
             </MenuItem>
           ))}
         </Select>
@@ -116,7 +81,6 @@ const CustomerFilters = ({
       <Button
         startIcon={<RefreshOutlinedIcon />}
         onClick={() => {
-          setSearch("");
           setSegment("All");
           setCity("All");
         }}

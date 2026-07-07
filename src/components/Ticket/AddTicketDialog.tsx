@@ -12,12 +12,10 @@ import {
   Typography,
   type SelectChangeEvent,
 } from "@mui/material";
-import {
-  agentOptions,
-  cityOptions,
-  departmentOptions,
-  issueTopicOptions,
-} from "../../data/mockTickets";
+import { useAgents } from "../../hooks/useAgents";
+import { useDepartments } from "../../hooks/useDepartments";
+import { useIssueTopics } from "../../hooks/useIssueTopics";
+import { useRegions } from "../../hooks/useRegions";
 import type { TicketPriority, TicketStatus } from "../../types/ticket";
 
 export interface NewTicketInput {
@@ -31,15 +29,15 @@ export interface NewTicketInput {
   assignedAgent: string | null;
 }
 
-const priorityOptions: TicketPriority[] = ["HIGH", "MEDIUM", "LOW"];
+const priorityOptions: TicketPriority[] = ["High", "Medium", "Low"];
 
 const emptyForm: NewTicketInput = {
   customer: "",
   description: "",
-  issueTopic: issueTopicOptions[0],
-  department: departmentOptions[0],
-  city: cityOptions[0],
-  priority: "MEDIUM",
+  issueTopic: "",
+  department: "",
+  city: "",
+  priority: "Medium",
   status: "OPEN",
   assignedAgent: null,
 };
@@ -54,6 +52,11 @@ interface AddTicketDialogProps {
 }
 
 const AddTicketDialog = ({ open, onClose, onSubmit }: AddTicketDialogProps) => {
+  const { data: issueTopics } = useIssueTopics();
+  const { data: departments } = useDepartments();
+  const { data: regions } = useRegions();
+  const { data: agents } = useAgents();
+
   const [form, setForm] = useState<NewTicketInput>(emptyForm);
 
   const handleClose = () => {
@@ -99,14 +102,18 @@ const AddTicketDialog = ({ open, onClose, onSubmit }: AddTicketDialogProps) => {
           <Typography sx={labelSx}>Issue Topic</Typography>
           <Select
             size="small"
+            displayEmpty
             value={form.issueTopic}
             onChange={(e: SelectChangeEvent) =>
               setForm({ ...form, issueTopic: e.target.value })
             }
           >
-            {issueTopicOptions.map((option) => (
-              <MenuItem key={option} value={option} sx={{ fontSize: 14 }}>
-                {option}
+            <MenuItem value="" sx={{ fontSize: 14 }}>
+              Select a topic
+            </MenuItem>
+            {(issueTopics ?? []).map((option) => (
+              <MenuItem key={option.id} value={option.name} sx={{ fontSize: 14 }}>
+                {option.name}
               </MenuItem>
             ))}
           </Select>
@@ -116,14 +123,18 @@ const AddTicketDialog = ({ open, onClose, onSubmit }: AddTicketDialogProps) => {
           <Typography sx={labelSx}>Department</Typography>
           <Select
             size="small"
+            displayEmpty
             value={form.department}
             onChange={(e: SelectChangeEvent) =>
               setForm({ ...form, department: e.target.value })
             }
           >
-            {departmentOptions.map((option) => (
-              <MenuItem key={option} value={option} sx={{ fontSize: 14 }}>
-                {option}
+            <MenuItem value="" sx={{ fontSize: 14 }}>
+              Select a department
+            </MenuItem>
+            {(departments ?? []).map((option) => (
+              <MenuItem key={option.id} value={option.name} sx={{ fontSize: 14 }}>
+                {option.name}
               </MenuItem>
             ))}
           </Select>
@@ -133,12 +144,16 @@ const AddTicketDialog = ({ open, onClose, onSubmit }: AddTicketDialogProps) => {
           <Typography sx={labelSx}>City</Typography>
           <Select
             size="small"
+            displayEmpty
             value={form.city}
             onChange={(e: SelectChangeEvent) => setForm({ ...form, city: e.target.value })}
           >
-            {cityOptions.map((option) => (
-              <MenuItem key={option} value={option} sx={{ fontSize: 14 }}>
-                {option}
+            <MenuItem value="" sx={{ fontSize: 14 }}>
+              Select a city
+            </MenuItem>
+            {(regions ?? []).map((option) => (
+              <MenuItem key={option.id} value={option.name} sx={{ fontSize: 14 }}>
+                {option.name}
               </MenuItem>
             ))}
           </Select>
@@ -185,9 +200,9 @@ const AddTicketDialog = ({ open, onClose, onSubmit }: AddTicketDialogProps) => {
             <MenuItem value="" sx={{ fontSize: 14 }}>
               Unassigned
             </MenuItem>
-            {agentOptions.map((option) => (
-              <MenuItem key={option} value={option} sx={{ fontSize: 14 }}>
-                {option}
+            {(agents ?? []).map((option) => (
+              <MenuItem key={option.id} value={option.name} sx={{ fontSize: 14 }}>
+                {option.name}
               </MenuItem>
             ))}
           </Select>

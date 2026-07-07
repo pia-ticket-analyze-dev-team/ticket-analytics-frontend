@@ -1,19 +1,33 @@
 export type TicketStatus = "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
 
-export type TicketPriority = "HIGH" | "MEDIUM" | "LOW";
+export type TicketPriority = "High" | "Medium" | "Low" | "Critical";
 
 export interface Ticket {
-  ticketNo: string;
-  customer: string;
-  description: string;
-  issueTopic: string;
-  department: string;
-  city: string;
-  priority: TicketPriority;
+  id: string;
+  ticketNumber: string;
+  customerId: string | null;
+  customerName: string | null;
+  topicId: string | null;
+  issueTopicName: string | null;
+  currentDepartmentId: string | null;
+  departmentName: string | null;
+  regionId: string | null;
+  city: string | null;
+  agentId: string | null;
+  assignedAgentName: string | null;
+  serviceTypeId: string | null;
+  serviceTypeName: string | null;
+  infrastructureTypeId: string | null;
+  infrastructureTypeName: string | null;
+  description: string | null;
   status: TicketStatus;
+  priority: TicketPriority;
   slaBreached: boolean;
-  createdAt: Date;
-  assignedAgent: string | null;
+  resolutionTimeHours: number | null;
+  customerSatisfactionScore: number | null;
+  createdAt: string;
+  resolvedAt: string | null;
+  creationSource: string | null;
 }
 
 export interface DateRange {

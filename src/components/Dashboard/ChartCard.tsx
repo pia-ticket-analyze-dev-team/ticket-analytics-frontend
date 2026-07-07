@@ -46,7 +46,7 @@ const ChartCard = ({ title, rangeOptions, children }: ChartCardProps) => {
         )}
       </Box>
 
-      <Box sx={{ position: "relative", minWidth: 0 }}>{children}</Box>
+      <Box sx={{ position: "relative", minWidth: 0, flexGrow: 1 }}>{children}</Box>
     </Box>
   );
 };

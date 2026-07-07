@@ -73,7 +73,7 @@ const DashboardPage = () => {
           gridTemplateColumns: {
             xs: "1fr",
             sm: "1fr 1fr",
-            lg: "repeat(6, 1fr)",
+            lg: "repeat(5, 1fr)",
           },
           gap: 2.5,
           mb: 2.5,
@@ -121,19 +121,22 @@ const DashboardPage = () => {
           </ChartAsyncContent>
         </ChartCard>
 
-        <ChartCard title="Tickets by Service Type">
+        <ChartCard title="Department Workload">
           <ChartAsyncContent
-            loading={serviceType.loading}
-            error={serviceType.error}
-            data={serviceType.data}
+            loading={departments.loading}
+            error={departments.error}
+            data={departments.data}
             skeletonHeight={200}
           >
             {(items) => (
-              <HorizontalBarChart
-                data={buildServiceTypeCounts(items)}
-                showAxis
-                labelWidth={100}
-              />
+              <Box sx={{ height: "100%", display: "flex", alignItems: "center" }}>
+                <HorizontalBarChart
+                  data={buildLabeledCounts(items)}
+                  showAxis
+                  labelWidth={140}
+                  fillHeight
+                />
+              </Box>
             )}
           </ChartAsyncContent>
         </ChartCard>
@@ -168,14 +171,14 @@ const DashboardPage = () => {
           </ChartAsyncContent>
         </ChartCard>
 
-        <ChartCard title="Department Workload">
+        <ChartCard title="Tickets by Service Type">
           <ChartAsyncContent
-            loading={departments.loading}
-            error={departments.error}
-            data={departments.data}
+            loading={serviceType.loading}
+            error={serviceType.error}
+            data={serviceType.data}
             skeletonHeight={220}
           >
-            {(items) => <VerticalBarChart data={buildLabeledCounts(items)} />}
+            {(items) => <VerticalBarChart data={buildServiceTypeCounts(items)} />}
           </ChartAsyncContent>
         </ChartCard>
       </Box>

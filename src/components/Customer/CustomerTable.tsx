@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Paper,
   Table,
@@ -18,6 +19,7 @@ import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined
 import { useNavigate } from "react-router-dom";
 
 import type { Customer } from "./customer.types";
+import DeleteCustomerDialog from "./DeleteCustomerDialog";
 
 type CustomerTableProps = {
   customers: Customer[];
@@ -25,13 +27,24 @@ type CustomerTableProps = {
   error: string | null;
   segment: string;
   city: string;
+  onEdit: (customer: Customer) => void;
+  onDeleted: () => void;
 };
 
 const getCityFromAddress = (address: string) =>
   address.trim().split(/\s+/).pop()?.replace(/[,.]+$/, "") ?? "";
 
-const CustomerTable = ({ customers, loading, error, segment, city }: CustomerTableProps) => {
+const CustomerTable = ({
+  customers,
+  loading,
+  error,
+  segment,
+  city,
+  onEdit,
+  onDeleted,
+}: CustomerTableProps) => {
   const navigate = useNavigate();
+  const [deleteTarget, setDeleteTarget] = useState<Customer | null>(null);
 
   const filteredCustomers = customers.filter((customer) => {
     const matchesSegment = segment === "All" || customer.segment === segment;
@@ -140,7 +153,7 @@ const CustomerTable = ({ customers, loading, error, segment, city }: CustomerTab
 
                   <IconButton
                     size="small"
-                    onClick={() => navigate(`/customers/${customer.id}/edit`)}
+                    onClick={() => onEdit(customer)}
                   >
                     <EditOutlinedIcon fontSize="small" />
                   </IconButton>
@@ -148,6 +161,7 @@ const CustomerTable = ({ customers, loading, error, segment, city }: CustomerTab
                   <IconButton
                     size="small"
                     color="error"
+                    onClick={() => setDeleteTarget(customer)}
                   >
                     <DeleteOutlineOutlinedIcon fontSize="small" />
                   </IconButton>
@@ -156,6 +170,13 @@ const CustomerTable = ({ customers, loading, error, segment, city }: CustomerTab
             ))}
         </TableBody>
       </Table>
+
+      <DeleteCustomerDialog
+        open={deleteTarget !== null}
+        customer={deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onDeleted={onDeleted}
+      />
     </TableContainer>
   );
 };

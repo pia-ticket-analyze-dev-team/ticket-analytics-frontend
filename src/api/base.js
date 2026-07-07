@@ -9,3 +9,17 @@ export async function apiGet(path) {
 
   return response.json();
 }
+
+export async function apiPost(path, body) {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request to ${path} failed with status ${response.status}`);
+  }
+
+  return response.json();
+}

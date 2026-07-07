@@ -1,10 +1,11 @@
 import { Box, Button, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { useNavigate } from "react-router-dom";
 
-const CustomerHeader = () => {
-  const navigate = useNavigate();
+type CustomerHeaderProps = {
+  onAddClick: () => void;
+};
 
+const CustomerHeader = ({ onAddClick }: CustomerHeaderProps) => {
   return (
     <Box
       sx={{
@@ -39,7 +40,7 @@ const CustomerHeader = () => {
       <Button
         variant="contained"
         startIcon={<AddIcon />}
-        onClick={() => navigate("/customers/new")}
+        onClick={onAddClick}
         sx={{
           textTransform: "none",
           borderRadius: "10px",

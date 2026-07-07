@@ -7,9 +7,10 @@ interface UseCustomersParams {
   page: number;
   size: number;
   search: string;
+  refreshKey?: number;
 }
 
-export function useCustomers({ page, size, search }: UseCustomersParams) {
+export function useCustomers({ page, size, search, refreshKey = 0 }: UseCustomersParams) {
   const [data, setData] = useState<PagedResponse<Customer> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +35,7 @@ export function useCustomers({ page, size, search }: UseCustomersParams) {
     return () => {
       cancelled = true;
     };
-  }, [page, size, search]);
+  }, [page, size, search, refreshKey]);
 
   return { data, loading, error };
 }

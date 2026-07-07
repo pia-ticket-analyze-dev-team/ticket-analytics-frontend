@@ -4,9 +4,29 @@ import {
   Select,
   MenuItem,
   Typography,
+  type SelectChangeEvent,
 } from "@mui/material";
 
-const CustomerPagination = () => {
+type CustomerPaginationProps = {
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  onSizeChange: (size: number) => void;
+};
+
+const CustomerPagination = ({
+  page,
+  size,
+  totalElements,
+  totalPages,
+  onPageChange,
+  onSizeChange,
+}: CustomerPaginationProps) => {
+  const from = totalElements === 0 ? 0 : page * size + 1;
+  const to = Math.min((page + 1) * size, totalElements);
+
   return (
     <Box
       sx={{
@@ -21,7 +41,7 @@ const CustomerPagination = () => {
         variant="body2"
         color="text.secondary"
       >
-        Showing 1 to 5 of 10,000 entries
+        Showing {from} to {to} of {totalElements} entries
       </Typography>
 
       <Box
@@ -32,15 +52,17 @@ const CustomerPagination = () => {
         }}
       >
         <Pagination
-          count={5}
-          page={1}
+          count={Math.max(totalPages, 1)}
+          page={page + 1}
+          onChange={(_, value) => onPageChange(value - 1)}
           color="primary"
           shape="rounded"
         />
 
         <Select
           size="small"
-          defaultValue={10}
+          value={size}
+          onChange={(e: SelectChangeEvent<number>) => onSizeChange(Number(e.target.value))}
           sx={{
             width: 90,
             height: 36,

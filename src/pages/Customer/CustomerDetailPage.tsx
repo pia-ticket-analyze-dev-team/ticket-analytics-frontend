@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useParams } from "react-router-dom";
+import { Box, CircularProgress, Typography } from "@mui/material";
 
 import MainLayout from "../../components/Layout/MainLayout";
 
@@ -7,6 +9,7 @@ import CustomerOverview from "../../components/Customer/Detail/CustomerOverview"
 import CustomerTicketTable from "../../components/Customer/Detail/CustomerTicketTable";
 
 import TicketPagination from "../../components/Ticket/TicketPagination";
+import { useCustomer } from "../../hooks/useCustomer";
 
 const tickets = [
   {
@@ -52,6 +55,9 @@ const tickets = [
 ];
 
 const CustomerDetailPage = () => {
+  const { id } = useParams();
+  const { data: customer, loading, error } = useCustomer(id);
+
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -64,23 +70,39 @@ const CustomerDetailPage = () => {
     <MainLayout>
       <CustomerDetailHeader />
 
-      <CustomerOverview />
+      {loading && (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+          <CircularProgress size={28} />
+        </Box>
+      )}
 
-      <CustomerTicketTable tickets={paginatedTickets} />
+      {!loading && error && (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+          <Typography color="error">{error}</Typography>
+        </Box>
+      )}
 
-      <TicketPagination
-        page={page}
-        totalPages={Math.ceil(tickets.length / rowsPerPage)}
-        totalEntries={tickets.length}
-        rangeStart={tickets.length === 0 ? 0 : start + 1}
-        rangeEnd={Math.min(end, tickets.length)}
-        rowsPerPage={rowsPerPage}
-        onPageChange={setPage}
-        onRowsPerPageChange={(value) => {
-          setRowsPerPage(value);
-          setPage(1);
-        }}
-      />
+      {!loading && !error && customer && (
+        <>
+          <CustomerOverview customer={customer} />
+
+          <CustomerTicketTable tickets={paginatedTickets} />
+
+          <TicketPagination
+            page={page}
+            totalPages={Math.ceil(tickets.length / rowsPerPage)}
+            totalEntries={tickets.length}
+            rangeStart={tickets.length === 0 ? 0 : start + 1}
+            rangeEnd={Math.min(end, tickets.length)}
+            rowsPerPage={rowsPerPage}
+            onPageChange={setPage}
+            onRowsPerPageChange={(value) => {
+              setRowsPerPage(value);
+              setPage(1);
+            }}
+          />
+        </>
+      )}
     </MainLayout>
   );
 };

@@ -50,7 +50,6 @@ const DashboardPage = () => {
     kpiTiles?.[0] ?? (loading ? "loading" : unavailableTile("Total Customers")),
     kpiTiles?.[1] ?? (loading ? "loading" : unavailableTile("Total Tickets")),
     kpiTiles?.[2] ?? (loading ? "loading" : unavailableTile("Open Tickets")),
-    slaTile ?? (sla.loading ? "loading" : unavailableTile("SLA Breach Rate")),
     kpiTiles?.[3] ?? (loading ? "loading" : unavailableTile("Avg. Resolution Time")),
     kpiTiles?.[4] ?? (loading ? "loading" : unavailableTile("Customer Satisfaction")),
   ];

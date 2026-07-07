@@ -13,6 +13,7 @@ interface HorizontalBarChartProps {
   color?: string;
   showAxis?: boolean;
   labelWidth?: number;
+  fillHeight?: boolean;
 }
 
 const WIDTH = 460;
@@ -36,6 +37,7 @@ const HorizontalBarChart = ({
   color = "#2a78d6",
   showAxis = false,
   labelWidth = 90,
+  fillHeight = false,
 }: HorizontalBarChartProps) => {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
@@ -49,11 +51,12 @@ const HorizontalBarChart = ({
   const hoveredBarWidth = hovered ? (hovered.value / niceMax) * plotWidth : 0;
 
   return (
-    <Box sx={{ position: "relative", width: "100%" }}>
+    <Box sx={{ position: "relative", width: "100%", height: fillHeight ? "75%" : undefined }}>
       <svg
         viewBox={`0 0 ${WIDTH} ${height}`}
         width="100%"
-        height={height}
+        height={fillHeight ? "100%" : height}
+        preserveAspectRatio={fillHeight ? "none" : undefined}
         style={{ display: "block", overflow: "visible" }}
       >
         {showAxis &&

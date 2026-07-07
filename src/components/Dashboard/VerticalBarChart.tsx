@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Box, Typography } from "@mui/material";
+import { niceAxisMax } from "../../utils/chartScale";
 import ChartTooltip from "./ChartTooltip";
 
 interface BarDatum {
@@ -30,7 +31,7 @@ const VerticalBarChart = ({ data, color = "#6da7ec" }: VerticalBarChartProps) =>
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
   const plotHeight = HEIGHT - PAD_TOP - PAD_BOTTOM;
-  const niceMax = Math.ceil(Math.max(...data.map((d) => d.value)) / 2000) * 2000;
+  const niceMax = niceAxisMax(Math.max(...data.map((d) => d.value)));
   const colWidth = WIDTH / data.length;
 
   const hovered = hoverIndex !== null ? data[hoverIndex] : null;

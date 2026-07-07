@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Box, Typography } from "@mui/material";
-import { ticketStatusBreakdown } from "../../data/mockDashboard";
+import type { TicketStatusSlice } from "../../data/mockDashboard";
 import ChartTooltip from "./ChartTooltip";
 
 const SIZE = 220;
@@ -10,42 +10,48 @@ const STROKE = 30;
 const GAP = 8;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
-const total = ticketStatusBreakdown.reduce((sum, s) => sum + s.value, 0);
+interface TicketStatusDonutProps {
+  data: TicketStatusSlice[];
+}
 
-const { segments } = ticketStatusBreakdown.reduce<{
-  cumulative: number;
-  segments: Array<(typeof ticketStatusBreakdown)[number] & {
-    index: number;
-    dasharray: string;
-    dashoffset: number;
-    percentage: number;
-    midAngle: number;
-  }>;
-}>(
-  (acc, slice, i) => {
-    const rawLen = (slice.value / total) * CIRCUMFERENCE;
-    const segmentLen = Math.max(rawLen - GAP, 0);
-
-    return {
-      cumulative: acc.cumulative + rawLen,
-      segments: [
-        ...acc.segments,
-        {
-          ...slice,
-          index: i,
-          dasharray: `${segmentLen} ${CIRCUMFERENCE - segmentLen}`,
-          dashoffset: -acc.cumulative - GAP / 2,
-          percentage: (slice.value / total) * 100,
-          midAngle: ((acc.cumulative + rawLen / 2) / CIRCUMFERENCE) * 360 - 90,
-        },
-      ],
-    };
-  },
-  { cumulative: 0, segments: [] }
-);
-
-const TicketStatusDonut = () => {
+const TicketStatusDonut = ({ data }: TicketStatusDonutProps) => {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+
+  const total = data.reduce((sum, s) => sum + s.value, 0);
+
+  const { segments } = data.reduce<{
+    cumulative: number;
+    segments: Array<
+      TicketStatusSlice & {
+        index: number;
+        dasharray: string;
+        dashoffset: number;
+        percentage: number;
+        midAngle: number;
+      }
+    >;
+  }>(
+    (acc, slice, i) => {
+      const rawLen = total > 0 ? (slice.value / total) * CIRCUMFERENCE : 0;
+      const segmentLen = Math.max(rawLen - GAP, 0);
+
+      return {
+        cumulative: acc.cumulative + rawLen,
+        segments: [
+          ...acc.segments,
+          {
+            ...slice,
+            index: i,
+            dasharray: `${segmentLen} ${CIRCUMFERENCE - segmentLen}`,
+            dashoffset: -acc.cumulative - GAP / 2,
+            percentage: total > 0 ? (slice.value / total) * 100 : 0,
+            midAngle: ((acc.cumulative + rawLen / 2) / CIRCUMFERENCE) * 360 - 90,
+          },
+        ],
+      };
+    },
+    { cumulative: 0, segments: [] }
+  );
 
   const hovered = hoverIndex !== null ? segments[hoverIndex] : null;
   const tooltipX = hovered

@@ -155,6 +155,7 @@ const TicketPage = () => {
     const newTicket: Ticket = {
       ticketNo: generateTicketNo(tickets),
       customer: input.customer,
+      description: input.description,
       issueTopic: input.issueTopic,
       department: input.department,
       city: input.city,

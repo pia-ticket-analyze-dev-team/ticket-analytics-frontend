@@ -16,8 +16,6 @@ type Props = {
   setSearch: (value: string) => void;
   segment: string;
   setSegment: (value: string) => void;
-  city: string;
-  setCity: (value: string) => void;
 };
 
 const CustomerFilters = ({
@@ -25,8 +23,6 @@ const CustomerFilters = ({
   setSearch,
   segment,
   setSegment,
-  city,
-  setCity,
 }: Props) => {
   return (
     <Box
@@ -45,7 +41,9 @@ const CustomerFilters = ({
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Search..."
-        startAdornment={<SearchIcon sx={{ mr: 1, color: "#9CA3AF" }} />}
+        startAdornment={
+          <SearchIcon sx={{ mr: 1, color: "#9CA3AF" }} />
+        }
         sx={{
           width: 280,
           borderRadius: "12px",
@@ -66,23 +64,6 @@ const CustomerFilters = ({
         </Select>
       </FormControl>
 
-      <FormControl sx={{ minWidth: 170 }}>
-        <InputLabel>City</InputLabel>
-
-        <Select
-          value={city}
-          label="City"
-          onChange={(e) => setCity(e.target.value)}
-        >
-          <MenuItem value="All">All</MenuItem>
-          <MenuItem value="İstanbul">İstanbul</MenuItem>
-          <MenuItem value="Ankara">Ankara</MenuItem>
-          <MenuItem value="İzmir">İzmir</MenuItem>
-          <MenuItem value="Bursa">Bursa</MenuItem>
-          <MenuItem value="Antalya">Antalya</MenuItem>
-        </Select>
-      </FormControl>
-
       <Box sx={{ flexGrow: 1 }} />
 
       <Button
@@ -90,7 +71,6 @@ const CustomerFilters = ({
         onClick={() => {
           setSearch("");
           setSegment("All");
-          setCity("All");
         }}
         sx={{
           textTransform: "none",

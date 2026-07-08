@@ -18,46 +18,68 @@ import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
 import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
 import TrendingDownOutlinedIcon from "@mui/icons-material/TrendingDownOutlined";
 
-const menuItems = [
+import { useAuth } from "../../auth/AuthContext";
+import type { UserRole } from "../../auth/auth.types";
+
+interface MenuItem {
+  title: string;
+  icon: React.ReactNode;
+  path: string;
+  roles: UserRole[];
+}
+
+const menuItems: MenuItem[] = [
   {
     title: "Dashboard",
     icon: <DashboardOutlinedIcon />,
     path: "/dashboard",
+    roles: ["ADMIN"],
   },
   {
     title: "Customers",
     icon: <GroupsOutlinedIcon />,
     path: "/customers",
+    roles: ["ADMIN", "FRONT_OFFICE"],
   },
   {
     title: "Tickets",
     icon: <ConfirmationNumberOutlinedIcon />,
     path: "/tickets",
+    roles: ["ADMIN", "FRONT_OFFICE"],
   },
   {
     title: "My Tickets",
     icon: <AssignmentOutlinedIcon />,
     path: "/my-tickets",
+    roles: ["AGENT"],
   },
   {
     title: "Agent Analytics",
     icon: <BarChartOutlinedIcon />,
     path: "/agent-analytics",
+    roles: ["ADMIN"],
   },
   {
     title: "Customer Churn",
     icon: <TrendingDownOutlinedIcon />,
     path: "/churn-analysis",
+    roles: ["ADMIN"],
   },
   {
     title: "Regional Insights",
     icon: <PublicOutlinedIcon />,
     path: "/regional-insights",
+    roles: ["ADMIN"],
   },
 ];
 
 const Sidebar = () => {
   const location = useLocation();
+  const { user } = useAuth();
+
+  const filteredMenuItems = menuItems.filter((item) =>
+    user ? item.roles.includes(user.role) : false
+  );
 
   return (
     <Box
@@ -92,7 +114,7 @@ const Sidebar = () => {
                 lineHeight: 1.1,
               }}
             >
-              Telecom
+              Telco360
             </Typography>
 
             <Typography
@@ -108,7 +130,7 @@ const Sidebar = () => {
         </Box>
 
         <List sx={{ px: 2 }}>
-          {menuItems.map((item) => {
+          {filteredMenuItems.map((item) => {
             const isActive = location.pathname === item.path;
 
             return (

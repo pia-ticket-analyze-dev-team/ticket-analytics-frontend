@@ -1,19 +1,59 @@
+import { useMemo, useState } from "react";
 import {
   AppBar,
   Avatar,
-  Badge,
   Box,
   InputBase,
+  Menu,
+  MenuItem,
   Toolbar,
   Typography,
 } from "@mui/material";
 
 import SearchIcon from "@mui/icons-material/Search";
-import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../auth/AuthContext";
+
 const Header = () => {
-  const notificationCount = 0;
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const profile = useMemo(() => {
+    switch (user?.role) {
+      case "ADMIN":
+        return {
+          name: "Admin",
+          subtitle: "System Administrator",
+        };
+
+      case "FRONT_OFFICE":
+        return {
+          name: "Front Office",
+          subtitle: "Front Office Agent",
+        };
+
+      case "AGENT":
+        return {
+          name: "Agent",
+          subtitle: "Support Agent",
+        };
+
+      default:
+        return {
+          name: "",
+          subtitle: "",
+        };
+    }
+  }, [user]);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
 
   return (
     <AppBar
@@ -62,75 +102,78 @@ const Header = () => {
           />
         </Box>
 
-        {/* Right Section */}
+        {/* User */}
 
         <Box
+          onClick={(e) => setAnchorEl(e.currentTarget)}
           sx={{
             display: "flex",
             alignItems: "center",
-            gap: 3,
+            gap: 1.5,
+            cursor: "pointer",
           }}
         >
-          <Badge
-            badgeContent={notificationCount}
-            color="error"
-            invisible={notificationCount === 0}
-          >
-            <NotificationsNoneIcon
-              sx={{
-                fontSize: 25,
-                cursor: "pointer",
-              }}
-            />
-          </Badge>
-
-          <Box
+          <Avatar
             sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1.5,
-              cursor: "pointer",
+              width: 42,
+              height: 42,
+              bgcolor: "#2563EB",
+              fontWeight: 600,
             }}
           >
-            <Avatar
+            {profile.name.charAt(0)}
+          </Avatar>
+
+          <Box>
+            <Typography
               sx={{
-                width: 42,
-                height: 42,
-                bgcolor: "#2563EB",
+                fontSize: 14,
                 fontWeight: 600,
+                lineHeight: 1.2,
               }}
             >
-              A
-            </Avatar>
+              {profile.name}
+            </Typography>
 
-            <Box>
-              <Typography
-                sx={{
-                  fontSize: 14,
-                  fontWeight: 600,
-                  lineHeight: 1.2,
-                }}
-              >
-                Admin User
-              </Typography>
-
-              <Typography
-                sx={{
-                  fontSize: 12,
-                  color: "#6B7280",
-                }}
-              >
-                System Administrator
-              </Typography>
-            </Box>
-
-            <KeyboardArrowDownIcon
+            <Typography
               sx={{
+                fontSize: 12,
                 color: "#6B7280",
               }}
-            />
+            >
+              {profile.subtitle}
+            </Typography>
           </Box>
+
+          <KeyboardArrowDownIcon
+            sx={{
+              color: "#6B7280",
+            }}
+          />
         </Box>
+
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={() => setAnchorEl(null)}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "right",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+        >
+          <MenuItem
+            onClick={() => {
+              setAnchorEl(null);
+              handleLogout();
+            }}
+          >
+            Logout
+          </MenuItem>
+        </Menu>
       </Toolbar>
     </AppBar>
   );

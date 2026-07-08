@@ -6,18 +6,27 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Menu,
+  MenuItem,
+  Snackbar,
+  Alert,
 } from "@mui/material";
+
 import { useState } from "react";
+import { useAuth } from "../../auth/AuthContext";
+
 import type {
   MyTicket,
   TicketPriority,
   TicketStatus,
 } from "./myTickets.types";
+
 import { myTickets } from "../../data/mockMyTickets";
+import { departmentAgents } from "../../data/mockAgents";
+
 import EditablePriority from "./EditablePriority";
 import EditableStatus from "./EditableStatus";
 import EditableActions from "./EditableActions";
-import DeleteTicketDialog from "./DeleteTicketDialog";
 import AssignmentHistoryDialog from "./AssignmentHistoryDialog";
 
 type Props = {
@@ -26,12 +35,26 @@ type Props = {
   priority: string;
 };
 
+const departments = [
+  "Front Office",
+  "Technical Support",
+  "Billing",
+  "Network Operations",
+  "SIM Operations",
+  "Retail Support",
+];
+
 const MyTicketsTable = ({ search, status, priority }: Props) => {
+  const { user } = useAuth();
+
   const [tickets, setTickets] = useState<MyTicket[]>(myTickets);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editedTicket, setEditedTicket] = useState<MyTicket | null>(null);
-  const [deleteTicket, setDeleteTicket] = useState<MyTicket | null>(null);
   const [historyTicket, setHistoryTicket] = useState<MyTicket | null>(null);
+  const [forwardTicket, setForwardTicket] = useState<MyTicket | null>(null);
+  const [forwardAnchor, setForwardAnchor] = useState<null | HTMLElement>(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const filteredTickets = tickets.filter((ticket) => {
     const matchesSearch =
@@ -39,10 +62,19 @@ const MyTicketsTable = ({ search, status, priority }: Props) => {
       ticket.ticketNo.toLowerCase().includes(search.toLowerCase());
 
     const matchesStatus = status === "All" || ticket.status === status;
-
     const matchesPriority = priority === "All" || ticket.priority === priority;
 
-    return matchesSearch && matchesStatus && matchesPriority;
+    // Admin ise tüm ticketları görebilsin.
+    if (user?.role === "ADMIN") {
+      return matchesSearch && matchesStatus && matchesPriority;
+    }
+
+    return (
+      matchesSearch &&
+      matchesStatus &&
+      matchesPriority &&
+      ticket.assignedAgent === user?.name
+    );
   });
 
   const handleEdit = (ticket: MyTicket) => {
@@ -68,14 +100,51 @@ const MyTicketsTable = ({ search, status, priority }: Props) => {
     setEditedTicket(null);
   };
 
-  const handleDelete = () => {
-    if (!deleteTicket) return;
+  const openForwardMenu = (
+    event: React.MouseEvent<HTMLElement>,
+    ticket: MyTicket
+  ) => {
+    setForwardAnchor(event.currentTarget);
+    setForwardTicket(ticket);
+  };
+
+  const handleForward = (department: string) => {
+    if (!forwardTicket) return;
+
+    const agents = departmentAgents[department] ?? [];
+    if (agents.length === 0) return;
+
+    const randomAgent = agents[Math.floor(Math.random() * agents.length)];
 
     setTickets((prev) =>
-      prev.filter((ticket) => ticket.id !== deleteTicket.id)
+      prev.map((ticket) => {
+        if (ticket.id !== forwardTicket.id) {
+          return ticket;
+        }
+
+        return {
+          ...ticket,
+          forwardedTo: department,
+          assignedAgent: randomAgent,
+          assignmentHistory: [
+            ...ticket.assignmentHistory,
+            {
+              department,
+              agent: randomAgent,
+              changedAt: new Date().toLocaleString(),
+            },
+          ],
+        };
+      })
     );
 
-    setDeleteTicket(null);
+    setSnackbarMessage(
+      `Ticket successfully forwarded to ${department} and assigned to ${randomAgent}.`
+    );
+
+    setSnackbarOpen(true);
+    setForwardAnchor(null);
+    setForwardTicket(null);
   };
 
   return (
@@ -98,14 +167,8 @@ const MyTicketsTable = ({ search, status, priority }: Props) => {
               <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>Created At</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>SLA</TableCell>
-              <TableCell
-                align="center"
-                sx={{
-                  fontWeight: 700,
-                  width: 120,
-                  minWidth: 120,
-                }}
-              >
+              <TableCell sx={{ fontWeight: 700 }}>Forwarded To</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 700, width: 150 }}>
                 Actions
               </TableCell>
             </TableRow>
@@ -135,7 +198,6 @@ const MyTicketsTable = ({ search, status, priority }: Props) => {
                       }
                     />
                   </TableCell>
-
                   <TableCell sx={{ width: 180 }}>
                     <EditableStatus
                       value={
@@ -151,23 +213,19 @@ const MyTicketsTable = ({ search, status, priority }: Props) => {
                       }
                     />
                   </TableCell>
-
                   <TableCell>{ticket.createdAt}</TableCell>
                   <TableCell>{ticket.sla}</TableCell>
-                  <TableCell
-                    align="center"
-                    sx={{
-                      width: 120,
-                      minWidth: 120,
-                    }}
-                  >
+                  <TableCell sx={{ fontWeight: 600, color: "#2463EB" }}>
+                    {ticket.forwardedTo}
+                  </TableCell>
+                  <TableCell align="center">
                     <EditableActions
                       editing={isEditing}
                       onView={() => setHistoryTicket(ticket)}
                       onEdit={() => handleEdit(ticket)}
                       onSave={handleSave}
                       onCancel={handleCancel}
-                      onDelete={() => setDeleteTicket(ticket)}
+                      onForward={(e) => openForwardMenu(e, ticket)}
                     />
                   </TableCell>
                 </TableRow>
@@ -177,7 +235,7 @@ const MyTicketsTable = ({ search, status, priority }: Props) => {
             {filteredTickets.length === 0 && (
               <TableRow>
                 <TableCell
-                  colSpan={8}
+                  colSpan={9}
                   align="center"
                   sx={{
                     py: 4,
@@ -192,18 +250,49 @@ const MyTicketsTable = ({ search, status, priority }: Props) => {
         </Table>
       </TableContainer>
 
-      <DeleteTicketDialog
-        open={Boolean(deleteTicket)}
-        ticketNo={deleteTicket?.ticketNo ?? ""}
-        onClose={() => setDeleteTicket(null)}
-        onDelete={handleDelete}
-      />
-
       <AssignmentHistoryDialog
         open={Boolean(historyTicket)}
         ticket={historyTicket}
         onClose={() => setHistoryTicket(null)}
       />
+
+      <Menu
+        anchorEl={forwardAnchor}
+        open={Boolean(forwardAnchor)}
+        onClose={() => {
+          setForwardAnchor(null);
+          setForwardTicket(null);
+        }}
+      >
+        {departments
+          .filter((department) => department !== forwardTicket?.forwardedTo)
+          .map((department) => (
+            <MenuItem
+              key={department}
+              onClick={() => handleForward(department)}
+            >
+              {department}
+            </MenuItem>
+          ))}
+      </Menu>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+      >
+        <Alert
+          severity="success"
+          variant="filled"
+          onClose={() => setSnackbarOpen(false)}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 };

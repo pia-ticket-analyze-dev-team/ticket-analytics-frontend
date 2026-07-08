@@ -6,7 +6,6 @@ import {
   Typography,
   type SelectChangeEvent,
 } from "@mui/material";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import {
   agentOptions,
@@ -24,8 +23,21 @@ interface FilterFieldProps {
   onChange: (value: string) => void;
 }
 
-const FilterField = ({ label, value, options, onChange }: FilterFieldProps) => (
-  <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75, flex: "1 1 0", minWidth: 0 }}>
+const FilterField = ({
+  label,
+  value,
+  options,
+  onChange,
+}: FilterFieldProps) => (
+  <Box
+    sx={{
+      display: "flex",
+      flexDirection: "column",
+      gap: 0.75,
+      flex: "1 1 0",
+      minWidth: 0,
+    }}
+  >
     <Typography
       sx={{
         fontSize: 13,
@@ -68,7 +80,6 @@ interface TicketFiltersProps {
   dateRange: DateRange;
   onDateRangeChange: (range: DateRange) => void;
   onClear: () => void;
-  onExport: () => void;
 }
 
 const TicketFilters = ({
@@ -77,7 +88,6 @@ const TicketFilters = ({
   dateRange,
   onDateRangeChange,
   onClear,
-  onExport,
 }: TicketFiltersProps) => {
   const setField = (field: keyof TicketFilterState) => (value: string) =>
     onChange({ ...filters, [field]: value });
@@ -95,7 +105,15 @@ const TicketFilters = ({
         gap: 2.5,
       }}
     >
-      <Box sx={{ display: "flex", flexWrap: "nowrap", gap: 2, overflowX: "auto", pb: 0.5 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "nowrap",
+          gap: 2,
+          overflowX: "auto",
+          pb: 0.5,
+        }}
+      >
         <FilterField
           label="Status"
           value={filters.status}
@@ -156,11 +174,20 @@ const TicketFilters = ({
         }}
       >
         <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
-          <Typography sx={{ fontSize: 13, color: "#6B7280", fontWeight: 500 }}>
+          <Typography
+            sx={{
+              fontSize: 13,
+              color: "#6B7280",
+              fontWeight: 500,
+            }}
+          >
             Created Date
           </Typography>
 
-          <DateRangePicker value={dateRange} onChange={onDateRangeChange} />
+          <DateRangePicker
+            value={dateRange}
+            onChange={onDateRangeChange}
+          />
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -174,26 +201,6 @@ const TicketFilters = ({
             }}
           >
             Clear Filters
-          </Button>
-
-          <Button
-            onClick={onExport}
-            variant="outlined"
-            startIcon={<FileDownloadOutlinedIcon />}
-            sx={{
-              fontSize: 14,
-              fontWeight: 500,
-              textTransform: "none",
-              borderColor: "#E5E7EB",
-              color: "#111827",
-              borderRadius: "8px",
-              "&:hover": {
-                borderColor: "#D1D5DB",
-                backgroundColor: "#F9FAFB",
-              },
-            }}
-          >
-            Export
           </Button>
         </Box>
       </Box>

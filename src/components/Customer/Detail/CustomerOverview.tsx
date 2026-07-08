@@ -11,7 +11,7 @@ const CustomerOverview = () => {
         gridTemplateColumns: "3fr 1fr",
         gap: 3,
         mb: 4,
-        alignItems: "stretch",
+        alignItems: "start",
       }}
     >
       <CustomerInfoCard />
@@ -22,6 +22,7 @@ const CustomerOverview = () => {
           gridTemplateColumns: "repeat(2,1fr)",
           gridAutoRows: "160px",
           gap: 2,
+          alignSelf: "start",
         }}
       >
         <CustomerStats />

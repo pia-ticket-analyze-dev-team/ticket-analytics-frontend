@@ -1,5 +1,12 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
+import { AuthProvider } from "./auth/AuthContext";
+import ProtectedRoute from "./auth/ProtectedRoute";
+import RoleProtectedRoute from "./auth/RoleProtectedRoute";
+
+import LoginPage from "./pages/Login/LoginPage";
+import UnauthorizedPage from "./pages/Unauthorized/UnauthorizedPage";
+
 import DashboardPage from "./pages/Dashboard/DashboardPage";
 
 import CustomerPage from "./pages/Customer/CustomerPage";
@@ -15,35 +22,53 @@ import ChurnPage from "./pages/Churn/ChurnPage";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-        <Route path="/dashboard" element={<DashboardPage />} />
+          {/* Protected Routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-        <Route path="/customers" element={<CustomerPage />} />
-        <Route path="/customers/new" element={<CustomerCreatePage />} />
-        <Route path="/customers/:id" element={<CustomerDetailPage />} />
-        <Route
-          path="/customers/:id/edit"
-          element={<CustomerEditPage />}
-        />
+            {/* ADMIN */}
+            <Route element={<RoleProtectedRoute allowedRoles={["ADMIN"]} />}>
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route
+                path="/regional-insights"
+                element={<RegionalInsightsPage />}
+              />
+              <Route path="/churn-analysis" element={<ChurnPage />} />
+            </Route>
 
-        <Route path="/tickets" element={<TicketPage />} />
+            {/* ADMIN + FRONT OFFICE */}
+            <Route
+              element={
+                <RoleProtectedRoute allowedRoles={["ADMIN", "FRONT_OFFICE"]} />
+              }
+            >
+              <Route path="/customers" element={<CustomerPage />} />
+              <Route path="/customers/new" element={<CustomerCreatePage />} />
+              <Route path="/customers/:id" element={<CustomerDetailPage />} />
+              <Route
+                path="/customers/:id/edit"
+                element={<CustomerEditPage />}
+              />
+              <Route path="/tickets" element={<TicketPage />} />
+            </Route>
 
-        <Route path="/my-tickets" element={<MyTicketsPage />} />
+            {/* AGENT */}
+            <Route element={<RoleProtectedRoute allowedRoles={["AGENT"]} />}>
+              <Route path="/my-tickets" element={<MyTicketsPage />} />
+            </Route>
+          </Route>
 
-        <Route
-          path="/regional-insights"
-          element={<RegionalInsightsPage />}
-        />
-
-        <Route
-          path="/churn-analysis"
-          element={<ChurnPage />}
-        />
-      </Routes>
-    </BrowserRouter>
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

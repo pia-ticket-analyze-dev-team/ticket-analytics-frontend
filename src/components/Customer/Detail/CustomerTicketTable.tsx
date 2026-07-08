@@ -14,7 +14,6 @@ import { useState } from "react";
 import CustomerEditableStatus from "./CustomerEditableStatus";
 import CustomerEditablePriority from "./CustomerEditablePriority";
 import CustomerEditableActions from "./CustomerEditableActions";
-import CustomerDeleteTicketDialog from "./CustomerDeleteTicketDialog";
 
 import type {
   CustomerTicket,
@@ -40,9 +39,6 @@ const CustomerTicketTable = ({
 
   const [editedPriority, setEditedPriority] =
     useState<CustomerTicketPriority>("LOW");
-
-  const [deleteTicket, setDeleteTicket] =
-    useState<CustomerTicket | null>(null);
 
   const handleEdit = (ticket: CustomerTicket) => {
     setEditingId(ticket.id);
@@ -70,144 +66,125 @@ const CustomerTicketTable = ({
     setEditingId(null);
   };
 
-  const handleDelete = () => {
-    if (!deleteTicket) return;
-
-    setTableData((prev) =>
-      prev.filter(
-        (ticket) => ticket.id !== deleteTicket.id
-      )
-    );
-
-    setDeleteTicket(null);
-  };
-
   return (
-    <>
-      <TableContainer
-        component={Paper}
+    <TableContainer
+      component={Paper}
+      sx={{
+        borderRadius: 3,
+        boxShadow: "0 2px 12px rgba(0,0,0,.06)",
+      }}
+    >
+      <Typography
         sx={{
-          borderRadius: 3,
-          boxShadow: "0 2px 12px rgba(0,0,0,.06)",
+          px: 3,
+          pt: 3,
+          pb: 2,
+          fontSize: 18,
+          fontWeight: 600,
         }}
       >
-        <Typography
-          sx={{
-            px: 3,
-            pt: 3,
-            pb: 2,
-            fontSize: 18,
-            fontWeight: 600,
-          }}
-        >
-          Customer Tickets
-        </Typography>
+        Customer Tickets
+      </Typography>
 
-        <Table>
-          <TableHead>
-            <TableRow sx={{ background: "#F8FAFC" }}>
-              <TableCell sx={{ fontWeight: 700 }}>
-                Ticket No
-              </TableCell>
+      <Table>
+        <TableHead>
+          <TableRow sx={{ background: "#F8FAFC" }}>
+            <TableCell sx={{ fontWeight: 700 }}>
+              Ticket No
+            </TableCell>
 
-              <TableCell sx={{ fontWeight: 700 }}>
-                Issue
-              </TableCell>
+            <TableCell sx={{ fontWeight: 700 }}>
+              Issue
+            </TableCell>
 
-              <TableCell sx={{ fontWeight: 700 }}>
-                Status
-              </TableCell>
+            <TableCell sx={{ fontWeight: 700 }}>
+              Status
+            </TableCell>
 
-              <TableCell sx={{ fontWeight: 700 }}>
-                Priority
-              </TableCell>
+            <TableCell sx={{ fontWeight: 700 }}>
+              Priority
+            </TableCell>
 
-              <TableCell sx={{ fontWeight: 700 }}>
-                Department
-              </TableCell>
+            <TableCell sx={{ fontWeight: 700 }}>
+              Department
+            </TableCell>
 
-              <TableCell sx={{ fontWeight: 700 }}>
-                Created At
-              </TableCell>
+            <TableCell sx={{ fontWeight: 700 }}>
+              Created At
+            </TableCell>
 
-              <TableCell
-                align="center"
-                sx={{ fontWeight: 700 }}
+            <TableCell
+              align="center"
+              sx={{
+                fontWeight: 700,
+                width: 90,
+              }}
+            >
+              Actions
+            </TableCell>
+          </TableRow>
+        </TableHead>
+
+        <TableBody>
+          {tableData.map((ticket) => {
+            const editing =
+              editingId === ticket.id;
+
+            return (
+              <TableRow
+                key={ticket.id}
+                hover
               >
-                Actions
-              </TableCell>
-            </TableRow>
-          </TableHead>
+                <TableCell>
+                  {ticket.id}
+                </TableCell>
 
-          <TableBody>
-            {tableData.map((ticket) => {
-              const editing =
-                editingId === ticket.id;
+                <TableCell>
+                  {ticket.issue}
+                </TableCell>
 
-              return (
-                <TableRow
-                  key={ticket.id}
-                  hover
-                >
-                  <TableCell>
-                    {ticket.id}
-                  </TableCell>
+                <TableCell sx={{ width: 180 }}>
+                  <CustomerEditableStatus
+                    value={ticket.status}
+                    editing={editing}
+                    onChange={setEditedStatus}
+                  />
+                </TableCell>
 
-                  <TableCell>
-                    {ticket.issue}
-                  </TableCell>
+                <TableCell sx={{ width: 180 }}>
+                  <CustomerEditablePriority
+                    value={ticket.priority}
+                    editing={editing}
+                    onChange={setEditedPriority}
+                  />
+                </TableCell>
 
-                  <TableCell sx={{ width: 180 }}>
-                    <CustomerEditableStatus
-                      value={ticket.status}
-                      editing={editing}
-                      onChange={setEditedStatus}
-                    />
-                  </TableCell>
+                <TableCell>
+                  {ticket.department}
+                </TableCell>
 
-                  <TableCell sx={{ width: 180 }}>
-                    <CustomerEditablePriority
-                      value={ticket.priority}
-                      editing={editing}
-                      onChange={setEditedPriority}
-                    />
-                  </TableCell>
+                <TableCell>
+                  {ticket.createdAt}
+                </TableCell>
 
-                  <TableCell>
-                    {ticket.department}
-                  </TableCell>
-
-                  <TableCell>
-                    {ticket.createdAt}
-                  </TableCell>
-
-                  <TableCell align="center">
-                    <CustomerEditableActions
-                      editing={editing}
-                      onEdit={() => handleEdit(ticket)}
-                      onSave={() =>
-                        handleSave(ticket.id)
-                      }
-                      onCancel={handleCancel}
-                      onDelete={() =>
-                        setDeleteTicket(ticket)
-                      }
-                    />
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      <CustomerDeleteTicketDialog
-        open={!!deleteTicket}
-        ticketNo={deleteTicket?.id ?? ""}
-        onClose={() => setDeleteTicket(null)}
-        onDelete={handleDelete}
-      />
-    </>
+                <TableCell>
+                  <CustomerEditableActions
+                    editing={editing}
+                    onEdit={() =>
+                      handleEdit(ticket)
+                    }
+                    onSave={() =>
+                      handleSave(ticket.id)
+                    }
+                    onCancel={handleCancel}
+                  />
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 };
 

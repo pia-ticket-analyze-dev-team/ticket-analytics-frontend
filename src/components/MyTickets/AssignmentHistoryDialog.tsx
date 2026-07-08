@@ -6,7 +6,10 @@ import {
   Stack,
   Button,
   Divider,
+  Box,
 } from "@mui/material";
+
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 
 import type { MyTicket } from "./myTickets.types";
 
@@ -29,7 +32,7 @@ const AssignmentHistoryDialog = ({
       onClose={onClose}
       PaperProps={{
         sx: {
-          width: 430,
+          width: 500,
           borderRadius: 4,
           p: 1,
         },
@@ -41,87 +44,77 @@ const AssignmentHistoryDialog = ({
           fontSize: 24,
         }}
       >
-        Assignment History
+        Assignment Journey
       </DialogTitle>
 
       <DialogContent>
-        <Stack spacing={2.5}>
-          <div>
-            <Typography
-              sx={{
-                color: "#6B7280",
-                fontSize: 13,
-              }}
-            >
-              Previous Agent
-            </Typography>
+        <Stack spacing={2}>
+          {ticket.assignmentHistory.map((step, index) => (
+            <Box key={index}>
+              <Typography
+                sx={{
+                  fontWeight: 700,
+                  fontSize: 17,
+                }}
+              >
+                {step.department}
+              </Typography>
 
-            <Typography
-              sx={{
-                fontWeight: 600,
-                fontSize: 17,
-              }}
-            >
-              {ticket.previousAgent}
-            </Typography>
-          </div>
+              <Typography
+                sx={{
+                  color: "#2463EB",
+                  fontSize: 15,
+                  fontWeight: 600,
+                }}
+              >
+                {step.agent}
+              </Typography>
 
-          <Divider />
+              <Typography
+                sx={{
+                  color: "#6B7280",
+                  fontSize: 13,
+                }}
+              >
+                {step.changedAt}
+              </Typography>
 
-          <div>
-            <Typography
-              sx={{
-                color: "#6B7280",
-                fontSize: 13,
-              }}
-            >
-              Previous Department
-            </Typography>
+              {index !==
+                ticket.assignmentHistory.length - 1 && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    py: 1,
+                  }}
+                >
+                  <ArrowDownwardIcon
+                    sx={{
+                      color: "#9CA3AF",
+                    }}
+                  />
+                </Box>
+              )}
 
-            <Typography
-              sx={{
-                fontWeight: 600,
-                fontSize: 17,
-              }}
-            >
-              {ticket.previousDepartment}
-            </Typography>
-          </div>
-
-          <Divider />
-
-          <div>
-            <Typography
-              sx={{
-                color: "#6B7280",
-                fontSize: 13,
-              }}
-            >
-              Changed At
-            </Typography>
-
-            <Typography
-              sx={{
-                fontWeight: 600,
-                fontSize: 17,
-              }}
-            >
-              {ticket.changedAt}
-            </Typography>
-          </div>
+              {index !==
+                ticket.assignmentHistory.length - 1 && (
+                <Divider sx={{ mt: 1 }} />
+              )}
+            </Box>
+          ))}
 
           <Stack
             direction="row"
             justifyContent="flex-end"
-            sx={{ pt: 1 }}
+            sx={{ pt: 2 }}
           >
             <Button
               variant="contained"
               onClick={onClose}
               sx={{
-                textTransform: "none",
                 borderRadius: 3,
                 px: 3,
+                textTransform: "none",
               }}
             >
               Close

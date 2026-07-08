@@ -28,11 +28,11 @@ const CustomerInfoCard = () => {
       elevation={0}
       sx={{
         width: "100%",
-        height: "100%",
-        minHeight: 320,
         border: "1px solid #E5E7EB",
         borderRadius: "24px",
-        p: 4,
+        px: 4,
+        pt: 4,
+        pb: 2,
         backgroundColor: "#FFFFFF",
       }}
     >
@@ -41,7 +41,7 @@ const CustomerInfoCard = () => {
           fontSize: 30,
           fontWeight: 700,
           color: "#1F2937",
-          mb: 4,
+          mb: 2.5,
         }}
       >
         Customer Information
@@ -54,8 +54,8 @@ const CustomerInfoCard = () => {
               display: "grid",
               gridTemplateColumns: "170px 1fr",
               alignItems: "center",
-              py: 1.5,
               columnGap: 2,
+              py: 1.1,
             }}
           >
             <Typography

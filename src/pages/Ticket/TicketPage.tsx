@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Box, Button, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+
 import MainLayout from "../../components/Layout/MainLayout";
 import TicketFilters from "../../components/Ticket/TicketFilters";
 import TicketTable from "../../components/Ticket/TicketTable";
@@ -8,7 +9,9 @@ import TicketPagination from "../../components/Ticket/TicketPagination";
 import AddTicketDialog, {
   type NewTicketInput,
 } from "../../components/Ticket/AddTicketDialog";
+
 import { mockTickets } from "../../data/mockTickets";
+
 import {
   defaultTicketFilters,
   type DateRange,
@@ -27,6 +30,7 @@ const generateTicketNo = (existing: Ticket[]) => {
     const num = parseInt(ticket.ticketNo.split("-").pop() ?? "0", 10);
     return Number.isNaN(num) ? max : Math.max(max, num);
   }, 0);
+
   return `TCKT-2024-${String(maxNum + 1).padStart(4, "0")}`;
 };
 
@@ -47,43 +51,83 @@ type SortOrder = "asc" | "desc" | null;
 
 const TicketPage = () => {
   const [tickets, setTickets] = useState<Ticket[]>(mockTickets);
-  const [filters, setFilters] = useState<TicketFilterState>(defaultTicketFilters);
-  const [dateRange, setDateRange] = useState<DateRange>(defaultDateRange);
-  const [sortOrder, setSortOrder] = useState<SortOrder>(null);
+  const [filters, setFilters] =
+    useState<TicketFilterState>(defaultTicketFilters);
+  const [dateRange, setDateRange] =
+    useState<DateRange>(defaultDateRange);
+  const [sortOrder, setSortOrder] =
+    useState<SortOrder>(null);
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isAddDialogOpen, setIsAddDialogOpen] =
+    useState(false);
 
   const filteredTickets = useMemo(() => {
     return tickets.filter((ticket) => {
-      if (filters.status !== "All" && ticket.status !== statusMap[filters.status]) {
+      if (
+        filters.status !== "All" &&
+        ticket.status !== statusMap[filters.status]
+      ) {
         return false;
       }
-      if (filters.priority !== "All" && ticket.priority !== priorityMap[filters.priority]) {
+
+      if (
+        filters.priority !== "All" &&
+        ticket.priority !== priorityMap[filters.priority]
+      ) {
         return false;
       }
-      if (filters.issueTopic !== "All" && ticket.issueTopic !== filters.issueTopic) {
+
+      if (
+        filters.issueTopic !== "All" &&
+        ticket.issueTopic !== filters.issueTopic
+      ) {
         return false;
       }
-      if (filters.department !== "All" && ticket.department !== filters.department) {
+
+      if (
+        filters.department !== "All" &&
+        ticket.department !== filters.department
+      ) {
         return false;
       }
-      if (filters.city !== "All" && ticket.city !== filters.city) {
+
+      if (
+        filters.city !== "All" &&
+        ticket.city !== filters.city
+      ) {
         return false;
       }
+
       if (filters.slaBreached !== "All") {
-        const wantsBreached = filters.slaBreached === "Yes";
-        if (ticket.slaBreached !== wantsBreached) return false;
-      }
-      if (filters.assignedAgent !== "All") {
-        const wantsUnassigned = filters.assignedAgent === "Unassigned";
-        if (wantsUnassigned ? ticket.assignedAgent !== null : ticket.assignedAgent !== filters.assignedAgent) {
+        const wantsBreached =
+          filters.slaBreached === "Yes";
+
+        if (ticket.slaBreached !== wantsBreached) {
           return false;
         }
       }
-      if (ticket.createdAt < dateRange.start || ticket.createdAt > dateRange.end) {
+
+      if (filters.assignedAgent !== "All") {
+        const wantsUnassigned =
+          filters.assignedAgent === "Unassigned";
+
+        if (
+          wantsUnassigned
+            ? ticket.assignedAgent !== null
+            : ticket.assignedAgent !== filters.assignedAgent
+        ) {
+          return false;
+        }
+      }
+
+      if (
+        ticket.createdAt < dateRange.start ||
+        ticket.createdAt > dateRange.end
+      ) {
         return false;
       }
+
       return true;
     });
   }, [tickets, filters, dateRange]);
@@ -99,17 +143,31 @@ const TicketPage = () => {
   }, [filteredTickets, sortOrder]);
 
   const totalEntries = sortedTickets.length;
-  const totalPages = Math.max(1, Math.ceil(totalEntries / rowsPerPage));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(totalEntries / rowsPerPage)
+  );
+
   const safePage = Math.min(page, totalPages);
-  const rangeStart = totalEntries === 0 ? 0 : (safePage - 1) * rowsPerPage + 1;
-  const rangeEnd = Math.min(safePage * rowsPerPage, totalEntries);
+
+  const rangeStart =
+    totalEntries === 0
+      ? 0
+      : (safePage - 1) * rowsPerPage + 1;
+
+  const rangeEnd = Math.min(
+    safePage * rowsPerPage,
+    totalEntries
+  );
 
   const paginatedTickets = sortedTickets.slice(
     (safePage - 1) * rowsPerPage,
     safePage * rowsPerPage
   );
 
-  const handleFiltersChange = (next: TicketFilterState) => {
+  const handleFiltersChange = (
+    next: TicketFilterState
+  ) => {
     setFilters(next);
     setPage(1);
   };
@@ -122,34 +180,56 @@ const TicketPage = () => {
   };
 
   const handleToggleSort = () => {
-    setSortOrder((prev) => (prev === "asc" ? "desc" : prev === "desc" ? null : "asc"));
+    setSortOrder((prev) =>
+      prev === "asc"
+        ? "desc"
+        : prev === "desc"
+        ? null
+        : "asc"
+    );
+
     setPage(1);
   };
 
-  const handleDateRangeChange = (range: DateRange) => {
+  const handleDateRangeChange = (
+    range: DateRange
+  ) => {
     setDateRange(range);
     setPage(1);
   };
 
-  const handleUpdateTicket = (ticketNo: string, updates: TicketUpdate) => {
-    setTickets((prev) =>
-      prev.map((ticket) => (ticket.ticketNo === ticketNo ? { ...ticket, ...updates } : ticket))
-    );
-  };
-
-  const handleDeleteTicket = (ticketNo: string) => {
-    setTickets((prev) => prev.filter((ticket) => ticket.ticketNo !== ticketNo));
-  };
-
-  const handleAssignTicket = (ticketNo: string, agent: string | null) => {
+  const handleUpdateTicket = (
+    ticketNo: string,
+    updates: TicketUpdate
+  ) => {
     setTickets((prev) =>
       prev.map((ticket) =>
-        ticket.ticketNo === ticketNo ? { ...ticket, assignedAgent: agent } : ticket
+        ticket.ticketNo === ticketNo
+          ? { ...ticket, ...updates }
+          : ticket
       )
     );
   };
 
-  const handleAddTicket = (input: NewTicketInput) => {
+  const handleAssignTicket = (
+    ticketNo: string,
+    agent: string | null
+  ) => {
+    setTickets((prev) =>
+      prev.map((ticket) =>
+        ticket.ticketNo === ticketNo
+          ? {
+              ...ticket,
+              assignedAgent: agent,
+            }
+          : ticket
+      )
+    );
+  };
+
+  const handleAddTicket = (
+    input: NewTicketInput
+  ) => {
     const createdAt = new Date();
 
     const newTicket: Ticket = {
@@ -160,7 +240,9 @@ const TicketPage = () => {
       city: input.city,
       priority: input.priority,
       status: input.status,
-      slaBreached: input.priority === "HIGH" && input.status === "OPEN",
+      slaBreached:
+        input.priority === "HIGH" &&
+        input.status === "OPEN",
       createdAt,
       assignedAgent: input.assignedAgent,
     };
@@ -168,7 +250,10 @@ const TicketPage = () => {
     setTickets((prev) => [newTicket, ...prev]);
 
     if (createdAt > dateRange.end) {
-      setDateRange((prev) => ({ ...prev, end: createdAt }));
+      setDateRange((prev) => ({
+        ...prev,
+        end: createdAt,
+      }));
     }
 
     setIsAddDialogOpen(false);
@@ -190,10 +275,23 @@ const TicketPage = () => {
         }}
       >
         <Box>
-          <Typography sx={{ fontSize: 24, fontWeight: 700, color: "#111827" }}>
+          <Typography
+            sx={{
+              fontSize: 24,
+              fontWeight: 700,
+              color: "#111827",
+            }}
+          >
             Tickets
           </Typography>
-          <Typography sx={{ fontSize: 13, color: "#9CA3AF", mt: 0.5 }}>
+
+          <Typography
+            sx={{
+              fontSize: 13,
+              color: "#9CA3AF",
+              mt: 0.5,
+            }}
+          >
             Dashboard / Tickets
           </Typography>
         </Box>
@@ -232,7 +330,6 @@ const TicketPage = () => {
       <TicketTable
         tickets={paginatedTickets}
         onUpdateTicket={handleUpdateTicket}
-        onDeleteTicket={handleDeleteTicket}
         onAssignTicket={handleAssignTicket}
         sortOrder={sortOrder}
         onToggleSort={handleToggleSort}

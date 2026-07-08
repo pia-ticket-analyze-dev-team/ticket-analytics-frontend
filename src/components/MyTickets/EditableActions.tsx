@@ -2,7 +2,7 @@ import { IconButton, Stack } from "@mui/material";
 
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import ForwardOutlinedIcon from "@mui/icons-material/ForwardOutlined";
 import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 
@@ -12,7 +12,9 @@ type Props = {
   onEdit: () => void;
   onSave: () => void;
   onCancel: () => void;
-  onDelete: () => void;
+  onForward: (
+    event: React.MouseEvent<HTMLElement>
+  ) => void;
 };
 
 const EditableActions = ({
@@ -21,7 +23,7 @@ const EditableActions = ({
   onEdit,
   onSave,
   onCancel,
-  onDelete,
+  onForward,
 }: Props) => {
   return (
     <Stack
@@ -65,11 +67,11 @@ const EditableActions = ({
           </IconButton>
 
           <IconButton
-            color="error"
+            color="primary"
             size="small"
-            onClick={onDelete}
+            onClick={onForward}
           >
-            <DeleteOutlineOutlinedIcon />
+            <ForwardOutlinedIcon />
           </IconButton>
         </>
       )}

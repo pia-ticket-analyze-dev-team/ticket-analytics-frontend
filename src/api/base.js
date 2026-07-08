@@ -42,6 +42,8 @@ export async function apiDelete(path) {
   const response = await fetch(`${API_BASE_URL}${path}`, { method: "DELETE" });
 
   if (!response.ok) {
-    throw new Error(`Request to ${path} failed with status ${response.status}`);
+    const error = new Error(`Request to ${path} failed with status ${response.status}`);
+    error.status = response.status;
+    throw error;
   }
 }

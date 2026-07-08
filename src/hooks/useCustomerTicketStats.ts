@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { fetchCustomerTicketStats } from "../api/customers/customers.js";
 import type { CustomerTicketStats } from "../components/Customer/customer.types";
 
-export function useCustomerTicketStats(id: string | undefined) {
+export function useCustomerTicketStats(id: string | undefined, refreshKey = 0) {
   const [data, setData] = useState<CustomerTicketStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +32,7 @@ export function useCustomerTicketStats(id: string | undefined) {
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, refreshKey]);
 
   return { data, loading, error };
 }

@@ -6,9 +6,13 @@ import type { CustomerTicket, PagedResponse } from "../components/Customer/custo
 interface UseCustomerTicketsParams {
   page: number;
   size: number;
+  refreshKey?: number;
 }
 
-export function useCustomerTickets(id: string | undefined, { page, size }: UseCustomerTicketsParams) {
+export function useCustomerTickets(
+  id: string | undefined,
+  { page, size, refreshKey = 0 }: UseCustomerTicketsParams
+) {
   const [data, setData] = useState<PagedResponse<CustomerTicket> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +41,7 @@ export function useCustomerTickets(id: string | undefined, { page, size }: UseCu
     return () => {
       cancelled = true;
     };
-  }, [id, page, size]);
+  }, [id, page, size, refreshKey]);
 
   return { data, loading, error };
 }

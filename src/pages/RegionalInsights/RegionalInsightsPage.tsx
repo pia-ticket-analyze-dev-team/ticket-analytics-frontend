@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from "@mui/material";
+import { Box, CircularProgress, Grid, Typography } from "@mui/material";
 
 import MainLayout from "../../components/Layout/MainLayout";
 
@@ -6,8 +6,11 @@ import RegionalStats from "../../components/Map/RegionalStats";
 import TurkeyHeatMap from "../../components/Map/TurkeyHeatMap";
 import TopRegionsCard from "../../components/Map/TopRegionsCard";
 import HeatLegend from "../../components/Map/HeatLegend";
+import { useRegionalInsights } from "../../hooks/useRegionalInsights";
 
 const RegionalInsightsPage = () => {
+  const { data, loading, error } = useRegionalInsights();
+
   return (
     <MainLayout>
       <Typography
@@ -31,27 +34,43 @@ const RegionalInsightsPage = () => {
         Monitor ticket density and service performance across Türkiye.
       </Typography>
 
-      <RegionalStats />
+      {loading && (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+          <CircularProgress size={28} />
+        </Box>
+      )}
 
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12, lg: 9 }}>
-          <TurkeyHeatMap />
-        </Grid>
+      {!loading && error && (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+          <Typography color="error">{error}</Typography>
+        </Box>
+      )}
 
-        <Grid size={{ xs: 12, lg: 3 }}>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 2,
-            }}
-          >
-            <TopRegionsCard />
+      {!loading && !error && data && (
+        <>
+          <RegionalStats kpis={data.kpis} />
 
-            <HeatLegend />
-          </Box>
-        </Grid>
-      </Grid>
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 12, lg: 9 }}>
+              <TurkeyHeatMap topCities={data.topCities} />
+            </Grid>
+
+            <Grid size={{ xs: 12, lg: 3 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 2,
+                }}
+              >
+                <TopRegionsCard regions={data.regionDensity} />
+
+                <HeatLegend />
+              </Box>
+            </Grid>
+          </Grid>
+        </>
+      )}
     </MainLayout>
   );
 };

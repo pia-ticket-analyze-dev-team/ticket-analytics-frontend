@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Chip,
   CircularProgress,
@@ -18,12 +19,15 @@ import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined
 
 import { useNavigate } from "react-router-dom";
 
+import { deleteTicket } from "../../../api/tickets/tickets.js";
+import { getTicketDeleteErrorMessage } from "../../../utils/errors";
 import type { CustomerTicket } from "../customer.types";
 
 interface CustomerTicketTableProps {
   tickets: CustomerTicket[];
   loading: boolean;
   error: string | null;
+  onDeleted: () => void;
 }
 
 const getStatusColor = (status: string) => {
@@ -95,19 +99,27 @@ const formatDateTime = (value: string) => {
       });
 };
 
-const CustomerTicketTable = ({ tickets, loading, error }: CustomerTicketTableProps) => {
+const CustomerTicketTable = ({ tickets, loading, error, onDeleted }: CustomerTicketTableProps) => {
   const navigate = useNavigate();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const handleDelete = (ticketId: string) => {
     const confirmed = window.confirm(
       `Are you sure you want to delete ${ticketId}?`
     );
 
-    if (confirmed) {
-      console.log("Deleted:", ticketId);
+    if (!confirmed) return;
 
-      // Backend geldiğinde burada API çağrısı olacak.
-    }
+    setDeletingId(ticketId);
+    setDeleteError(null);
+
+    deleteTicket(ticketId)
+      .then(() => onDeleted())
+      .catch((err) =>
+        setDeleteError(getTicketDeleteErrorMessage(err, "Couldn't delete ticket. Please try again."))
+      )
+      .finally(() => setDeletingId(null));
   };
 
   return (
@@ -129,6 +141,15 @@ const CustomerTicketTable = ({ tickets, loading, error }: CustomerTicketTablePro
       >
         Customer Tickets
       </Typography>
+
+      {deleteError && (
+        <Typography
+          color="error"
+          sx={{ px: 3, pb: 2, fontSize: 13 }}
+        >
+          {deleteError}
+        </Typography>
+      )}
 
       <Table>
         <TableHead>
@@ -242,6 +263,7 @@ const CustomerTicketTable = ({ tickets, loading, error }: CustomerTicketTablePro
                   <IconButton
                     size="small"
                     color="error"
+                    disabled={deletingId === ticket.id}
                     onClick={() => handleDelete(ticket.id)}
                   >
                     <DeleteOutlineOutlinedIcon fontSize="small" />

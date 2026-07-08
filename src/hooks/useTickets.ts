@@ -16,6 +16,7 @@ interface UseTicketsParams {
   agentId?: string;
   startDate?: string;
   endDate?: string;
+  refreshKey?: number;
 }
 
 export function useTickets(params: UseTicketsParams) {
@@ -35,6 +36,7 @@ export function useTickets(params: UseTicketsParams) {
     agentId,
     startDate,
     endDate,
+    refreshKey = 0,
   } = params;
 
   useEffect(() => {
@@ -69,7 +71,7 @@ export function useTickets(params: UseTicketsParams) {
     return () => {
       cancelled = true;
     };
-  }, [page, size, status, priority, topicId, departmentId, regionId, slaBreached, agentId, startDate, endDate]);
+  }, [page, size, status, priority, topicId, departmentId, regionId, slaBreached, agentId, startDate, endDate, refreshKey]);
 
   return { data, loading, error };
 }

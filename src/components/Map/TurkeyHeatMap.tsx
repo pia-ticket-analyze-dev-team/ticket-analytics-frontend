@@ -4,20 +4,32 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
 import turkeyGeo from "../../assets/maps/tr-cities.json";
-import { cityData } from "./dummyData";
+import type { TopCity } from "../../types/regionalInsights";
 
-const cityMap = Object.fromEntries(
-  cityData.map((city) => [city.city, city])
-);
+type TurkeyHeatMapProps = {
+  topCities: TopCity[];
+};
 
-const getColor = (value: number) => {
-  if (value >= 100) return "#2463FF";
-  if (value >= 70) return "#5B8CFF";
-  if (value >= 40) return "#9FC2FF";
+// GeoJSON province names use proper Turkish "İ" (U+0130), but the backend
+// returns ASCII "I" (e.g. "Istanbul", "Izmir") — normalize both sides so the
+// lookup isn't broken by that mismatch.
+const normalizeCityName = (name: string) => name.replace(/İ/g, "I").replace(/ı/g, "i");
+
+const getColor = (value: number, maxValue: number) => {
+  if (maxValue <= 0) return "#DCEBFF";
+  const ratio = value / maxValue;
+  if (ratio >= 0.66) return "#2463FF";
+  if (ratio >= 0.33) return "#5B8CFF";
+  if (ratio > 0) return "#9FC2FF";
   return "#DCEBFF";
 };
 
-const TurkeyHeatMap = () => {
+const TurkeyHeatMap = ({ topCities }: TurkeyHeatMapProps) => {
+  const cityMap = Object.fromEntries(
+    topCities.map((city) => [normalizeCityName(city.cityName), city])
+  );
+  const maxTicketCount = Math.max(0, ...topCities.map((city) => city.ticketCount));
+
   return (
     <Paper
       elevation={0}
@@ -65,34 +77,35 @@ const TurkeyHeatMap = () => {
           <GeoJSON
             data={turkeyGeo as any}
             style={(feature) => {
-              const city =
+              const city = normalizeCityName(
                 feature?.properties?.name ||
                 feature?.properties?.NAME_1 ||
-                "";
+                ""
+              );
 
               return {
-                fillColor: getColor(cityMap[city]?.tickets ?? 0),
+                fillColor: getColor(cityMap[city]?.ticketCount ?? 0, maxTicketCount),
                 fillOpacity: 1,
                 color: "#FFFFFF",
                 weight: 1,
               };
             }}
             onEachFeature={(feature, layer) => {
-              const city =
+              const displayName =
                 feature.properties?.name ||
                 feature.properties?.NAME_1 ||
                 "";
 
-              const info = cityMap[city];
+              const info = cityMap[normalizeCityName(displayName)];
 
               layer.bindTooltip(
                 `
                   <div style="padding:4px">
-                    <strong style="font-size:14px">${city}</strong>
+                    <strong style="font-size:14px">${displayName}</strong>
                     <br/>
-                    🎫 Tickets: ${info?.tickets ?? 0}
+                    🎫 Tickets: ${info?.ticketCount ?? 0}
                     <br/>
-                    ⏱ Avg Resolution: ${info?.avgResolution ?? "N/A"}
+                    ⏱ Avg Resolution: ${info ? `${info.avgResolutionTimeHours.toFixed(1)} h` : "N/A"}
                   </div>
                 `,
                 {

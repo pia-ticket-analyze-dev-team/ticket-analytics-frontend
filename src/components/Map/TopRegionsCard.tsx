@@ -1,7 +1,15 @@
 import { Box, Chip, Paper, Typography } from "@mui/material";
-import { topRegions } from "./dummyData";
+import type { RegionDensity } from "../../types/regionalInsights";
 
-const TopRegionsCard = () => {
+type TopRegionsCardProps = {
+  regions: RegionDensity[];
+};
+
+const TopRegionsCard = ({ regions }: TopRegionsCardProps) => {
+  const topRegions = [...regions]
+    .sort((a, b) => b.ticketCount - a.ticketCount)
+    .slice(0, 3);
+
   return (
     <Paper
       elevation={0}
@@ -23,7 +31,7 @@ const TopRegionsCard = () => {
 
       {topRegions.map((region, index) => (
         <Box
-          key={region.region}
+          key={region.regionName}
           sx={{
             display: "flex",
             justifyContent: "space-between",
@@ -39,7 +47,7 @@ const TopRegionsCard = () => {
                 color: "#1F2937",
               }}
             >
-              #{index + 1} {region.region}
+              #{index + 1} {region.regionName}
             </Typography>
 
             <Typography
@@ -48,12 +56,12 @@ const TopRegionsCard = () => {
                 mt: 0.5,
               }}
             >
-              {region.tickets.toLocaleString()} Tickets
+              {region.ticketCount.toLocaleString()} Tickets
             </Typography>
           </Box>
 
           <Chip
-            label={region.avgResolution}
+            label={`${region.avgResolutionTimeHours.toFixed(1)} h`}
             sx={{
               bgcolor: "#EEF4FF",
               color: "#2563EB",

@@ -29,7 +29,7 @@ export interface NewTicketInput {
   assignedAgent: string | null;
 }
 
-const priorityOptions: TicketPriority[] = ["High", "Medium", "Low"];
+const priorityOptions: TicketPriority[] = ["High", "Medium", "Low", "Critical"];
 
 const emptyForm: NewTicketInput = {
   customer: "",

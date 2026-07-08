@@ -1,4 +1,4 @@
-import { apiGet } from "../base.js";
+import { apiGet, apiPut, apiDelete } from "../base.js";
 
 interface FetchTicketsParams {
   page?: number;
@@ -12,6 +12,26 @@ interface FetchTicketsParams {
   agentId?: string;
   startDate?: string;
   endDate?: string;
+}
+
+export interface TicketRequestPayload {
+  ticketNumber: string;
+  customerId: string | null;
+  topicId: string | null;
+  currentDepartmentId: string | null;
+  agentId: string | null;
+  regionId: string | null;
+  serviceTypeId: string | null;
+  infrastructureTypeId: string | null;
+  description: string | null;
+  status: string;
+  priority: string;
+  slaBreached: boolean;
+  resolutionTimeHours: number | null;
+  customerSatisfactionScore: number | null;
+  createdAt: string;
+  resolvedAt: string | null;
+  creationSource: string | null;
 }
 
 export function fetchTickets({
@@ -40,4 +60,12 @@ export function fetchTickets({
   if (endDate) params.set("endDate", endDate);
 
   return apiGet(`/api/tickets?${params.toString()}`);
+}
+
+export function updateTicket(id: string, payload: TicketRequestPayload) {
+  return apiPut(`/api/tickets/${id}`, payload);
+}
+
+export function deleteTicket(id: string) {
+  return apiDelete(`/api/tickets/${id}`);
 }

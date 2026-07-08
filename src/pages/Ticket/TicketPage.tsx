@@ -9,11 +9,13 @@ import AddTicketDialog, {
   type NewTicketInput,
 } from "../../components/Ticket/AddTicketDialog";
 import { useTickets } from "../../hooks/useTickets";
+import { updateTicket, deleteTicket } from "../../api/tickets/tickets.js";
 import { useIssueTopics } from "../../hooks/useIssueTopics";
 import { useDepartments } from "../../hooks/useDepartments";
 import { useRegions } from "../../hooks/useRegions";
 import { useAgents } from "../../hooks/useAgents";
 import { toApiDateTime } from "../../utils/date";
+import { getTicketDeleteErrorMessage } from "../../utils/errors";
 import {
   defaultTicketFilters,
   type DateRange,
@@ -50,10 +52,10 @@ const TicketPage = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
-  const [localOverrides, setLocalOverrides] = useState<Record<string, TicketUpdate>>({});
   const [localAssignments, setLocalAssignments] = useState<Record<string, string | null>>({});
-  const [localDeletedIds, setLocalDeletedIds] = useState<Set<string>>(new Set());
   const [localAdditions, setLocalAdditions] = useState<Ticket[]>([]);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const { data: issueTopics } = useIssueTopics();
   const { data: departments } = useDepartments();
@@ -95,34 +97,23 @@ const TicketPage = () => {
     agentId,
     startDate: toApiDateTime(dateRange.start),
     endDate: toApiDateTime(dateRange.end),
+    refreshKey,
   });
 
   const displayedTickets = useMemo(() => {
-    const remote = (data?.content ?? [])
-      .filter((ticket) => !localDeletedIds.has(ticket.id))
-      .map((ticket) => {
-        const override = localOverrides[ticket.id];
-        const assignment = localAssignments[ticket.id];
+    const remote = (data?.content ?? []).map((ticket) => {
+      const assignment = localAssignments[ticket.id];
 
-        return {
-          ...ticket,
-          ...(override
-            ? {
-                issueTopicName: override.issueTopic,
-                departmentName: override.department,
-                city: override.city,
-                priority: override.priority,
-                status: override.status,
-              }
-            : {}),
-          ...(ticket.id in localAssignments ? { assignedAgentName: assignment ?? null } : {}),
-        };
-      });
+      return {
+        ...ticket,
+        ...(ticket.id in localAssignments ? { assignedAgentName: assignment ?? null } : {}),
+      };
+    });
 
     const combined = [...localAdditions, ...remote];
 
     return sortOrder === "asc" ? [...combined].reverse() : combined;
-  }, [data, localOverrides, localAssignments, localDeletedIds, localAdditions, sortOrder]);
+  }, [data, localAssignments, localAdditions, sortOrder]);
 
   const totalEntries = data?.totalElements ?? 0;
   const totalPages = data?.totalPages ?? 0;
@@ -151,11 +142,70 @@ const TicketPage = () => {
   };
 
   const handleUpdateTicket = (ticketId: string, updates: TicketUpdate) => {
-    setLocalOverrides((prev) => ({ ...prev, [ticketId]: updates }));
+    const localAddition = localAdditions.find((t) => t.id === ticketId);
+
+    if (localAddition) {
+      setLocalAdditions((prev) =>
+        prev.map((t) =>
+          t.id === ticketId
+            ? {
+                ...t,
+                issueTopicName: updates.issueTopic,
+                departmentName: updates.department,
+                city: updates.city,
+                priority: updates.priority,
+                status: updates.status,
+              }
+            : t
+        )
+      );
+      return;
+    }
+
+    const ticket = data?.content.find((t) => t.id === ticketId);
+    if (!ticket) return;
+
+    setActionError(null);
+
+    updateTicket(ticketId, {
+      ticketNumber: ticket.ticketNumber,
+      customerId: ticket.customerId,
+      topicId: issueTopics?.find((t) => t.name === updates.issueTopic)?.id ?? ticket.topicId,
+      currentDepartmentId:
+        departments?.find((d) => d.name === updates.department)?.id ?? ticket.currentDepartmentId,
+      agentId: ticket.agentId,
+      regionId: regions?.find((r) => r.name === updates.city)?.id ?? ticket.regionId,
+      serviceTypeId: ticket.serviceTypeId,
+      infrastructureTypeId: ticket.infrastructureTypeId,
+      description: ticket.description,
+      status: updates.status,
+      priority: updates.priority,
+      slaBreached: ticket.slaBreached,
+      resolutionTimeHours: ticket.resolutionTimeHours,
+      customerSatisfactionScore: ticket.customerSatisfactionScore,
+      createdAt: ticket.createdAt,
+      resolvedAt: ticket.resolvedAt,
+      creationSource: ticket.creationSource,
+    })
+      .then(() => setRefreshKey((key) => key + 1))
+      .catch(() => setActionError("Couldn't save changes. Please try again."));
   };
 
   const handleDeleteTicket = (ticketId: string) => {
-    setLocalDeletedIds((prev) => new Set(prev).add(ticketId));
+    const isLocalAddition = localAdditions.some((t) => t.id === ticketId);
+
+    if (isLocalAddition) {
+      setLocalAdditions((prev) => prev.filter((t) => t.id !== ticketId));
+      return;
+    }
+
+    setActionError(null);
+
+    deleteTicket(ticketId)
+      .then(() => setRefreshKey((key) => key + 1))
+      .catch((err) =>
+        setActionError(getTicketDeleteErrorMessage(err, "Couldn't delete ticket. Please try again."))
+      );
   };
 
   const handleAssignTicket = (ticketId: string, agent: string | null) => {
@@ -248,6 +298,10 @@ const TicketPage = () => {
 
       {error && (
         <Typography sx={{ fontSize: 13, color: "#d03b3b", mb: 1.5 }}>{error}</Typography>
+      )}
+
+      {actionError && (
+        <Typography sx={{ fontSize: 13, color: "#d03b3b", mb: 1.5 }}>{actionError}</Typography>
       )}
 
       <TicketTable

@@ -14,6 +14,8 @@ import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import { useRegions } from "../../hooks/useRegions";
 
 type Props = {
+  search: string;
+  setSearch: (value: string) => void;
   segment: string;
   setSegment: (value: string) => void;
   city: string;
@@ -21,6 +23,8 @@ type Props = {
 };
 
 const CustomerFilters = ({
+  search,
+  setSearch,
   segment,
   setSegment,
   city,
@@ -41,6 +45,17 @@ const CustomerFilters = ({
         boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
       }}
     >
+      <OutlinedInput
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Search by name or surname..."
+        startAdornment={<SearchIcon sx={{ mr: 1, color: "#9CA3AF" }} />}
+        sx={{
+          width: 280,
+          borderRadius: "12px",
+        }}
+      />
+
       <FormControl sx={{ minWidth: 170 }}>
         <InputLabel>Segment</InputLabel>
 
@@ -81,6 +96,7 @@ const CustomerFilters = ({
       <Button
         startIcon={<RefreshOutlinedIcon />}
         onClick={() => {
+          setSearch("");
           setSegment("All");
           setCity("All");
         }}

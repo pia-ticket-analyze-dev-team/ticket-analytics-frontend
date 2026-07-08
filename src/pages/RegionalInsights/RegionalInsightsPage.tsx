@@ -52,7 +52,7 @@ const RegionalInsightsPage = () => {
 
           <Grid container spacing={3}>
             <Grid size={{ xs: 12, lg: 9 }}>
-              <TurkeyHeatMap topCities={data.topCities} />
+              <TurkeyHeatMap cityDensity={data.cityDensity} />
             </Grid>
 
             <Grid size={{ xs: 12, lg: 3 }}>

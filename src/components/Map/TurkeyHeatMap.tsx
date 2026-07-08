@@ -4,10 +4,10 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
 import turkeyGeo from "../../assets/maps/tr-cities.json";
-import type { TopCity } from "../../types/regionalInsights";
+import type { CityDensity } from "../../types/regionalInsights";
 
 type TurkeyHeatMapProps = {
-  topCities: TopCity[];
+  cityDensity: CityDensity[];
 };
 
 // GeoJSON province names use proper Turkish "İ" (U+0130), but the backend
@@ -15,20 +15,16 @@ type TurkeyHeatMapProps = {
 // lookup isn't broken by that mismatch.
 const normalizeCityName = (name: string) => name.replace(/İ/g, "I").replace(/ı/g, "i");
 
-const getColor = (value: number, maxValue: number) => {
-  if (maxValue <= 0) return "#DCEBFF";
-  const ratio = value / maxValue;
-  if (ratio >= 0.66) return "#2463FF";
-  if (ratio >= 0.33) return "#5B8CFF";
-  if (ratio > 0) return "#9FC2FF";
-  return "#DCEBFF";
+const DENSITY_COLORS: Record<CityDensity["densityLevel"], string> = {
+  HIGH: "#2463FF",
+  MEDIUM: "#5B8CFF",
+  LOW: "#DCEBFF",
 };
 
-const TurkeyHeatMap = ({ topCities }: TurkeyHeatMapProps) => {
+const TurkeyHeatMap = ({ cityDensity }: TurkeyHeatMapProps) => {
   const cityMap = Object.fromEntries(
-    topCities.map((city) => [normalizeCityName(city.cityName), city])
+    cityDensity.map((city) => [normalizeCityName(city.cityName), city])
   );
-  const maxTicketCount = Math.max(0, ...topCities.map((city) => city.ticketCount));
 
   return (
     <Paper
@@ -84,7 +80,7 @@ const TurkeyHeatMap = ({ topCities }: TurkeyHeatMapProps) => {
               );
 
               return {
-                fillColor: getColor(cityMap[city]?.ticketCount ?? 0, maxTicketCount),
+                fillColor: DENSITY_COLORS[cityMap[city]?.densityLevel ?? "LOW"],
                 fillOpacity: 1,
                 color: "#FFFFFF",
                 weight: 1,

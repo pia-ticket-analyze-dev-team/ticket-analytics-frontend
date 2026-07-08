@@ -12,15 +12,16 @@ export interface RegionDensity {
   densityLevel: "HIGH" | "MEDIUM" | "LOW";
 }
 
-export interface TopCity {
+export interface CityDensity {
   rank: number;
   cityName: string;
   ticketCount: number;
   avgResolutionTimeHours: number;
+  densityLevel: "HIGH" | "MEDIUM" | "LOW";
 }
 
 export interface RegionalInsights {
   kpis: RegionalKpiSummary;
   regionDensity: RegionDensity[];
-  topCities: TopCity[];
+  cityDensity: CityDensity[];
 }

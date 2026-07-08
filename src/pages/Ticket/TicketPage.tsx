@@ -5,9 +5,7 @@ import MainLayout from "../../components/Layout/MainLayout";
 import TicketFilters from "../../components/Ticket/TicketFilters";
 import TicketTable from "../../components/Ticket/TicketTable";
 import TicketPagination from "../../components/Ticket/TicketPagination";
-import AddTicketDialog, {
-  type NewTicketInput,
-} from "../../components/Ticket/AddTicketDialog";
+import AddTicketDialog from "../../components/Ticket/AddTicketDialog";
 import { useTickets } from "../../hooks/useTickets";
 import { updateTicket, deleteTicket } from "../../api/tickets/tickets.js";
 import { useIssueTopics } from "../../hooks/useIssueTopics";
@@ -19,7 +17,6 @@ import { getTicketDeleteErrorMessage } from "../../utils/errors";
 import {
   defaultTicketFilters,
   type DateRange,
-  type Ticket,
   type TicketFilterState,
   type TicketUpdate,
 } from "../../types/ticket";
@@ -53,7 +50,6 @@ const TicketPage = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const [localAssignments, setLocalAssignments] = useState<Record<string, string | null>>({});
-  const [localAdditions, setLocalAdditions] = useState<Ticket[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -110,10 +106,8 @@ const TicketPage = () => {
       };
     });
 
-    const combined = [...localAdditions, ...remote];
-
-    return sortOrder === "asc" ? [...combined].reverse() : combined;
-  }, [data, localAssignments, localAdditions, sortOrder]);
+    return sortOrder === "asc" ? [...remote].reverse() : remote;
+  }, [data, localAssignments, sortOrder]);
 
   const totalEntries = data?.totalElements ?? 0;
   const totalPages = data?.totalPages ?? 0;
@@ -142,26 +136,6 @@ const TicketPage = () => {
   };
 
   const handleUpdateTicket = (ticketId: string, updates: TicketUpdate) => {
-    const localAddition = localAdditions.find((t) => t.id === ticketId);
-
-    if (localAddition) {
-      setLocalAdditions((prev) =>
-        prev.map((t) =>
-          t.id === ticketId
-            ? {
-                ...t,
-                issueTopicName: updates.issueTopic,
-                departmentName: updates.department,
-                city: updates.city,
-                priority: updates.priority,
-                status: updates.status,
-              }
-            : t
-        )
-      );
-      return;
-    }
-
     const ticket = data?.content.find((t) => t.id === ticketId);
     if (!ticket) return;
 
@@ -192,13 +166,6 @@ const TicketPage = () => {
   };
 
   const handleDeleteTicket = (ticketId: string) => {
-    const isLocalAddition = localAdditions.some((t) => t.id === ticketId);
-
-    if (isLocalAddition) {
-      setLocalAdditions((prev) => prev.filter((t) => t.id !== ticketId));
-      return;
-    }
-
     setActionError(null);
 
     deleteTicket(ticketId)
@@ -210,41 +177,6 @@ const TicketPage = () => {
 
   const handleAssignTicket = (ticketId: string, agent: string | null) => {
     setLocalAssignments((prev) => ({ ...prev, [ticketId]: agent }));
-  };
-
-  const handleAddTicket = (input: NewTicketInput) => {
-    const createdAt = new Date();
-
-    const newTicket: Ticket = {
-      id: `local-${createdAt.getTime()}`,
-      ticketNumber: `LOCAL-${createdAt.getTime()}`,
-      customerId: null,
-      customerName: input.customer,
-      topicId: null,
-      issueTopicName: input.issueTopic,
-      currentDepartmentId: null,
-      departmentName: input.department,
-      regionId: null,
-      city: input.city,
-      agentId: null,
-      assignedAgentName: input.assignedAgent,
-      serviceTypeId: null,
-      serviceTypeName: null,
-      infrastructureTypeId: null,
-      infrastructureTypeName: null,
-      description: input.description,
-      status: input.status,
-      priority: input.priority,
-      slaBreached: input.priority === "High" && input.status === "OPEN",
-      resolutionTimeHours: null,
-      customerSatisfactionScore: null,
-      createdAt: createdAt.toISOString(),
-      resolvedAt: null,
-      creationSource: "CALL_CENTER",
-    };
-
-    setLocalAdditions((prev) => [newTicket, ...prev]);
-    setIsAddDialogOpen(false);
   };
 
   return (
@@ -330,7 +262,10 @@ const TicketPage = () => {
       <AddTicketDialog
         open={isAddDialogOpen}
         onClose={() => setIsAddDialogOpen(false)}
-        onSubmit={handleAddTicket}
+        onCreated={() => {
+          setIsAddDialogOpen(false);
+          setRefreshKey((key) => key + 1);
+        }}
       />
     </MainLayout>
   );

@@ -1,5 +1,6 @@
 import {
   Chip,
+  CircularProgress,
   Paper,
   Table,
   TableBody,
@@ -7,28 +8,27 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Typography,
 } from "@mui/material";
 
-import { mockChurn } from "../../data/mockChurn";
+import type { ChurnCustomer } from "../../types/churnType";
 
 type Props = {
+  customers: ChurnCustomer[];
+  loading: boolean;
+  error: string | null;
   search: string;
-  segment: string;
-  riskLevel: string;
 };
 
 const getRiskColor = (risk: string) => {
   switch (risk) {
-    case "Critical":
-      return "#D32F2F";
-
-    case "High":
+    case "HIGH":
       return "#F57C00";
 
-    case "Medium":
+    case "MEDIUM":
       return "#FBC02D";
 
-    case "Low":
+    case "LOW":
       return "#2E7D32";
 
     default:
@@ -37,28 +37,14 @@ const getRiskColor = (risk: string) => {
 };
 
 const ChurnTable = ({
+  customers,
+  loading,
+  error,
   search,
-  segment,
-  riskLevel,
 }: Props) => {
-  const filteredCustomers = mockChurn.filter((customer) => {
-    const matchesSearch = customer.customerName
-      .toLowerCase()
-      .includes(search.toLowerCase());
-
-    const matchesSegment =
-      segment === "All" || customer.segment === segment;
-
-    const matchesRisk =
-      riskLevel === "All" ||
-      customer.riskLevel === riskLevel;
-
-    return (
-      matchesSearch &&
-      matchesSegment &&
-      matchesRisk
-    );
-  });
+  const filteredCustomers = customers.filter((customer) =>
+    customer.customerName.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <TableContainer
@@ -107,55 +93,93 @@ const ChurnTable = ({
         </TableHead>
 
         <TableBody>
-          {filteredCustomers.map((customer) => (
-            <TableRow
-              hover
-              key={customer.id}
-              sx={{
-                "&:last-child td": {
-                  borderBottom: 0,
-                },
-              }}
-            >
-              <TableCell>
-                {customer.customerName}
-              </TableCell>
-
-              <TableCell>
-                {customer.segment}
-              </TableCell>
-
-              <TableCell>
-                {customer.ticketCount}
-              </TableCell>
-
-              <TableCell>
-                {customer.satisfactionScore.toFixed(1)} / 5
-              </TableCell>
-
-              <TableCell>
-                {customer.averageResolutionHours} h
-              </TableCell>
-
-              <TableCell>
-                {customer.churnRiskScore}
-              </TableCell>
-
-              <TableCell>
-                <Chip
-                  label={customer.riskLevel}
-                  size="small"
-                  sx={{
-                    color: "#fff",
-                    fontWeight: 600,
-                    backgroundColor: getRiskColor(
-                      customer.riskLevel
-                    ),
-                  }}
-                />
+          {loading && (
+            <TableRow>
+              <TableCell
+                colSpan={7}
+                align="center"
+                sx={{ py: 4 }}
+              >
+                <CircularProgress size={28} />
               </TableCell>
             </TableRow>
-          ))}
+          )}
+
+          {!loading && error && (
+            <TableRow>
+              <TableCell
+                colSpan={7}
+                align="center"
+                sx={{ py: 4 }}
+              >
+                <Typography color="error">{error}</Typography>
+              </TableCell>
+            </TableRow>
+          )}
+
+          {!loading && !error && filteredCustomers.length === 0 && (
+            <TableRow>
+              <TableCell
+                colSpan={7}
+                align="center"
+                sx={{ py: 4 }}
+              >
+                <Typography color="text.secondary">No customers found.</Typography>
+              </TableCell>
+            </TableRow>
+          )}
+
+          {!loading &&
+            !error &&
+            filteredCustomers.map((customer) => (
+              <TableRow
+                hover
+                key={customer.customerId}
+                sx={{
+                  "&:last-child td": {
+                    borderBottom: 0,
+                  },
+                }}
+              >
+                <TableCell>
+                  {customer.customerName}
+                </TableCell>
+
+                <TableCell>
+                  {customer.customerSegment}
+                </TableCell>
+
+                <TableCell>
+                  {customer.ticketCount}
+                </TableCell>
+
+                <TableCell>
+                  {customer.averageSatisfactionScore.toFixed(1)} / 5
+                </TableCell>
+
+                <TableCell>
+                  {customer.averageResolutionHours.toFixed(1)} h
+                </TableCell>
+
+                <TableCell>
+                  {customer.churnRiskScore.toFixed(1)}
+                </TableCell>
+
+                <TableCell>
+                  <Chip
+                    label={customer.riskLevel}
+                    size="small"
+                    sx={{
+                      color: "#fff",
+                      fontWeight: 600,
+                      backgroundColor: getRiskColor(
+                        customer.riskLevel
+                      ),
+                    }}
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
         </TableBody>
       </Table>
     </TableContainer>

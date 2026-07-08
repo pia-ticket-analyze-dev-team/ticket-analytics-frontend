@@ -11,6 +11,12 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 
+const RISK_LEVEL_LABELS: Record<string, string> = {
+  LOW: "Low",
+  MEDIUM: "Medium",
+  HIGH: "High",
+};
+
 type Props = {
   search: string;
   setSearch: (value: string) => void;
@@ -18,6 +24,8 @@ type Props = {
   setSegment: (value: string) => void;
   riskLevel: string;
   setRiskLevel: (value: string) => void;
+  segmentOptions: string[];
+  riskLevelOptions: string[];
 };
 
 const ChurnFilters = ({
@@ -27,6 +35,8 @@ const ChurnFilters = ({
   setSegment,
   riskLevel,
   setRiskLevel,
+  segmentOptions,
+  riskLevelOptions,
 }: Props) => {
   return (
     <Box
@@ -61,8 +71,14 @@ const ChurnFilters = ({
           onChange={(e) => setSegment(e.target.value)}
         >
           <MenuItem value="All">All</MenuItem>
-          <MenuItem value="Individual">Individual</MenuItem>
-          <MenuItem value="Corporate">Corporate</MenuItem>
+          {segmentOptions.map((option) => (
+            <MenuItem
+              key={option}
+              value={option}
+            >
+              {option}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
 
@@ -75,10 +91,14 @@ const ChurnFilters = ({
           onChange={(e) => setRiskLevel(e.target.value)}
         >
           <MenuItem value="All">All</MenuItem>
-          <MenuItem value="Low">Low</MenuItem>
-          <MenuItem value="Medium">Medium</MenuItem>
-          <MenuItem value="High">High</MenuItem>
-          <MenuItem value="Critical">Critical</MenuItem>
+          {riskLevelOptions.map((option) => (
+            <MenuItem
+              key={option}
+              value={option}
+            >
+              {RISK_LEVEL_LABELS[option] ?? option}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
 

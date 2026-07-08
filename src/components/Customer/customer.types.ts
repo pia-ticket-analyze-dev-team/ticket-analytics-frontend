@@ -4,5 +4,4 @@ export interface Customer {
   lastName: string;
   segment: string;
   city: string;
-  ...
 }

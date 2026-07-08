@@ -9,9 +9,19 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { keyframes } from "@mui/material/styles";
 import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
+
+const rotate360 = keyframes`
+  0% {
+    transform: perspective(800px) rotateY(0deg);
+  }
+  100% {
+    transform: perspective(800px) rotateY(360deg);
+  }
+`;
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -30,18 +40,17 @@ const LoginPage = () => {
 
       const user = await login(email, password);
 
-      switch (user.role) {
-        case "ADMIN":
-          navigate("/dashboard");
-          break;
-
-        case "FRONT_OFFICE":
-          navigate("/customers");
-          break;
-
-        case "AGENT":
-          navigate("/my-tickets");
-          break;
+      // Admin
+      if (user.agentId === null) {
+        navigate("/dashboard");
+      }
+      // Front Office (Call Center Agent)
+      else if (user.departmentCode === "FRONT") {
+        navigate("/customers");
+      }
+      // Department Agents
+      else {
+        navigate("/my-tickets");
       }
     } catch {
       setError("Invalid email or password.");
@@ -63,12 +72,12 @@ const LoginPage = () => {
     >
       <Card
         sx={{
-          width: 430,
-          borderRadius: 4,
-          boxShadow: "0px 10px 30px rgba(0,0,0,0.12)",
+          width: 500,
+          borderRadius: 5,
+          boxShadow: "0px 18px 45px rgba(7,27,77,0.15)",
         }}
       >
-        <CardContent sx={{ p: 5 }}>
+        <CardContent sx={{ p: 7 }}>
           <Box
             sx={{
               display: "flex",
@@ -79,7 +88,7 @@ const LoginPage = () => {
           >
             <LanguageOutlinedIcon
               sx={{
-                fontSize: 56,
+                fontSize: 68,
                 color: "#071B4D",
                 mb: 1,
               }}
@@ -87,19 +96,22 @@ const LoginPage = () => {
 
             <Typography
               sx={{
-                fontSize: 34,
-                fontWeight: 700,
+                fontSize: 45,
+                fontWeight: 800,
                 color: "#071B4D",
                 lineHeight: 1,
+                display: "flex",
+                alignItems: "center",
               }}
             >
-              Telco360
+              <Box component="span">Telco360</Box>
+
             </Typography>
 
             <Typography
               sx={{
-                fontSize: 12,
-                letterSpacing: 2,
+                fontSize: 15,
+                letterSpacing: 3,
                 color: "#6B7280",
                 mb: 4,
               }}
@@ -108,10 +120,30 @@ const LoginPage = () => {
             </Typography>
 
             <Typography
-              variant="h5"
-              fontWeight={700}
+              sx={{
+                mt: 0.5,
+                fontSize: 28,
+                fontWeight: 700,
+                letterSpacing: "-0.5px",
+                color: "#071B4D",
+              }}
             >
-              Sign In
+              Access Portal
+            </Typography>
+
+            <Typography
+              sx={{
+                fontSize: 15,
+                fontWeight: 400,
+                letterSpacing: 2,
+                textAlign: "center",
+                color: "#6B7280",
+                mb: 4,
+              }}
+            >
+              Sign in with your corporate
+              <br />
+              email and password.
             </Typography>
           </Box>
 
@@ -162,10 +194,7 @@ const LoginPage = () => {
             }}
           >
             {loading ? (
-              <CircularProgress
-                size={22}
-                color="inherit"
-              />
+              <CircularProgress size={22} color="inherit" />
             ) : (
               "Sign In"
             )}

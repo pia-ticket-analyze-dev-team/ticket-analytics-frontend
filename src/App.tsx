@@ -46,7 +46,10 @@ function App() {
             {/* ADMIN + FRONT OFFICE */}
             <Route
               element={
-                <RoleProtectedRoute allowedRoles={["ADMIN", "FRONT_OFFICE"]} />
+                <RoleProtectedRoute
+                  allowedRoles={["ADMIN"]}
+                  allowFrontOffice
+                />
               }
             >
               <Route path="/customers" element={<CustomerPage />} />

@@ -24,6 +24,8 @@ export const login = async ({
     name: user.name,
     email: user.email,
     role: user.role,
+    agentId: user.agentId,
+    departmentCode: user.departmentCode,
   };
 
   return currentUser;

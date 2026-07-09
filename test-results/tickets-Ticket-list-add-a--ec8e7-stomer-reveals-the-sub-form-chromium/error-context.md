@@ -1,0 +1,496 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: tickets.spec.ts >> Ticket list >> add a ticket for a brand-new customer reveals the sub-form
+- Location: e2e/tickets.spec.ts:79:3
+
+# Error details
+
+```
+Test timeout of 30000ms exceeded.
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - img [ref=e7]
+          - generic [ref=e9]:
+            - paragraph [ref=e10]: Telco360
+            - paragraph [ref=e11]: INSIGHT CONSOLE
+        - list [ref=e12]:
+          - link [ref=e13] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e15]
+            - generic [ref=e18]: Dashboard
+          - link [ref=e19] [cursor=pointer]:
+            - /url: /customers
+            - img [ref=e21]
+            - generic [ref=e24]: Customers
+          - link [ref=e25] [cursor=pointer]:
+            - /url: /tickets
+            - img [ref=e27]
+            - generic [ref=e30]: Tickets
+          - link [ref=e31] [cursor=pointer]:
+            - /url: /analytics
+            - img [ref=e33]
+            - generic [ref=e36]: Agent Analytics
+          - link [ref=e37] [cursor=pointer]:
+            - /url: /customer-churn-risk
+            - img [ref=e39]
+            - generic [ref=e42]: Customer Churn Risk
+          - link [ref=e43] [cursor=pointer]:
+            - /url: /regional-insights
+            - img [ref=e45]
+            - generic [ref=e48]: Regional Insights
+      - button [ref=e50] [cursor=pointer]:
+        - img [ref=e52]
+        - generic [ref=e55]: Collapse
+    - generic [ref=e56]:
+      - banner [ref=e57]:
+        - generic [ref=e58]:
+          - generic [ref=e59]:
+            - img [ref=e60]
+            - textbox [ref=e63]:
+              - /placeholder: Search customers, tickets...
+          - generic [ref=e64]:
+            - img [ref=e66] [cursor=pointer]
+            - generic [ref=e68] [cursor=pointer]:
+              - generic [ref=e69]: E
+              - generic [ref=e70]:
+                - paragraph [ref=e71]: Eser Çetin
+                - paragraph [ref=e72]: System Administrator
+              - img [ref=e73]
+      - generic [ref=e75]:
+        - generic [ref=e76]:
+          - generic [ref=e77]:
+            - paragraph [ref=e78]: Tickets
+            - paragraph [ref=e79]: Dashboard / Tickets
+          - button [ref=e80] [cursor=pointer]:
+            - img [ref=e82]
+            - text: Add Ticket
+        - generic [ref=e84]:
+          - generic [ref=e85]:
+            - generic [ref=e86]:
+              - paragraph [ref=e87]: Status
+              - generic [ref=e88]:
+                - combobox [ref=e89] [cursor=pointer]: All
+                - textbox: All
+                - img
+                - group
+            - generic [ref=e90]:
+              - paragraph [ref=e91]: Priority
+              - generic [ref=e92]:
+                - combobox [ref=e93] [cursor=pointer]: All
+                - textbox: All
+                - img
+                - group
+            - generic [ref=e94]:
+              - paragraph [ref=e95]: Issue Topic
+              - generic [ref=e96]:
+                - combobox [ref=e97] [cursor=pointer]: All
+                - textbox: All
+                - img
+                - group
+            - generic [ref=e98]:
+              - paragraph [ref=e99]: Department
+              - generic [ref=e100]:
+                - combobox [ref=e101] [cursor=pointer]: All
+                - textbox: All
+                - img
+                - group
+            - generic [ref=e102]:
+              - paragraph [ref=e103]: City
+              - generic [ref=e104]:
+                - combobox [ref=e105] [cursor=pointer]: All
+                - textbox: All
+                - img
+                - group
+            - generic [ref=e106]:
+              - paragraph [ref=e107]: SLA Breached
+              - generic [ref=e108]:
+                - combobox [ref=e109] [cursor=pointer]: All
+                - textbox: All
+                - img
+                - group
+            - generic [ref=e110]:
+              - paragraph [ref=e111]: Assigned Agent
+              - generic [ref=e112]:
+                - combobox [ref=e113] [cursor=pointer]: All
+                - textbox: All
+                - img
+                - group
+          - generic [ref=e114]:
+            - generic [ref=e115]:
+              - paragraph [ref=e116]: Created Date
+              - generic [ref=e117] [cursor=pointer]:
+                - img [ref=e118]
+                - paragraph [ref=e120]: 09.07.2021 - 09.07.2026
+            - button [ref=e122] [cursor=pointer]: Clear Filters
+        - table [ref=e124]:
+          - rowgroup [ref=e125]:
+            - row [ref=e126]:
+              - columnheader [ref=e127]: Ticket No
+              - columnheader [ref=e128]: Customer
+              - columnheader [ref=e129]: Issue Topic
+              - columnheader [ref=e130]: Department
+              - columnheader [ref=e131]: City
+              - columnheader [ref=e132]: Priority
+              - columnheader [ref=e133]: Status
+              - columnheader [ref=e134]: SLA
+              - columnheader [ref=e135]:
+                - generic [ref=e136] [cursor=pointer]:
+                  - text: Created At
+                  - img [ref=e137]
+              - columnheader [ref=e139]: Action
+          - rowgroup [ref=e140]:
+            - row [ref=e141]:
+              - cell [ref=e142]: TCK-202607-00073
+              - cell [ref=e143]: Zzyx Nomatch1783597561427
+              - cell [ref=e144]: Account Access
+              - cell [ref=e145]: Customer Relations
+              - cell [ref=e146]: Adana
+              - cell [ref=e147]:
+                - paragraph [ref=e148]: Medium
+              - cell [ref=e149]:
+                - generic [ref=e150]: Open
+              - cell [ref=e151]:
+                - img [ref=e152]
+              - cell [ref=e154]: 09.07.2026 16:00
+              - cell [ref=e155]:
+                - generic [ref=e156]:
+                  - button [ref=e157] [cursor=pointer]:
+                    - img [ref=e158]
+                  - button [ref=e163] [cursor=pointer]:
+                    - img [ref=e164]
+                  - button [ref=e166] [cursor=pointer]:
+                    - img [ref=e167]
+            - row [ref=e169]:
+              - cell [ref=e170]: TCK-202607-00072
+              - cell [ref=e171]: Zzyx Nomatch1783601855411
+              - cell [ref=e172]: Account Access
+              - cell [ref=e173]: Customer Relations
+              - cell [ref=e174]: Adana
+              - cell [ref=e175]:
+                - paragraph [ref=e176]: Low
+              - cell [ref=e177]:
+                - generic [ref=e178]: In Progress
+              - cell [ref=e179]:
+                - img [ref=e180]
+              - cell [ref=e182]: 09.07.2026 15:57
+              - cell [ref=e183]:
+                - generic [ref=e184]:
+                  - button [ref=e185] [cursor=pointer]:
+                    - img [ref=e186]
+                  - button [ref=e191] [cursor=pointer]:
+                    - img [ref=e192]
+                  - button [ref=e194] [cursor=pointer]:
+                    - img [ref=e195]
+            - row [ref=e197]:
+              - cell [ref=e198]: TCK-202607-00071
+              - cell [ref=e199]: Zzyx Nomatch1783600160908
+              - cell [ref=e200]: Account Access
+              - cell [ref=e201]: Customer Relations
+              - cell [ref=e202]: Adana
+              - cell [ref=e203]:
+                - paragraph [ref=e204]: Medium
+              - cell [ref=e205]:
+                - generic [ref=e206]: Open
+              - cell [ref=e207]:
+                - img [ref=e208]
+              - cell [ref=e210]: 09.07.2026 15:57
+              - cell [ref=e211]:
+                - generic [ref=e212]:
+                  - button [ref=e213] [cursor=pointer]:
+                    - img [ref=e214]
+                  - button [ref=e219] [cursor=pointer]:
+                    - img [ref=e220]
+                  - button [ref=e222] [cursor=pointer]:
+                    - img [ref=e223]
+            - row [ref=e225]:
+              - cell [ref=e226]: TCK-202607-00070
+              - cell [ref=e227]: Zzyx Nomatch1783601739480
+              - cell [ref=e228]: Account Access
+              - cell [ref=e229]: Customer Relations
+              - cell [ref=e230]: Adana
+              - cell [ref=e231]:
+                - paragraph [ref=e232]: Low
+              - cell [ref=e233]:
+                - generic [ref=e234]: In Progress
+              - cell [ref=e235]:
+                - img [ref=e236]
+              - cell [ref=e238]: 09.07.2026 15:55
+              - cell [ref=e239]:
+                - generic [ref=e240]:
+                  - button [ref=e241] [cursor=pointer]:
+                    - img [ref=e242]
+                  - button [ref=e247] [cursor=pointer]:
+                    - img [ref=e248]
+                  - button [ref=e250] [cursor=pointer]:
+                    - img [ref=e251]
+            - row [ref=e253]:
+              - cell [ref=e254]: TCK-202607-00069
+              - cell [ref=e255]: Zzyx Nomatch1783600160908
+              - cell [ref=e256]: Account Access
+              - cell [ref=e257]: Customer Relations
+              - cell [ref=e258]: Adana
+              - cell [ref=e259]:
+                - paragraph [ref=e260]: Medium
+              - cell [ref=e261]:
+                - generic [ref=e262]: Open
+              - cell [ref=e263]:
+                - img [ref=e264]
+              - cell [ref=e266]: 09.07.2026 15:55
+              - cell [ref=e267]:
+                - generic [ref=e268]:
+                  - button [ref=e269] [cursor=pointer]:
+                    - img [ref=e270]
+                  - button [ref=e275] [cursor=pointer]:
+                    - img [ref=e276]
+                  - button [ref=e278] [cursor=pointer]:
+                    - img [ref=e279]
+            - row [ref=e281]:
+              - cell [ref=e282]: TCK-202607-00068
+              - cell [ref=e283]: Zzyx Nomatch1783600160908
+              - cell [ref=e284]: Account Access
+              - cell [ref=e285]: Customer Relations
+              - cell [ref=e286]: Adana
+              - cell [ref=e287]:
+                - paragraph [ref=e288]: Low
+              - cell [ref=e289]:
+                - generic [ref=e290]: In Progress
+              - cell [ref=e291]:
+                - img [ref=e292]
+              - cell [ref=e294]: 09.07.2026 15:29
+              - cell [ref=e295]:
+                - generic [ref=e296]:
+                  - button [ref=e297] [cursor=pointer]:
+                    - img [ref=e298]
+                  - button [ref=e303] [cursor=pointer]:
+                    - img [ref=e304]
+                  - button [ref=e306] [cursor=pointer]:
+                    - img [ref=e307]
+            - row [ref=e309]:
+              - cell [ref=e310]: TCK-202607-00067
+              - cell [ref=e311]: Zzyx Nomatch1783597561427
+              - cell [ref=e312]: Account Access
+              - cell [ref=e313]: Customer Relations
+              - cell [ref=e314]: Adana
+              - cell [ref=e315]:
+                - paragraph [ref=e316]: Medium
+              - cell [ref=e317]:
+                - generic [ref=e318]: Open
+              - cell [ref=e319]:
+                - img [ref=e320]
+              - cell [ref=e322]: 09.07.2026 15:29
+              - cell [ref=e323]:
+                - generic [ref=e324]:
+                  - button [ref=e325] [cursor=pointer]:
+                    - img [ref=e326]
+                  - button [ref=e331] [cursor=pointer]:
+                    - img [ref=e332]
+                  - button [ref=e334] [cursor=pointer]:
+                    - img [ref=e335]
+            - row [ref=e337]:
+              - cell [ref=e338]: TCK-202607-00066
+              - cell [ref=e339]: Zzyx Nomatch1783597561427
+              - cell [ref=e340]: Account Access
+              - cell [ref=e341]: Customer Relations
+              - cell [ref=e342]: Adana
+              - cell [ref=e343]:
+                - paragraph [ref=e344]: Low
+              - cell [ref=e345]:
+                - generic [ref=e346]: In Progress
+              - cell [ref=e347]:
+                - img [ref=e348]
+              - cell [ref=e350]: 09.07.2026 14:46
+              - cell [ref=e351]:
+                - generic [ref=e352]:
+                  - button [ref=e353] [cursor=pointer]:
+                    - img [ref=e354]
+                  - button [ref=e359] [cursor=pointer]:
+                    - img [ref=e360]
+                  - button [ref=e362] [cursor=pointer]:
+                    - img [ref=e363]
+            - row [ref=e365]:
+              - cell [ref=e366]: TCK-202607-00065
+              - cell [ref=e367]: Tolga Erdoğan
+              - cell [ref=e368]: Account Access
+              - cell [ref=e369]: Customer Relations
+              - cell [ref=e370]: Adana
+              - cell [ref=e371]:
+                - paragraph [ref=e372]: Medium
+              - cell [ref=e373]:
+                - generic [ref=e374]: Open
+              - cell [ref=e375]:
+                - img [ref=e376]
+              - cell [ref=e378]: 09.07.2026 14:45
+              - cell [ref=e379]:
+                - generic [ref=e380]:
+                  - button [ref=e381] [cursor=pointer]:
+                    - img [ref=e382]
+                  - button [ref=e387] [cursor=pointer]:
+                    - img [ref=e388]
+                  - button [ref=e390] [cursor=pointer]:
+                    - img [ref=e391]
+            - row [ref=e393]:
+              - cell [ref=e394]: TCK-202607-00064
+              - cell [ref=e395]: Tolga Erdoğan
+              - cell [ref=e396]: Account Access
+              - cell [ref=e397]: Customer Relations
+              - cell [ref=e398]: Adana
+              - cell [ref=e399]:
+                - paragraph [ref=e400]: Low
+              - cell [ref=e401]:
+                - generic [ref=e402]: In Progress
+              - cell [ref=e403]:
+                - img [ref=e404]
+              - cell [ref=e406]: 09.07.2026 14:22
+              - cell [ref=e407]:
+                - generic [ref=e408]:
+                  - button [ref=e409] [cursor=pointer]:
+                    - img [ref=e410]
+                  - button [ref=e415] [cursor=pointer]:
+                    - img [ref=e416]
+                  - button [ref=e418] [cursor=pointer]:
+                    - img [ref=e419]
+        - generic [ref=e421]:
+          - paragraph [ref=e422]: Showing 1 to 10 of 29,948 entries
+          - generic [ref=e423]:
+            - img [ref=e425]
+            - generic [ref=e427] [cursor=pointer]: "1"
+            - generic [ref=e428] [cursor=pointer]: "2"
+            - paragraph [ref=e429]: ...
+            - generic [ref=e430] [cursor=pointer]: "2994"
+            - generic [ref=e431] [cursor=pointer]: "2995"
+            - img [ref=e433] [cursor=pointer]
+          - generic [ref=e435]:
+            - combobox [ref=e436] [cursor=pointer]: 10 / page
+            - textbox: "10"
+            - img
+            - group
+  - generic: Submitting — this creates the customer and ticket together
+  - dialog "Add Ticket" [ref=e439]:
+    - heading "Add Ticket" [level=2] [ref=e440]
+    - generic [ref=e441]:
+      - generic [ref=e442]:
+        - paragraph [ref=e443]: Customer
+        - generic [ref=e446]:
+          - combobox "Search customer name" [ref=e447]: Zzyx Nomatch 1783602031099
+          - group
+      - generic [ref=e449]:
+        - paragraph [ref=e450]: No matching customer — enter new customer details
+        - generic [ref=e451]:
+          - generic [ref=e452]:
+            - paragraph [ref=e453]: First Name
+            - generic [ref=e455]:
+              - textbox [ref=e456]: Zzyx
+              - group
+          - generic [ref=e457]:
+            - paragraph [ref=e458]: Last Name
+            - generic [ref=e460]:
+              - textbox [ref=e461]: Nomatch1783602031099
+              - group
+        - generic [ref=e462]:
+          - paragraph [ref=e463]: Email
+          - generic [ref=e465]:
+            - textbox [ref=e466]: zzyx.nomatch.1783602031099@example.com
+            - group
+        - generic [ref=e467]:
+          - generic [ref=e468]:
+            - paragraph [ref=e469]: Phone
+            - generic [ref=e471]:
+              - textbox [ref=e472]
+              - group
+          - generic [ref=e473]:
+            - paragraph [ref=e474]: Birthdate
+            - generic [ref=e476]:
+              - textbox [ref=e477]
+              - group
+        - generic [ref=e478]:
+          - paragraph [ref=e479]: Address
+          - generic [ref=e481]:
+            - textbox [ref=e482]: Yeni Mahalle, Deneme Sokak No:2, Bursa
+            - group
+        - generic [ref=e483]:
+          - paragraph [ref=e484]: Segment
+          - generic [ref=e485]:
+            - combobox [ref=e486] [cursor=pointer]: Individual
+            - textbox: Individual
+            - img
+            - group
+      - generic [ref=e487]:
+        - paragraph [ref=e488]: Description
+        - generic [ref=e490]:
+          - textbox "Describe the issue (optional)" [ref=e491]
+          - group
+      - generic [ref=e492]:
+        - paragraph [ref=e493]: Issue Topic
+        - generic [ref=e494]:
+          - combobox [ref=e495] [cursor=pointer]: Account Access
+          - textbox: Account Access
+          - img
+          - group
+      - generic [ref=e496]:
+        - paragraph [ref=e497]: Department
+        - generic [ref=e498]:
+          - combobox [ref=e499] [cursor=pointer]: Customer Relations
+          - textbox: Customer Relations
+          - img
+          - group
+      - generic [ref=e500]:
+        - paragraph [ref=e501]: City
+        - generic [ref=e502]:
+          - combobox [ref=e503] [cursor=pointer]: Adana
+          - textbox: Adana
+          - img
+          - group
+      - generic [ref=e504]:
+        - paragraph [ref=e505]: Service Type
+        - generic [ref=e506]:
+          - combobox [ref=e507] [cursor=pointer]: Corporate Internet
+          - textbox: Corporate Internet
+          - img
+          - group
+      - generic [ref=e508]:
+        - paragraph [ref=e509]: Infrastructure Type
+        - generic [ref=e510]:
+          - combobox [ref=e511] [cursor=pointer]: 4G
+          - textbox: 4G
+          - img
+          - group
+      - generic [ref=e512]:
+        - generic [ref=e513]:
+          - paragraph [ref=e514]: Priority
+          - generic [ref=e515]:
+            - combobox [ref=e516] [cursor=pointer]: Medium
+            - textbox: Medium
+            - img
+            - group
+        - generic [ref=e517]:
+          - paragraph [ref=e518]: Status
+          - generic [ref=e519]:
+            - combobox [disabled] [ref=e520]: Open
+            - textbox [disabled]: OPEN
+            - img
+            - group
+      - generic [ref=e521]:
+        - paragraph [ref=e522]: Assigned Agent
+        - generic [ref=e523]:
+          - combobox [ref=e524] [cursor=pointer]: Ahmet Demir
+          - textbox: Ahmet Demir
+          - img
+          - group
+    - generic [ref=e525]:
+      - button "Cancel" [ref=e526] [cursor=pointer]
+      - button "Creating..." [disabled]
+```

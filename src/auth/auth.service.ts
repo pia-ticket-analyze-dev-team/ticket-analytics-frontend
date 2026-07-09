@@ -11,6 +11,7 @@ export const login = async ({
   email,
   password,
 }: LoginRequest): Promise<User> => {
+  console.log("Logging in with:", { email, password });
   const response = await loginRequest(email, password);
 
   currentUser = {
@@ -21,7 +22,7 @@ export const login = async ({
     agentId: response.agentId,
     departmentCode: response.departmentCode,
   };
-
+  console.log("currentUser", currentUser);
   return currentUser;
 };
 

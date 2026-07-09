@@ -60,7 +60,7 @@ const DashboardPage = () => {
         <Typography sx={{ fontSize: 24, fontWeight: 700, color: "#111827" }}>
           Dashboard
         </Typography>
-        <Typography sx={{ fontSize: 13, color: "#9CA3AF", mt: 0.5 }}>Dashboard</Typography>
+        <Typography sx={{ fontSize: 13, color: "#9CA3AF", mt: 0.5 }}>View real-time insights into support operations, ticket trends and service quality.</Typography>
       </Box>
 
       {error && (

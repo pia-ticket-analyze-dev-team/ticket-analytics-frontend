@@ -6,17 +6,23 @@ import CustomerFilters from "../../components/Customer/CustomerFilters";
 import CustomerTable from "../../components/Customer/CustomerTable";
 import CustomerPagination from "../../components/Customer/CustomerPagination";
 import CustomerFormDialog from "../../components/Customer/Form/CustomerFormDialog";
+
 import { useCustomers } from "../../hooks/useCustomers";
+
 import type { Customer } from "../../components/Customer/customer.types";
 
 const CustomerPage = () => {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+
   const [segment, setSegment] = useState("All");
-  const [city, setCity] = useState("All");
+
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(10);
-  const [formTarget, setFormTarget] = useState<"create" | Customer | null>(null);
+
+  const [formTarget, setFormTarget] =
+    useState<"create" | Customer | null>(null);
+
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -43,24 +49,22 @@ const CustomerPage = () => {
 
   return (
     <MainLayout>
-      <CustomerHeader onAddClick={() => setFormTarget("create")} />
+      <CustomerHeader
+        onAddClick={() => setFormTarget("create")}
+      />
 
       <CustomerFilters
         search={search}
         setSearch={setSearch}
         segment={segment}
         setSegment={handleSegmentChange}
-        city={city}
-        setCity={setCity}
       />
 
       <CustomerTable
         customers={data?.content ?? []}
         loading={loading}
         error={error}
-        city={city}
         onEdit={setFormTarget}
-        onDeleted={() => setRefreshKey((key) => key + 1)}
       />
 
       <CustomerPagination
@@ -78,8 +82,14 @@ const CustomerPage = () => {
       <CustomerFormDialog
         open={formTarget !== null}
         onClose={() => setFormTarget(null)}
-        onSaved={() => setRefreshKey((key) => key + 1)}
-        customer={typeof formTarget === "object" && formTarget !== null ? formTarget : undefined}
+        onSaved={() =>
+          setRefreshKey((key) => key + 1)
+        }
+        customer={
+          typeof formTarget === "object"
+            ? formTarget
+            : undefined
+        }
       />
     </MainLayout>
   );

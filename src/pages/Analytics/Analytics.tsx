@@ -19,10 +19,10 @@ const Analytics = () => {
     <MainLayout>
       <Box sx={{ mb: 3 }}>
         <Typography sx={{ fontSize: 24, fontWeight: 700, color: "#111827" }}>
-          AgentAnalytics
+          Agent Analytics
         </Typography>
         <Typography sx={{ fontSize: 13, color: "#9CA3AF", mt: 0.5 }}>
-           Analytics for Agents
+           Monitor agent performance, SLA compliance and customer satisfaction metrics.
         </Typography>
       </Box>
 

@@ -9,6 +9,7 @@ import {
 import { NavLink, useLocation } from "react-router-dom";
 
 import { useAuth } from "../../auth/AuthContext";
+
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import ConfirmationNumberOutlinedIcon from "@mui/icons-material/ConfirmationNumberOutlined";
@@ -45,7 +46,7 @@ const menuItems = [
     icon: <BarChartOutlinedIcon />,
     path: "/analytics",
   },
-    {
+  {
     title: "Customer Churn Risk",
     icon: <PersonOffOutlinedIcon />,
     path: "/customer-churn-risk",
@@ -54,37 +55,39 @@ const menuItems = [
     title: "Regional Insights",
     icon: <PublicOutlinedIcon />,
     path: "/regional-insights",
-  }
-];
-
-const FRONT_OFFICE_HIDDEN_PATHS = [
-  "/dashboard",
-  "/analytics",
-  "/regional-insights",
-  "/customer-churn-risk",
+  },
 ];
 
 const Sidebar = () => {
   const location = useLocation();
   const { user } = useAuth();
 
-  const isNonFrontAgent = Boolean(user?.agentId) && user?.departmentCode !== "FRONT";
+  const isAdmin = user?.departmentCode === null;
   const isFrontOfficeAgent = user?.departmentCode === "FRONT";
+  const isDepartmentAgent =
+    user?.departmentCode !== null &&
+    user?.departmentCode !== "FRONT";
 
   const visibleMenuItems = menuItems.filter((item) => {
-    if (isNonFrontAgent) {
+    // Admin
+    if (isAdmin) {
+      return item.path !== "/my-tickets";
+    }
+
+    // Front Office
+    if (isFrontOfficeAgent) {
+      return (
+        item.path === "/customers" ||
+        item.path === "/tickets"
+      );
+    }
+
+    // Department Agents
+    if (isDepartmentAgent) {
       return item.path === "/my-tickets";
     }
 
-    if (item.path === "/my-tickets") {
-      return isFrontOfficeAgent;
-    }
-
-    if (isFrontOfficeAgent) {
-      return !FRONT_OFFICE_HIDDEN_PATHS.includes(item.path);
-    }
-
-    return true;
+    return false;
   });
 
   return (

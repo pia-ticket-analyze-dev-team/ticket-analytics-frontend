@@ -29,10 +29,6 @@ const CustomerInfoCard = ({ customer }: CustomerInfoCardProps) => {
       value: customer.address,
     },
     {
-      label: "Birthdate",
-      value: customer.birthdate ?? "-",
-    },
-    {
       label: "Registration Date",
       value: customer.createdAt,
     },
@@ -46,20 +42,21 @@ const CustomerInfoCard = ({ customer }: CustomerInfoCardProps) => {
     <Paper
       elevation={0}
       sx={{
-        height: "100%",
-        minHeight: 330,
+        width: "100%",
         border: "1px solid #E5E7EB",
-        borderRadius: "20px",
-        p: 3.5,
+        borderRadius: "24px",
+        px: 4,
+        pt: 4,
+        pb: 2,
         backgroundColor: "#FFFFFF",
       }}
     >
       <Typography
         sx={{
-          fontSize: 18,
+          fontSize: 30,
           fontWeight: 700,
           color: "#1F2937",
-          mb: 3,
+          mb: 2.5,
         }}
       >
         Customer Information
@@ -70,15 +67,15 @@ const CustomerInfoCard = ({ customer }: CustomerInfoCardProps) => {
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: "120px 1fr",
+              gridTemplateColumns: "170px 1fr",
               alignItems: "center",
-              py: 1.3,
               columnGap: 2,
+              py: 1.1,
             }}
           >
             <Typography
               sx={{
-                fontSize: 14,
+                fontSize: 16,
                 color: "#6B7280",
               }}
             >
@@ -87,14 +84,14 @@ const CustomerInfoCard = ({ customer }: CustomerInfoCardProps) => {
 
             <Typography
               sx={{
-                fontSize: 14,
+                fontSize: 16,
                 fontWeight: 500,
                 color: "#1F2937",
                 textAlign: "right",
                 wordBreak: "break-word",
               }}
             >
-              {item.value}
+              {item.value || "-"}
             </Typography>
           </Box>
 

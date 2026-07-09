@@ -1,5 +1,8 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
+import { AuthProvider } from "./auth/AuthContext";
+import ProtectedRoute from "./auth/ProtectedRoute";
+import LoginPage from "./pages/Login/Login";
 import DashboardPage from "./pages/Dashboard/DashboardPage";
 import CustomerPage from "./pages/Customer/CustomerPage";
 import CustomerDetailPage from "./pages/Customer/CustomerDetailPage";
@@ -12,27 +15,79 @@ import RegionalInsightsPage from "./pages/RegionalInsights/RegionalInsightsPage"
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/login" element={<LoginPage />} />
 
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/tickets" element={<TicketPage />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tickets"
+            element={
+              <ProtectedRoute>
+                <TicketPage />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route path="/customers" element={<CustomerPage />} />
-        <Route path="/customers/new" element={<CustomerCreatePage />} />
-        <Route path="/customers/:id" element={<CustomerDetailPage />} />
-        <Route
-          path="/customers/:id/edit"
-          element={<CustomerEditPage />}
-        />
+          <Route
+            path="/customers"
+            element={
+              <ProtectedRoute>
+                <CustomerPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/customers/new"
+            element={
+              <ProtectedRoute>
+                <CustomerCreatePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/customers/:id"
+            element={
+              <ProtectedRoute>
+                <CustomerDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/customers/:id/edit"
+            element={
+              <ProtectedRoute>
+                <CustomerEditPage />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/regional-insights"
-          element={<RegionalInsightsPage />}
-        />
-              <Route path="/dashboard" element={<DashboardPage />} />
-      <Route path="/analytics" element={<Analytics />} />
-      </Routes>
+          <Route
+            path="/regional-insights"
+            element={
+              <ProtectedRoute>
+                <RegionalInsightsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/analytics"
+            element={
+              <ProtectedRoute>
+                <Analytics />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

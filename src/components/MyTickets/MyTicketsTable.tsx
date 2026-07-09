@@ -17,6 +17,8 @@ import {
 import { useMemo, useState } from "react";
 import { useAuth } from "../../auth/AuthContext";
 import { useAgentTickets } from "../../hooks/useAgentTickets";
+import { useDepartments } from "../../hooks/useDepartments";
+import { fetchAgents } from "../../api/lookup/lookup.js";
 import TicketPagination from "../Ticket/TicketPagination";
 
 import type {
@@ -25,8 +27,7 @@ import type {
   TicketStatus,
 } from "./myTickets.types";
 import type { Ticket } from "../../types/ticket";
-
-import { departmentAgents } from "../../data/mockAgents";
+import type { LookupOption } from "../../types/lookup";
 
 import EditablePriority from "./EditablePriority";
 import EditableStatus from "./EditableStatus";
@@ -38,15 +39,6 @@ type Props = {
   status: string;
   priority: string;
 };
-
-const departments = [
-  "Front Office",
-  "Technical Support",
-  "Billing",
-  "Network Operations",
-  "SIM Operations",
-  "Retail Support",
-];
 
 const statusToApi: Record<string, string | undefined> = {
   All: undefined,
@@ -99,6 +91,7 @@ const toMyTicket = (ticket: Ticket): MyTicket => ({
 
 const MyTicketsTable = ({ search, status, priority }: Props) => {
   const { user } = useAuth();
+  const { data: departments } = useDepartments();
 
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -175,38 +168,41 @@ const MyTicketsTable = ({ search, status, priority }: Props) => {
     setForwardTicket(ticket);
   };
 
-  const handleForward = (department: string) => {
+  const handleForward = (department: LookupOption) => {
     if (!forwardTicket) return;
 
-    const agents = departmentAgents[department] ?? [];
-    if (agents.length === 0) return;
-
-    const randomAgent = agents[Math.floor(Math.random() * agents.length)];
-
-    setOverrides((prev) => ({
-      ...prev,
-      [forwardTicket.id]: {
-        ...prev[forwardTicket.id],
-        forwardedTo: department,
-        assignedAgent: randomAgent,
-        assignmentHistory: [
-          ...forwardTicket.assignmentHistory,
-          {
-            department,
-            agent: randomAgent,
-            changedAt: new Date().toLocaleString(),
-          },
-        ],
-      },
-    }));
-
-    setSnackbarMessage(
-      `Ticket successfully forwarded to ${department} and assigned to ${randomAgent}.`
-    );
-
-    setSnackbarOpen(true);
+    const ticket = forwardTicket;
     setForwardAnchor(null);
     setForwardTicket(null);
+
+    fetchAgents(department.id).then((agents: LookupOption[]) => {
+      if (!agents || agents.length === 0) return;
+
+      const randomAgent = agents[Math.floor(Math.random() * agents.length)];
+
+      setOverrides((prev) => ({
+        ...prev,
+        [ticket.id]: {
+          ...prev[ticket.id],
+          forwardedTo: department.name,
+          assignedAgent: randomAgent.name,
+          assignmentHistory: [
+            ...ticket.assignmentHistory,
+            {
+              department: department.name,
+              agent: randomAgent.name,
+              changedAt: new Date().toLocaleString(),
+            },
+          ],
+        },
+      }));
+
+      setSnackbarMessage(
+        `Ticket successfully forwarded to ${department.name} and assigned to ${randomAgent.name}.`
+      );
+
+      setSnackbarOpen(true);
+    });
   };
 
   if (!user?.agentId) {
@@ -376,14 +372,14 @@ const MyTicketsTable = ({ search, status, priority }: Props) => {
           setForwardTicket(null);
         }}
       >
-        {departments
-          .filter((department) => department !== forwardTicket?.forwardedTo)
+        {(departments ?? [])
+          .filter((department) => department.name !== forwardTicket?.forwardedTo)
           .map((department) => (
             <MenuItem
-              key={department}
+              key={department.id}
               onClick={() => handleForward(department)}
             >
-              {department}
+              {department.name}
             </MenuItem>
           ))}
       </Menu>

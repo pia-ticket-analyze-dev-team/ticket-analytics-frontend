@@ -12,8 +12,15 @@ export function fetchIssueTopics() {
   return apiGet("/api/topics");
 }
 
-export function fetchAgents() {
-  return apiGet("/api/agents");
+export function fetchAgents(departmentId) {
+  const params = new URLSearchParams();
+
+  if (departmentId) {
+    params.set("departmentId", departmentId);
+  }
+
+  const query = params.toString();
+  return apiGet(query ? `/api/agents?${query}` : "/api/agents");
 }
 
 export function fetchServiceTypes() {

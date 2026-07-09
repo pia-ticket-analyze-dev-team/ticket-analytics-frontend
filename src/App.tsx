@@ -12,6 +12,7 @@ import TicketPage from "./pages/Ticket/TicketPage";
 import Analytics from "./pages/Analytics/Analytics";
 import RegionalInsightsPage from "./pages/RegionalInsights/RegionalInsightsPage";
 import MyTicketsPage from "./pages/MyTickets/MyTicketsPage";
+import ChurnPage from "./pages/Churn/ChurnPage";
 
 function App() {
   return (
@@ -92,6 +93,14 @@ function App() {
             element={
               <ProtectedRoute blockDepartmentCodes={["FRONT"]} blockOtherAgents>
                 <Analytics />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/customer-churn-risk"
+            element={
+              <ProtectedRoute blockDepartmentCodes={["FRONT"]} blockOtherAgents>
+                <ChurnPage />
               </ProtectedRoute>
             }
           />

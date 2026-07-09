@@ -15,6 +15,7 @@ import ConfirmationNumberOutlinedIcon from "@mui/icons-material/ConfirmationNumb
 import AssignmentIndOutlinedIcon from "@mui/icons-material/AssignmentIndOutlined";
 import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
 import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
+import PersonOffOutlinedIcon from "@mui/icons-material/PersonOffOutlined";
 import KeyboardArrowLeftOutlinedIcon from "@mui/icons-material/KeyboardArrowLeftOutlined";
 import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
 
@@ -44,14 +45,24 @@ const menuItems = [
     icon: <BarChartOutlinedIcon />,
     path: "/analytics",
   },
+    {
+    title: "Customer Churn Risk",
+    icon: <PersonOffOutlinedIcon />,
+    path: "/customer-churn-risk",
+  },
   {
     title: "Regional Insights",
     icon: <PublicOutlinedIcon />,
     path: "/regional-insights",
-  },
+  }
 ];
 
-const FRONT_OFFICE_HIDDEN_PATHS = ["/dashboard", "/analytics", "/regional-insights"];
+const FRONT_OFFICE_HIDDEN_PATHS = [
+  "/dashboard",
+  "/analytics",
+  "/regional-insights",
+  "/customer-churn-risk",
+];
 
 const Sidebar = () => {
   const location = useLocation();

@@ -2,9 +2,7 @@ import { useState } from "react";
 import {
   AppBar,
   Avatar,
-  Badge,
   Box,
-  InputBase,
   Menu,
   MenuItem,
   Toolbar,
@@ -12,8 +10,6 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
-import SearchIcon from "@mui/icons-material/Search";
-import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 
@@ -30,7 +26,6 @@ const DEPARTMENT_NAMES: Record<string, string> = {
 };
 
 const Header = () => {
-  const notificationCount = 0;
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -43,10 +38,12 @@ const Header = () => {
   };
 
   const displayName = user?.name ?? "Guest";
+
   const displaySubtitle =
     user?.role === "ADMIN"
       ? "System Administrator"
       : (user?.departmentCode && DEPARTMENT_NAMES[user.departmentCode]) || "Agent";
+
   const avatarLetter = displayName.charAt(0).toUpperCase();
 
   return (
@@ -63,41 +60,10 @@ const Header = () => {
         sx={{
           height: 72,
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "flex-end",
           px: 4,
         }}
       >
-        {/* Search */}
-
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            width: 360,
-            backgroundColor: "#F5F7FA",
-            borderRadius: 3,
-            px: 2,
-            py: 0.8,
-          }}
-        >
-          <SearchIcon
-            sx={{
-              color: "#9CA3AF",
-              mr: 1,
-            }}
-          />
-
-          <InputBase
-            placeholder="Search customers, tickets..."
-            fullWidth
-            sx={{
-              fontSize: 14,
-            }}
-          />
-        </Box>
-
-        {/* Right Section */}
-
         <Box
           sx={{
             display: "flex",
@@ -105,19 +71,6 @@ const Header = () => {
             gap: 3,
           }}
         >
-          <Badge
-            badgeContent={notificationCount}
-            color="error"
-            invisible={notificationCount === 0}
-          >
-            <NotificationsNoneIcon
-              sx={{
-                fontSize: 25,
-                cursor: "pointer",
-              }}
-            />
-          </Badge>
-
           <Box
             onClick={(e) => setAnchorEl(e.currentTarget)}
             sx={{
@@ -174,7 +127,13 @@ const Header = () => {
             transformOrigin={{ vertical: "top", horizontal: "right" }}
           >
             <MenuItem onClick={handleLogout}>
-              <LogoutOutlinedIcon sx={{ fontSize: 18, mr: 1.5, color: "#6B7280" }} />
+              <LogoutOutlinedIcon
+                sx={{
+                  fontSize: 18,
+                  mr: 1.5,
+                  color: "#6B7280",
+                }}
+              />
               Logout
             </MenuItem>
           </Menu>

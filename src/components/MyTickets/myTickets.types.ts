@@ -1,7 +1,8 @@
 export type TicketStatus =
   | "Open"
   | "In Progress"
-  | "Resolved";
+  | "Resolved"
+  | "Closed";
 
 export type TicketPriority =
   | "Low"
@@ -16,7 +17,7 @@ export interface AssignmentStep {
 }
 
 export interface MyTicket {
-  id: number;
+  id: string;
   ticketNo: string;
   customer: string;
  topic: string;

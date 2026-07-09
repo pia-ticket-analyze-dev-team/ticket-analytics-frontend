@@ -10,18 +10,22 @@ import {
   MenuItem,
   Snackbar,
   Alert,
+  CircularProgress,
+  Typography,
 } from "@mui/material";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useAuth } from "../../auth/AuthContext";
+import { useAgentTickets } from "../../hooks/useAgentTickets";
+import TicketPagination from "../Ticket/TicketPagination";
 
 import type {
   MyTicket,
   TicketPriority,
   TicketStatus,
 } from "./myTickets.types";
+import type { Ticket } from "../../types/ticket";
 
-import { myTickets } from "../../data/mockMyTickets";
 import { departmentAgents } from "../../data/mockAgents";
 
 import EditablePriority from "./EditablePriority";
@@ -44,11 +48,79 @@ const departments = [
   "Retail Support",
 ];
 
+const statusToApi: Record<string, string | undefined> = {
+  All: undefined,
+  Open: "OPEN",
+  "In Progress": "IN_PROGRESS",
+  Resolved: "RESOLVED",
+  Closed: "CLOSED",
+};
+
+const apiStatusToDisplay: Record<string, TicketStatus> = {
+  OPEN: "Open",
+  IN_PROGRESS: "In Progress",
+  RESOLVED: "Resolved",
+  CLOSED: "Closed",
+};
+
+const formatDate = (iso: string) => {
+  const date = new Date(iso);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${day}.${month}.${date.getFullYear()}`;
+};
+
+const formatSla = (ticket: Ticket) => {
+  switch (ticket.slaStatus) {
+    case "COMPLETED":
+      return "Completed";
+    case "BREACHED":
+      return "Breached";
+    case "ON_TRACK":
+      return ticket.slaHoursRemaining != null ? `${ticket.slaHoursRemaining}h Left` : "On Track";
+    default:
+      return ticket.slaBreached ? "Breached" : "-";
+  }
+};
+
+const toMyTicket = (ticket: Ticket): MyTicket => ({
+  id: ticket.id,
+  ticketNo: ticket.ticketNumber,
+  customer: ticket.customerName ?? "Unknown",
+  topic: ticket.issueTopicName ?? "-",
+  priority: (ticket.priority as TicketPriority) ?? "Medium",
+  status: apiStatusToDisplay[ticket.status] ?? "Open",
+  createdAt: formatDate(ticket.createdAt),
+  sla: formatSla(ticket),
+  forwardedTo: ticket.departmentName ?? "-",
+  assignedAgent: ticket.assignedAgentName ?? "-",
+  assignmentHistory: [],
+});
+
 const MyTicketsTable = ({ search, status, priority }: Props) => {
   const { user } = useAuth();
 
-  const [tickets, setTickets] = useState<MyTicket[]>(myTickets);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const { data, loading, error } = useAgentTickets({
+    agentId: user?.agentId ?? null,
+    page: page - 1,
+    size: rowsPerPage,
+    status: statusToApi[status],
+    priority: priority === "All" ? undefined : priority,
+  });
+
+  const baseTickets = useMemo(() => (data?.content ?? []).map(toMyTicket), [data]);
+
+  const [overrides, setOverrides] = useState<Record<string, Partial<MyTicket>>>({});
+
+  const tickets = useMemo(
+    () => baseTickets.map((ticket) => ({ ...ticket, ...overrides[ticket.id] })),
+    [baseTickets, overrides]
+  );
+
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [editedTicket, setEditedTicket] = useState<MyTicket | null>(null);
   const [historyTicket, setHistoryTicket] = useState<MyTicket | null>(null);
   const [forwardTicket, setForwardTicket] = useState<MyTicket | null>(null);
@@ -61,21 +133,13 @@ const MyTicketsTable = ({ search, status, priority }: Props) => {
       ticket.customer.toLowerCase().includes(search.toLowerCase()) ||
       ticket.ticketNo.toLowerCase().includes(search.toLowerCase());
 
-    const matchesStatus = status === "All" || ticket.status === status;
-    const matchesPriority = priority === "All" || ticket.priority === priority;
-
-    // Admin ise tüm ticketları görebilsin.
-    if (user?.role === "ADMIN") {
-      return matchesSearch && matchesStatus && matchesPriority;
-    }
-
-    return (
-      matchesSearch &&
-      matchesStatus &&
-      matchesPriority &&
-      ticket.assignedAgent === user?.name
-    );
+    return matchesSearch;
   });
+
+  const totalEntries = data?.totalElements ?? 0;
+  const totalPages = data?.totalPages ?? 0;
+  const rangeStart = totalEntries === 0 ? 0 : (page - 1) * rowsPerPage + 1;
+  const rangeEnd = Math.min(page * rowsPerPage, totalEntries);
 
   const handleEdit = (ticket: MyTicket) => {
     setEditingId(ticket.id);
@@ -90,11 +154,14 @@ const MyTicketsTable = ({ search, status, priority }: Props) => {
   const handleSave = () => {
     if (!editedTicket) return;
 
-    setTickets((prev) =>
-      prev.map((ticket) =>
-        ticket.id === editedTicket.id ? editedTicket : ticket
-      )
-    );
+    setOverrides((prev) => ({
+      ...prev,
+      [editedTicket.id]: {
+        ...prev[editedTicket.id],
+        priority: editedTicket.priority,
+        status: editedTicket.status,
+      },
+    }));
 
     setEditingId(null);
     setEditedTicket(null);
@@ -116,27 +183,22 @@ const MyTicketsTable = ({ search, status, priority }: Props) => {
 
     const randomAgent = agents[Math.floor(Math.random() * agents.length)];
 
-    setTickets((prev) =>
-      prev.map((ticket) => {
-        if (ticket.id !== forwardTicket.id) {
-          return ticket;
-        }
-
-        return {
-          ...ticket,
-          forwardedTo: department,
-          assignedAgent: randomAgent,
-          assignmentHistory: [
-            ...ticket.assignmentHistory,
-            {
-              department,
-              agent: randomAgent,
-              changedAt: new Date().toLocaleString(),
-            },
-          ],
-        };
-      })
-    );
+    setOverrides((prev) => ({
+      ...prev,
+      [forwardTicket.id]: {
+        ...prev[forwardTicket.id],
+        forwardedTo: department,
+        assignedAgent: randomAgent,
+        assignmentHistory: [
+          ...forwardTicket.assignmentHistory,
+          {
+            department,
+            agent: randomAgent,
+            changedAt: new Date().toLocaleString(),
+          },
+        ],
+      },
+    }));
 
     setSnackbarMessage(
       `Ticket successfully forwarded to ${department} and assigned to ${randomAgent}.`
@@ -146,6 +208,24 @@ const MyTicketsTable = ({ search, status, priority }: Props) => {
     setForwardAnchor(null);
     setForwardTicket(null);
   };
+
+  if (!user?.agentId) {
+    return (
+      <Paper
+        sx={{
+          mt: 3,
+          borderRadius: "20px",
+          boxShadow: "0 2px 12px rgba(0,0,0,.06)",
+          p: 4,
+          textAlign: "center",
+        }}
+      >
+        <Typography color="text.secondary">
+          This page is only available to logged-in agents.
+        </Typography>
+      </Paper>
+    );
+  }
 
   return (
     <>
@@ -175,64 +255,82 @@ const MyTicketsTable = ({ search, status, priority }: Props) => {
           </TableHead>
 
           <TableBody>
-            {filteredTickets.map((ticket) => {
-              const isEditing = editingId === ticket.id;
+            {loading && (
+              <TableRow>
+                <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
+                  <CircularProgress size={28} />
+                </TableCell>
+              </TableRow>
+            )}
 
-              return (
-                <TableRow key={ticket.id} hover>
-                  <TableCell>{ticket.ticketNo}</TableCell>
-                  <TableCell>{ticket.customer}</TableCell>
-                  <TableCell>{ticket.topic}</TableCell>
-                  <TableCell sx={{ width: 180 }}>
-                    <EditablePriority
-                      value={
-                        isEditing && editedTicket
-                          ? editedTicket.priority
-                          : ticket.priority
-                      }
-                      editing={isEditing}
-                      onChange={(value: TicketPriority) =>
-                        setEditedTicket((prev) =>
-                          prev ? { ...prev, priority: value } : prev
-                        )
-                      }
-                    />
-                  </TableCell>
-                  <TableCell sx={{ width: 180 }}>
-                    <EditableStatus
-                      value={
-                        isEditing && editedTicket
-                          ? editedTicket.status
-                          : ticket.status
-                      }
-                      editing={isEditing}
-                      onChange={(value: TicketStatus) =>
-                        setEditedTicket((prev) =>
-                          prev ? { ...prev, status: value } : prev
-                        )
-                      }
-                    />
-                  </TableCell>
-                  <TableCell>{ticket.createdAt}</TableCell>
-                  <TableCell>{ticket.sla}</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: "#2463EB" }}>
-                    {ticket.forwardedTo}
-                  </TableCell>
-                  <TableCell align="center">
-                    <EditableActions
-                      editing={isEditing}
-                      onView={() => setHistoryTicket(ticket)}
-                      onEdit={() => handleEdit(ticket)}
-                      onSave={handleSave}
-                      onCancel={handleCancel}
-                      onForward={(e) => openForwardMenu(e, ticket)}
-                    />
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+            {!loading && error && (
+              <TableRow>
+                <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
+                  <Typography color="error">{error}</Typography>
+                </TableCell>
+              </TableRow>
+            )}
 
-            {filteredTickets.length === 0 && (
+            {!loading &&
+              !error &&
+              filteredTickets.map((ticket) => {
+                const isEditing = editingId === ticket.id;
+
+                return (
+                  <TableRow key={ticket.id} hover>
+                    <TableCell>{ticket.ticketNo}</TableCell>
+                    <TableCell>{ticket.customer}</TableCell>
+                    <TableCell>{ticket.topic}</TableCell>
+                    <TableCell sx={{ width: 180 }}>
+                      <EditablePriority
+                        value={
+                          isEditing && editedTicket
+                            ? editedTicket.priority
+                            : ticket.priority
+                        }
+                        editing={isEditing}
+                        onChange={(value: TicketPriority) =>
+                          setEditedTicket((prev) =>
+                            prev ? { ...prev, priority: value } : prev
+                          )
+                        }
+                      />
+                    </TableCell>
+                    <TableCell sx={{ width: 180 }}>
+                      <EditableStatus
+                        value={
+                          isEditing && editedTicket
+                            ? editedTicket.status
+                            : ticket.status
+                        }
+                        editing={isEditing}
+                        onChange={(value: TicketStatus) =>
+                          setEditedTicket((prev) =>
+                            prev ? { ...prev, status: value } : prev
+                          )
+                        }
+                      />
+                    </TableCell>
+                    <TableCell>{ticket.createdAt}</TableCell>
+                    <TableCell>{ticket.sla}</TableCell>
+                    <TableCell sx={{ fontWeight: 600, color: "#2463EB" }}>
+                      {ticket.forwardedTo}
+                    </TableCell>
+                    <TableCell align="center">
+                      <EditableActions
+                        editing={isEditing}
+                        onView={() => setHistoryTicket(ticket)}
+                        onEdit={() => handleEdit(ticket)}
+                        onSave={handleSave}
+                        onCancel={handleCancel}
+                        onForward={(e) => openForwardMenu(e, ticket)}
+                      />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+
+            {!loading && !error && filteredTickets.length === 0 && (
               <TableRow>
                 <TableCell
                   colSpan={9}
@@ -248,6 +346,20 @@ const MyTicketsTable = ({ search, status, priority }: Props) => {
             )}
           </TableBody>
         </Table>
+
+        <TicketPagination
+          page={page}
+          totalPages={totalPages}
+          totalEntries={totalEntries}
+          rangeStart={rangeStart}
+          rangeEnd={rangeEnd}
+          rowsPerPage={rowsPerPage}
+          onPageChange={setPage}
+          onRowsPerPageChange={(next) => {
+            setRowsPerPage(next);
+            setPage(1);
+          }}
+        />
       </TableContainer>
 
       <AssignmentHistoryDialog

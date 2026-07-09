@@ -18,13 +18,17 @@ const getColor = (
 ):
   | "success"
   | "warning"
-  | "info" => {
+  | "info"
+  | "default" => {
   switch (status) {
     case "Resolved":
       return "success";
 
     case "In Progress":
       return "warning";
+
+    case "Closed":
+      return "default";
 
     default:
       return "info";
@@ -67,6 +71,10 @@ const EditableStatus = ({
 
         <MenuItem value="Resolved">
           Resolved
+        </MenuItem>
+
+        <MenuItem value="Closed">
+          Closed
         </MenuItem>
       </Select>
     </FormControl>

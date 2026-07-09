@@ -5,9 +5,11 @@ import { useAuth } from "./AuthContext";
 const ProtectedRoute = ({
   children,
   blockDepartmentCodes,
+  blockOtherAgents,
 }: {
   children: ReactNode;
   blockDepartmentCodes?: string[];
+  blockOtherAgents?: boolean;
 }) => {
   const { user } = useAuth();
 
@@ -21,6 +23,10 @@ const ProtectedRoute = ({
     blockDepartmentCodes.includes(user.departmentCode)
   ) {
     return <Navigate to="/customers" replace />;
+  }
+
+  if (blockOtherAgents && user.agentId && user.departmentCode !== "FRONT") {
+    return <Navigate to="/my-tickets" replace />;
   }
 
   return <>{children}</>;

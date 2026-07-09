@@ -1,19 +1,53 @@
+import { useState } from "react";
 import {
   AppBar,
   Avatar,
   Badge,
   Box,
   InputBase,
+  Menu,
+  MenuItem,
   Toolbar,
   Typography,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 import SearchIcon from "@mui/icons-material/Search";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
+
+import { useAuth } from "../../auth/AuthContext";
+
+const DEPARTMENT_NAMES: Record<string, string> = {
+  FRONT: "Front Office",
+  NET: "Network Operations",
+  FLDO: "Field Operations",
+  IT: "IT",
+  FIN: "Finance",
+  TECH: "Technical Support",
+  CREL: "Customer Relations",
+};
 
 const Header = () => {
   const notificationCount = 0;
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleLogout = async () => {
+    setAnchorEl(null);
+    await logout();
+    navigate("/login");
+  };
+
+  const displayName = user?.name ?? "Guest";
+  const displaySubtitle =
+    user?.role === "ADMIN"
+      ? "System Administrator"
+      : (user?.departmentCode && DEPARTMENT_NAMES[user.departmentCode]) || "Agent";
+  const avatarLetter = displayName.charAt(0).toUpperCase();
 
   return (
     <AppBar
@@ -85,6 +119,7 @@ const Header = () => {
           </Badge>
 
           <Box
+            onClick={(e) => setAnchorEl(e.currentTarget)}
             sx={{
               display: "flex",
               alignItems: "center",
@@ -100,7 +135,7 @@ const Header = () => {
                 fontWeight: 600,
               }}
             >
-              A
+              {avatarLetter}
             </Avatar>
 
             <Box>
@@ -111,7 +146,7 @@ const Header = () => {
                   lineHeight: 1.2,
                 }}
               >
-                Admin User
+                {displayName}
               </Typography>
 
               <Typography
@@ -120,7 +155,7 @@ const Header = () => {
                   color: "#6B7280",
                 }}
               >
-                System Administrator
+                {displaySubtitle}
               </Typography>
             </Box>
 
@@ -130,6 +165,19 @@ const Header = () => {
               }}
             />
           </Box>
+
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={() => setAnchorEl(null)}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
+          >
+            <MenuItem onClick={handleLogout}>
+              <LogoutOutlinedIcon sx={{ fontSize: 18, mr: 1.5, color: "#6B7280" }} />
+              Logout
+            </MenuItem>
+          </Menu>
         </Box>
       </Toolbar>
     </AppBar>

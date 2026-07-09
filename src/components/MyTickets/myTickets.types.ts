@@ -10,12 +10,6 @@ export type TicketPriority =
   | "High"
   | "Critical";
 
-export interface AssignmentStep {
-  department: string;
-  agent: string;
-  changedAt: string;
-}
-
 export interface MyTicket {
   id: string;
   ticketNo: string;
@@ -33,6 +27,4 @@ export interface MyTicket {
 
   // Ticket şu an hangi agentta?
   assignedAgent: string;
-
-  assignmentHistory: AssignmentStep[];
 }

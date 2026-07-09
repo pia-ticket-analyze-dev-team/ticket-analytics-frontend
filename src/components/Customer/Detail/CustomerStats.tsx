@@ -57,7 +57,7 @@ const CustomerStats = ({ stats }: CustomerStatsProps) => {
 
       <StatCard
         title="Avg. Satisfaction"
-        value={`${stats.averageSatisfactionScore.toFixed(1)} / 5`}
+        value={`${stats.averageSatisfactionScore.toFixed(1)}`}
         color="#10B981"
         icon={
           <SentimentSatisfiedAltOutlinedIcon

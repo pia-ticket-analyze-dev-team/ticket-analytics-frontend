@@ -86,7 +86,6 @@ const toMyTicket = (ticket: Ticket): MyTicket => ({
   sla: formatSla(ticket),
   forwardedTo: ticket.departmentName ?? "-",
   assignedAgent: ticket.assignedAgentName ?? "-",
-  assignmentHistory: [],
 });
 
 const MyTicketsTable = ({ search, status, priority }: Props) => {
@@ -186,14 +185,6 @@ const MyTicketsTable = ({ search, status, priority }: Props) => {
           ...prev[ticket.id],
           forwardedTo: department.name,
           assignedAgent: randomAgent.name,
-          assignmentHistory: [
-            ...ticket.assignmentHistory,
-            {
-              department: department.name,
-              agent: randomAgent.name,
-              changedAt: new Date().toLocaleString(),
-            },
-          ],
         },
       }));
 
@@ -360,7 +351,7 @@ const MyTicketsTable = ({ search, status, priority }: Props) => {
 
       <AssignmentHistoryDialog
         open={Boolean(historyTicket)}
-        ticket={historyTicket}
+        ticketId={historyTicket?.id ?? null}
         onClose={() => setHistoryTicket(null)}
       />
 

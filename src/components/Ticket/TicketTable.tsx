@@ -17,6 +17,7 @@ import {
   type SelectChangeEvent,
 } from "@mui/material";
 import SupportAgentOutlinedIcon from "@mui/icons-material/SupportAgentOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
@@ -39,6 +40,7 @@ import { useAgents } from "../../hooks/useAgents";
 import { useDepartments } from "../../hooks/useDepartments";
 import { useIssueTopics } from "../../hooks/useIssueTopics";
 import { useRegions } from "../../hooks/useRegions";
+import AssignmentHistoryDialog from "../MyTickets/AssignmentHistoryDialog";
 
 const priorityOptions: TicketPriority[] = ["High", "Medium", "Low"];
 
@@ -111,6 +113,7 @@ const TicketTable = ({
 
   const [agentMenuAnchor, setAgentMenuAnchor] = useState<HTMLElement | null>(null);
   const [assigningTicket, setAssigningTicket] = useState<Ticket | null>(null);
+  const [historyTicketId, setHistoryTicketId] = useState<string | null>(null);
 
   const startEdit = (ticket: Ticket) => {
     setEditingTicketId(ticket.id);
@@ -460,6 +463,12 @@ const TicketTable = ({
                         </>
                       ) : (
                         <>
+                          <Tooltip title="View department history">
+                            <IconButton size="small" onClick={() => setHistoryTicketId(ticket.id)}>
+                              <VisibilityOutlinedIcon sx={{ fontSize: 19, color: "#6B7280" }} />
+                            </IconButton>
+                          </Tooltip>
+
                           <Tooltip
                             title={
                               ticket.assignedAgentName
@@ -531,6 +540,12 @@ const TicketTable = ({
           </MenuItem>
         ))}
       </Menu>
+
+      <AssignmentHistoryDialog
+        open={Boolean(historyTicketId)}
+        ticketId={historyTicketId}
+        onClose={() => setHistoryTicketId(null)}
+      />
     </>
   );
 };

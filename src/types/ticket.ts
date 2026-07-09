@@ -46,6 +46,22 @@ export interface TicketUpdate {
   status: TicketStatus;
 }
 
+export interface TicketDepartmentHistoryEntry {
+  historyId: string;
+  ticketId: string;
+  previousDepartmentId: string | null;
+  previousDepartmentName: string | null;
+  newDepartmentId: string | null;
+  newDepartmentName: string | null;
+  agentId: string | null;
+  agentName: string | null;
+  previousStatus: string | null;
+  newStatus: string | null;
+  actionType: string | null;
+  changedAt: string;
+  durationMinutes: number | null;
+}
+
 export interface TicketFilterState {
   status: string;
   priority: string;

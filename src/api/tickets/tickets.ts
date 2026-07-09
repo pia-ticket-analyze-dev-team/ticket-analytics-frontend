@@ -102,3 +102,7 @@ export interface TicketCreatePayload {
 export function createTicket(payload: TicketCreatePayload) {
   return apiPost("/api/tickets", payload);
 }
+
+export function fetchTicketDepartmentHistory(ticketId: string) {
+  return apiGet(`/api/tickets/${ticketId}/department-history`);
+}

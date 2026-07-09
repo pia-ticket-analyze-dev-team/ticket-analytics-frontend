@@ -7,24 +7,34 @@ import {
   Button,
   Divider,
   Box,
+  CircularProgress,
 } from "@mui/material";
 
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 
-import type { MyTicket } from "./myTickets.types";
+import { useTicketDepartmentHistory } from "../../hooks/useTicketDepartmentHistory";
 
 type Props = {
   open: boolean;
-  ticket: MyTicket | null;
+  ticketId: string | null;
   onClose: () => void;
+};
+
+const formatChangedAt = (value: string) => {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
 };
 
 const AssignmentHistoryDialog = ({
   open,
-  ticket,
+  ticketId,
   onClose,
 }: Props) => {
-  if (!ticket) return null;
+  const { data: history, loading, error } = useTicketDepartmentHistory(
+    open ? ticketId : null
+  );
+
+  if (!ticketId) return null;
 
   return (
     <Dialog
@@ -49,59 +59,77 @@ const AssignmentHistoryDialog = ({
 
       <DialogContent>
         <Stack spacing={2}>
-          {ticket.assignmentHistory.map((step, index) => (
-            <Box key={index}>
-              <Typography
-                sx={{
-                  fontWeight: 700,
-                  fontSize: 17,
-                }}
-              >
-                {step.department}
-              </Typography>
+          {loading && (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+              <CircularProgress size={28} />
+            </Box>
+          )}
 
-              <Typography
-                sx={{
-                  color: "#2463EB",
-                  fontSize: 15,
-                  fontWeight: 600,
-                }}
-              >
-                {step.agent}
-              </Typography>
+          {!loading && error && (
+            <Typography color="error" sx={{ py: 2 }}>
+              {error}
+            </Typography>
+          )}
 
-              <Typography
-                sx={{
-                  color: "#6B7280",
-                  fontSize: 13,
-                }}
-              >
-                {step.changedAt}
-              </Typography>
+          {!loading && !error && history.length === 0 && (
+            <Typography color="text.secondary" sx={{ py: 2 }}>
+              No department history available.
+            </Typography>
+          )}
 
-              {index !==
-                ticket.assignmentHistory.length - 1 && (
-                <Box
+          {!loading &&
+            !error &&
+            history.map((step, index) => (
+              <Box key={step.historyId}>
+                <Typography
                   sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    py: 1,
+                    fontWeight: 700,
+                    fontSize: 17,
                   }}
                 >
-                  <ArrowDownwardIcon
-                    sx={{
-                      color: "#9CA3AF",
-                    }}
-                  />
-                </Box>
-              )}
+                  {step.newDepartmentName ?? "Unknown Department"}
+                </Typography>
 
-              {index !==
-                ticket.assignmentHistory.length - 1 && (
-                <Divider sx={{ mt: 1 }} />
-              )}
-            </Box>
-          ))}
+                <Typography
+                  sx={{
+                    color: "#2463EB",
+                    fontSize: 15,
+                    fontWeight: 600,
+                  }}
+                >
+                  {step.agentName ?? "Unassigned"}
+                </Typography>
+
+                <Typography
+                  sx={{
+                    color: "#6B7280",
+                    fontSize: 13,
+                  }}
+                >
+                  {formatChangedAt(step.changedAt)}
+                </Typography>
+
+                {index !== history.length - 1 && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      py: 1,
+                    }}
+                  >
+                    <ArrowDownwardIcon
+                      sx={{
+                        color: "#9CA3AF",
+                      }}
+                    />
+                  </Box>
+                )}
+
+                {index !== history.length - 1 && (
+                  <Divider sx={{ mt: 1 }} />
+                )}
+              </Box>
+            ))}
 
           <Stack
             direction="row"

@@ -1,10 +1,14 @@
 import { apiGet, apiPost, apiPut, apiDelete } from "../base.js";
 
-export function fetchCustomers({ page = 0, size = 10, search = "" } = {}) {
+export function fetchCustomers({ page = 0, size = 10, search = "", segment = "" } = {}) {
   const params = new URLSearchParams({ page: String(page), size: String(size) });
 
   if (search) {
     params.set("search", search);
+  }
+
+  if (segment) {
+    params.set("segment", segment);
   }
 
   return apiGet(`/api/customers?${params.toString()}`);

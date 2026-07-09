@@ -28,7 +28,18 @@ const CustomerPage = () => {
     return () => clearTimeout(timeout);
   }, [search]);
 
-  const { data, loading, error } = useCustomers({ page, size, search: debouncedSearch, refreshKey });
+  const { data, loading, error } = useCustomers({
+    page,
+    size,
+    search: debouncedSearch,
+    segment: segment === "All" ? "" : segment,
+    refreshKey,
+  });
+
+  const handleSegmentChange = (value: string) => {
+    setSegment(value);
+    setPage(0);
+  };
 
   return (
     <MainLayout>
@@ -38,7 +49,7 @@ const CustomerPage = () => {
         search={search}
         setSearch={setSearch}
         segment={segment}
-        setSegment={setSegment}
+        setSegment={handleSegmentChange}
         city={city}
         setCity={setCity}
       />
@@ -47,7 +58,6 @@ const CustomerPage = () => {
         customers={data?.content ?? []}
         loading={loading}
         error={error}
-        segment={segment}
         city={city}
         onEdit={setFormTarget}
         onDeleted={() => setRefreshKey((key) => key + 1)}

@@ -8,6 +8,7 @@ import {
 } from "@mui/material";
 import { NavLink, useLocation } from "react-router-dom";
 
+import { useAuth } from "../../auth/AuthContext";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import ConfirmationNumberOutlinedIcon from "@mui/icons-material/ConfirmationNumberOutlined";
@@ -44,8 +45,16 @@ const menuItems = [
   },
 ];
 
+const FRONT_OFFICE_HIDDEN_PATHS = ["/dashboard", "/analytics", "/regional-insights"];
+
 const Sidebar = () => {
   const location = useLocation();
+  const { user } = useAuth();
+
+  const visibleMenuItems =
+    user?.departmentCode === "FRONT"
+      ? menuItems.filter((item) => !FRONT_OFFICE_HIDDEN_PATHS.includes(item.path))
+      : menuItems;
 
   return (
     <Box
@@ -96,7 +105,7 @@ const Sidebar = () => {
         </Box>
 
         <List sx={{ px: 2 }}>
-          {menuItems.map((item) => {
+          {visibleMenuItems.map((item) => {
             const isActive = location.pathname === item.path;
 
             return (

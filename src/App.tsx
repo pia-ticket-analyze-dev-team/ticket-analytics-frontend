@@ -23,7 +23,7 @@ function App() {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute blockDepartmentCodes={["FRONT"]}>
                 <DashboardPage />
               </ProtectedRoute>
             }
@@ -73,7 +73,7 @@ function App() {
           <Route
             path="/regional-insights"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute blockDepartmentCodes={["FRONT"]}>
                 <RegionalInsightsPage />
               </ProtectedRoute>
             }
@@ -81,7 +81,7 @@ function App() {
           <Route
             path="/analytics"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute blockDepartmentCodes={["FRONT"]}>
                 <Analytics />
               </ProtectedRoute>
             }

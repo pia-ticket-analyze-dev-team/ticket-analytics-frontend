@@ -194,7 +194,7 @@ const TicketPage = () => {
             Tickets
           </Typography>
           <Typography sx={{ fontSize: 13, color: "#9CA3AF", mt: 0.5 }}>
-            Dashboard / Tickets
+            Manage customer support tickets and track their status across departments.
           </Typography>
         </Box>
 

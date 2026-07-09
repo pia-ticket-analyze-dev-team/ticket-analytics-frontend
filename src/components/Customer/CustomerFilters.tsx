@@ -11,15 +11,11 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 
-import { useRegions } from "../../hooks/useRegions";
-
 type Props = {
   search: string;
   setSearch: (value: string) => void;
   segment: string;
   setSegment: (value: string) => void;
-  city: string;
-  setCity: (value: string) => void;
 };
 
 const CustomerFilters = ({
@@ -27,11 +23,7 @@ const CustomerFilters = ({
   setSearch,
   segment,
   setSegment,
-  city,
-  setCity,
 }: Props) => {
-  const { data: regions } = useRegions();
-
   return (
     <Box
       sx={{
@@ -71,26 +63,6 @@ const CustomerFilters = ({
         </Select>
       </FormControl>
 
-      <FormControl sx={{ minWidth: 170 }}>
-        <InputLabel>City</InputLabel>
-
-        <Select
-          value={city}
-          label="City"
-          onChange={(e) => setCity(e.target.value)}
-        >
-          <MenuItem value="All">All</MenuItem>
-          {(regions ?? []).map((region) => (
-            <MenuItem
-              key={region.id}
-              value={region.name}
-            >
-              {region.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-
       <Box sx={{ flexGrow: 1 }} />
 
       <Button
@@ -98,7 +70,6 @@ const CustomerFilters = ({
         onClick={() => {
           setSearch("");
           setSegment("All");
-          setCity("All");
         }}
         sx={{
           textTransform: "none",

@@ -1,12 +1,10 @@
 import { useState, type MouseEvent } from "react";
 import {
   Box,
-  Button,
   IconButton,
   ListItemIcon,
   Menu,
   MenuItem,
-  Popover,
   Select,
   Table,
   TableBody,
@@ -20,7 +18,6 @@ import {
 } from "@mui/material";
 import SupportAgentOutlinedIcon from "@mui/icons-material/SupportAgentOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -29,7 +26,14 @@ import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import PersonOffOutlinedIcon from "@mui/icons-material/PersonOffOutlined";
-import type { Ticket, TicketPriority, TicketStatus, TicketUpdate } from "../../types/ticket";
+
+import type {
+  Ticket,
+  TicketPriority,
+  TicketStatus,
+  TicketUpdate,
+} from "../../types/ticket";
+
 import { formatDateTime } from "../../utils/date";
 import { useAgents } from "../../hooks/useAgents";
 import { useDepartments } from "../../hooks/useDepartments";
@@ -37,7 +41,13 @@ import { useIssueTopics } from "../../hooks/useIssueTopics";
 import { useRegions } from "../../hooks/useRegions";
 
 const priorityOptions: TicketPriority[] = ["High", "Medium", "Low"];
-const statusOptions: TicketStatus[] = ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"];
+
+const statusOptions: TicketStatus[] = [
+  "OPEN",
+  "IN_PROGRESS",
+  "RESOLVED",
+  "CLOSED",
+];
 
 const priorityColors: Record<TicketPriority, string> = {
   High: "#DC2626",
@@ -46,7 +56,10 @@ const priorityColors: Record<TicketPriority, string> = {
   Critical: "#960a0a",
 };
 
-const statusStyles: Record<TicketStatus, { bg: string; color: string; label: string }> = {
+const statusStyles: Record<
+  TicketStatus,
+  { bg: string; color: string; label: string }
+> = {
   OPEN: { bg: "#FEF3C7", color: "#B45309", label: "Open" },
   IN_PROGRESS: { bg: "#DBEAFE", color: "#1D4ED8", label: "In Progress" },
   RESOLVED: { bg: "#D1FAE5", color: "#047857", label: "Resolved" },
@@ -76,7 +89,6 @@ type SortOrder = "asc" | "desc" | null;
 interface TicketTableProps {
   tickets: Ticket[];
   onUpdateTicket: (ticketId: string, updates: TicketUpdate) => void;
-  onDeleteTicket: (ticketId: string) => void;
   onAssignTicket: (ticketId: string, agent: string | null) => void;
   sortOrder: SortOrder;
   onToggleSort: () => void;
@@ -85,7 +97,6 @@ interface TicketTableProps {
 const TicketTable = ({
   tickets,
   onUpdateTicket,
-  onDeleteTicket,
   onAssignTicket,
   sortOrder,
   onToggleSort,
@@ -97,8 +108,7 @@ const TicketTable = ({
 
   const [editingTicketId, setEditingTicketId] = useState<string | null>(null);
   const [draft, setDraft] = useState<TicketUpdate | null>(null);
-  const [deleteAnchor, setDeleteAnchor] = useState<HTMLElement | null>(null);
-  const [deletingTicket, setDeletingTicket] = useState<Ticket | null>(null);
+
   const [agentMenuAnchor, setAgentMenuAnchor] = useState<HTMLElement | null>(null);
   const [assigningTicket, setAssigningTicket] = useState<Ticket | null>(null);
 
@@ -123,23 +133,6 @@ const TicketTable = ({
       onUpdateTicket(editingTicketId, draft);
     }
     cancelEdit();
-  };
-
-  const openDeleteConfirm = (e: MouseEvent<HTMLElement>, ticket: Ticket) => {
-    setDeleteAnchor(e.currentTarget);
-    setDeletingTicket(ticket);
-  };
-
-  const closeDeleteConfirm = () => {
-    setDeleteAnchor(null);
-    setDeletingTicket(null);
-  };
-
-  const confirmDelete = () => {
-    if (deletingTicket) {
-      onDeleteTicket(deletingTicket.id);
-    }
-    closeDeleteConfirm();
   };
 
   const openAgentMenu = (e: MouseEvent<HTMLElement>, ticket: Ticket) => {
@@ -170,11 +163,22 @@ const TicketTable = ({
       >
         <Table>
           <TableHead>
-            <TableRow sx={{ "& th": { borderBottom: "1px solid #E5E7EB" } }}>
+            <TableRow
+              sx={{
+                "& th": {
+                  borderBottom: "1px solid #E5E7EB",
+                },
+              }}
+            >
               {columns.map((col) => (
                 <TableCell
                   key={col}
-                  sx={{ fontSize: 13, fontWeight: 600, color: "#6B7280", py: 1.75 }}
+                  sx={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: "#6B7280",
+                    py: 1.75,
+                  }}
                 >
                   {col === "Created At" ? (
                     <Box
@@ -207,265 +211,299 @@ const TicketTable = ({
 
           <TableBody>
             {tickets.map((ticket) => {
-            const status = statusStyles[ticket.status];
-            const isEditing = editingTicketId === ticket.id;
+              const status = statusStyles[ticket.status];
+              const isEditing = editingTicketId === ticket.id;
 
-            return (
-              <TableRow
-                key={ticket.id}
-                sx={{
-                  "&:last-child td": { borderBottom: 0 },
-                  "&:hover": { backgroundColor: "#F9FAFB" },
-                }}
-              >
-                <TableCell sx={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>
-                  {ticket.ticketNumber}
-                </TableCell>
+              return (
+                <TableRow
+                  key={ticket.id}
+                  sx={{
+                    "&:last-child td": {
+                      borderBottom: 0,
+                    },
+                    "&:hover": {
+                      backgroundColor: "#F9FAFB",
+                    },
+                  }}
+                >
+                  <TableCell
+                    sx={{
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: "#111827",
+                    }}
+                  >
+                    {ticket.ticketNumber}
+                  </TableCell>
 
-                <TableCell sx={{ fontSize: 14, color: "#111827" }}>
-                  {ticket.customerName}
-                </TableCell>
+                  <TableCell
+                    sx={{
+                      fontSize: 14,
+                      color: "#111827",
+                    }}
+                  >
+                    {ticket.customerName}
+                  </TableCell>
 
-                <TableCell sx={{ fontSize: 14, color: "#374151", minWidth: 180 }}>
-                  {isEditing && draft ? (
-                    <Select
-                      size="small"
-                      fullWidth
-                      value={draft.issueTopic}
-                      onChange={(e: SelectChangeEvent) =>
-                        setDraft({ ...draft, issueTopic: e.target.value })
-                      }
-                      sx={editSelectSx}
-                    >
-                      {(issueTopics ?? []).map((option) => (
-                        <MenuItem key={option.id} value={option.name} sx={{ fontSize: 14 }}>
-                          {option.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  ) : (
-                    ticket.issueTopicName
-                  )}
-                </TableCell>
-
-                <TableCell sx={{ fontSize: 14, color: "#374151", minWidth: 160 }}>
-                  {isEditing && draft ? (
-                    <Select
-                      size="small"
-                      fullWidth
-                      value={draft.department}
-                      onChange={(e: SelectChangeEvent) =>
-                        setDraft({ ...draft, department: e.target.value })
-                      }
-                      sx={editSelectSx}
-                    >
-                      {(departments ?? []).map((option) => (
-                        <MenuItem key={option.id} value={option.name} sx={{ fontSize: 14 }}>
-                          {option.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  ) : (
-                    ticket.departmentName
-                  )}
-                </TableCell>
-
-                <TableCell sx={{ fontSize: 14, color: "#374151", minWidth: 130 }}>
-                  {isEditing && draft ? (
-                    <Select
-                      size="small"
-                      fullWidth
-                      value={draft.city}
-                      onChange={(e: SelectChangeEvent) =>
-                        setDraft({ ...draft, city: e.target.value })
-                      }
-                      sx={editSelectSx}
-                    >
-                      {(regions ?? []).map((option) => (
-                        <MenuItem key={option.id} value={option.name} sx={{ fontSize: 14 }}>
-                          {option.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  ) : (
-                    ticket.city
-                  )}
-                </TableCell>
-
-                <TableCell sx={{ minWidth: 110 }}>
-                  {isEditing && draft ? (
-                    <Select
-                      size="small"
-                      fullWidth
-                      value={draft.priority}
-                      onChange={(e: SelectChangeEvent) =>
-                        setDraft({ ...draft, priority: e.target.value as TicketPriority })
-                      }
-                      sx={editSelectSx}
-                    >
-                      {priorityOptions.map((option) => (
-                        <MenuItem key={option} value={option} sx={{ fontSize: 14 }}>
-                          {option}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  ) : (
-                    <Typography
-                      sx={{
-                        fontSize: 13,
-                        fontWeight: 700,
-                        color: priorityColors[ticket.priority],
-                      }}
-                    >
-                      {ticket.priority}
-                    </Typography>
-                  )}
-                </TableCell>
-
-                <TableCell sx={{ minWidth: 150 }}>
-                  {isEditing && draft ? (
-                    <Select
-                      size="small"
-                      fullWidth
-                      value={draft.status}
-                      onChange={(e: SelectChangeEvent) =>
-                        setDraft({ ...draft, status: e.target.value as TicketStatus })
-                      }
-                      sx={editSelectSx}
-                    >
-                      {statusOptions.map((option) => (
-                        <MenuItem key={option} value={option} sx={{ fontSize: 14 }}>
-                          {statusStyles[option].label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  ) : (
-                    <Box
-                      sx={{
-                        display: "inline-block",
-                        fontSize: 12,
-                        fontWeight: 600,
-                        color: status.color,
-                        backgroundColor: status.bg,
-                        borderRadius: "999px",
-                        px: 1.5,
-                        py: 0.4,
-                      }}
-                    >
-                      {status.label}
-                    </Box>
-                  )}
-                </TableCell>
-
-                <TableCell>
-                  {ticket.slaBreached ? (
-                    <ErrorIcon sx={{ fontSize: 19, color: "#D97706" }} />
-                  ) : (
-                    <CheckCircleIcon sx={{ fontSize: 19, color: "#059669" }} />
-                  )}
-                </TableCell>
-
-                <TableCell sx={{ fontSize: 13, color: "#6B7280", whiteSpace: "nowrap" }}>
-                  {formatDateTime(new Date(ticket.createdAt))}
-                </TableCell>
-
-                <TableCell>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    {isEditing ? (
-                      <>
-                        <IconButton size="small" onClick={saveEdit}>
-                          <CheckIcon sx={{ fontSize: 19, color: "#059669" }} />
-                        </IconButton>
-
-                        <IconButton size="small" onClick={cancelEdit}>
-                          <CloseIcon sx={{ fontSize: 19, color: "#DC2626" }} />
-                        </IconButton>
-                      </>
+                  <TableCell
+                    sx={{
+                      fontSize: 14,
+                      color: "#374151",
+                      minWidth: 180,
+                    }}
+                  >
+                    {isEditing && draft ? (
+                      <Select
+                        size="small"
+                        fullWidth
+                        value={draft.issueTopic}
+                        onChange={(e: SelectChangeEvent) =>
+                          setDraft({
+                            ...draft,
+                            issueTopic: e.target.value,
+                          })
+                        }
+                        sx={editSelectSx}
+                      >
+                        {(issueTopics ?? []).map((option) => (
+                          <MenuItem
+                            key={option.id}
+                            value={option.name}
+                            sx={{ fontSize: 14 }}
+                          >
+                            {option.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
                     ) : (
-                      <>
-                        <Tooltip
-                          title={
-                            ticket.assignedAgentName
-                              ? `Assigned to ${ticket.assignedAgentName}`
-                              : "Assign agent"
-                          }
-                        >
-                          <IconButton size="small" onClick={(e) => openAgentMenu(e, ticket)}>
-                            <SupportAgentOutlinedIcon sx={{ fontSize: 19, color: "#6B7280" }} />
-                          </IconButton>
-                        </Tooltip>
-
-                        <IconButton size="small" onClick={() => startEdit(ticket)}>
-                          <EditOutlinedIcon sx={{ fontSize: 19, color: "#6B7280" }} />
-                        </IconButton>
-
-                        <IconButton size="small" onClick={(e) => openDeleteConfirm(e, ticket)}>
-                          <DeleteOutlineIcon sx={{ fontSize: 19, color: "#6B7280" }} />
-                        </IconButton>
-                      </>
+                      ticket.issueTopicName
                     )}
-                  </Box>
+                  </TableCell>
+
+                  <TableCell
+                    sx={{
+                      fontSize: 14,
+                      color: "#374151",
+                      minWidth: 160,
+                    }}
+                  >
+                    {isEditing && draft ? (
+                      <Select
+                        size="small"
+                        fullWidth
+                        value={draft.department}
+                        onChange={(e: SelectChangeEvent) =>
+                          setDraft({
+                            ...draft,
+                            department: e.target.value,
+                          })
+                        }
+                        sx={editSelectSx}
+                      >
+                        {(departments ?? []).map((option) => (
+                          <MenuItem
+                            key={option.id}
+                            value={option.name}
+                            sx={{ fontSize: 14 }}
+                          >
+                            {option.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    ) : (
+                      ticket.departmentName
+                    )}
+                  </TableCell>
+
+                  <TableCell
+                    sx={{
+                      fontSize: 14,
+                      color: "#374151",
+                      minWidth: 130,
+                    }}
+                  >
+                    {isEditing && draft ? (
+                      <Select
+                        size="small"
+                        fullWidth
+                        value={draft.city}
+                        onChange={(e: SelectChangeEvent) =>
+                          setDraft({
+                            ...draft,
+                            city: e.target.value,
+                          })
+                        }
+                        sx={editSelectSx}
+                      >
+                        {(regions ?? []).map((option) => (
+                          <MenuItem
+                            key={option.id}
+                            value={option.name}
+                            sx={{ fontSize: 14 }}
+                          >
+                            {option.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    ) : (
+                      ticket.city
+                    )}
+                  </TableCell>
+
+                  <TableCell sx={{ minWidth: 110 }}>
+                    {isEditing && draft ? (
+                      <Select
+                        size="small"
+                        fullWidth
+                        value={draft.priority}
+                        onChange={(e: SelectChangeEvent) =>
+                          setDraft({
+                            ...draft,
+                            priority: e.target.value as TicketPriority,
+                          })
+                        }
+                        sx={editSelectSx}
+                      >
+                        {priorityOptions.map((option) => (
+                          <MenuItem
+                            key={option}
+                            value={option}
+                            sx={{ fontSize: 14 }}
+                          >
+                            {option}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    ) : (
+                      <Typography
+                        sx={{
+                          fontSize: 13,
+                          fontWeight: 700,
+                          color: priorityColors[ticket.priority],
+                        }}
+                      >
+                        {ticket.priority}
+                      </Typography>
+                    )}
+                  </TableCell>
+
+                  <TableCell sx={{ minWidth: 150 }}>
+                    {isEditing && draft ? (
+                      <Select
+                        size="small"
+                        fullWidth
+                        value={draft.status}
+                        onChange={(e: SelectChangeEvent) =>
+                          setDraft({
+                            ...draft,
+                            status: e.target.value as TicketStatus,
+                          })
+                        }
+                        sx={editSelectSx}
+                      >
+                        {statusOptions.map((option) => (
+                          <MenuItem
+                            key={option}
+                            value={option}
+                            sx={{ fontSize: 14 }}
+                          >
+                            {statusStyles[option].label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    ) : (
+                      <Box
+                        sx={{
+                          display: "inline-block",
+                          fontSize: 12,
+                          fontWeight: 600,
+                          color: status.color,
+                          backgroundColor: status.bg,
+                          borderRadius: "999px",
+                          px: 1.5,
+                          py: 0.4,
+                        }}
+                      >
+                        {status.label}
+                      </Box>
+                    )}
+                  </TableCell>
+
+                  <TableCell>
+                    {ticket.slaBreached ? (
+                      <ErrorIcon sx={{ fontSize: 19, color: "#D97706" }} />
+                    ) : (
+                      <CheckCircleIcon sx={{ fontSize: 19, color: "#059669" }} />
+                    )}
+                  </TableCell>
+
+                  <TableCell
+                    sx={{
+                      fontSize: 13,
+                      color: "#6B7280",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {formatDateTime(new Date(ticket.createdAt))}
+                  </TableCell>
+
+                  <TableCell>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      {isEditing ? (
+                        <>
+                          <IconButton size="small" onClick={saveEdit}>
+                            <CheckIcon sx={{ fontSize: 19, color: "#059669" }} />
+                          </IconButton>
+                          <IconButton size="small" onClick={cancelEdit}>
+                            <CloseIcon sx={{ fontSize: 19, color: "#DC2626" }} />
+                          </IconButton>
+                        </>
+                      ) : (
+                        <>
+                          <Tooltip
+                            title={
+                              ticket.assignedAgentName
+                                ? `Assigned to ${ticket.assignedAgentName}`
+                                : "Assign agent"
+                            }
+                          >
+                            <IconButton size="small" onClick={(e) => openAgentMenu(e, ticket)}>
+                              <SupportAgentOutlinedIcon sx={{ fontSize: 19, color: "#6B7280" }} />
+                            </IconButton>
+                          </Tooltip>
+
+                          <IconButton size="small" onClick={() => startEdit(ticket)}>
+                            <EditOutlinedIcon sx={{ fontSize: 19, color: "#6B7280" }} />
+                          </IconButton>
+                        </>
+                      )}
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+
+            {tickets.length === 0 && (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  sx={{ textAlign: "center", py: 6 }}
+                >
+                  <Typography sx={{ fontSize: 14, color: "#6B7280" }}>
+                    No tickets match the selected filters.
+                  </Typography>
                 </TableCell>
               </TableRow>
-            );
-          })}
-
-          {tickets.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={columns.length} sx={{ textAlign: "center", py: 6 }}>
-                <Typography sx={{ fontSize: 14, color: "#6B7280" }}>
-                  No tickets match the selected filters.
-                </Typography>
-              </TableCell>
-            </TableRow>
-          )}
+            )}
           </TableBody>
         </Table>
       </TableContainer>
 
-      <Popover
-        open={Boolean(deleteAnchor)}
-        anchorEl={deleteAnchor}
-        onClose={closeDeleteConfirm}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
-        slotProps={{ paper: { sx: { mt: 1 } } }}
+      <Menu
+        anchorEl={agentMenuAnchor}
+        open={Boolean(agentMenuAnchor)}
+        onClose={closeAgentMenu}
       >
-        <Box sx={{ p: 2.5, width: 260, display: "flex", flexDirection: "column", gap: 2 }}>
-          <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>
-            Delete {deletingTicket?.ticketNumber}?
-          </Typography>
-
-          <Typography sx={{ fontSize: 13, color: "#6B7280" }}>
-            This ticket will be permanently removed from the list.
-          </Typography>
-
-          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
-            <Button
-              onClick={closeDeleteConfirm}
-              sx={{ textTransform: "none", fontSize: 13, color: "#6B7280" }}
-            >
-              Cancel
-            </Button>
-
-            <Button
-              onClick={confirmDelete}
-              variant="contained"
-              sx={{
-                textTransform: "none",
-                fontSize: 13,
-                backgroundColor: "#DC2626",
-                boxShadow: "none",
-                "&:hover": { backgroundColor: "#B91C1C", boxShadow: "none" },
-              }}
-            >
-              Delete
-            </Button>
-          </Box>
-        </Box>
-      </Popover>
-
-      <Menu anchorEl={agentMenuAnchor} open={Boolean(agentMenuAnchor)} onClose={closeAgentMenu}>
         <MenuItem
           onClick={() => handleAssign(null)}
           sx={{ fontSize: 14 }}

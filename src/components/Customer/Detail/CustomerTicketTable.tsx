@@ -1,8 +1,4 @@
-import { useState } from "react";
 import {
-  Chip,
-  CircularProgress,
-  IconButton,
   Paper,
   Table,
   TableBody,
@@ -11,83 +7,18 @@ import {
   TableHead,
   TableRow,
   Typography,
+  Chip,
 } from "@mui/material";
 
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-
-import { useNavigate } from "react-router-dom";
-
-import { deleteTicket } from "../../../api/tickets/tickets.js";
-import { getTicketDeleteErrorMessage } from "../../../utils/errors";
 import type { CustomerTicket } from "../customer.types";
 
 interface CustomerTicketTableProps {
   tickets: CustomerTicket[];
-  loading: boolean;
-  error: string | null;
-  onDeleted: () => void;
 }
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "OPEN":
-      return {
-        bgcolor: "#FFF7ED",
-        color: "#EA580C",
-      };
-
-    case "RESOLVED":
-      return {
-        bgcolor: "#ECFDF5",
-        color: "#16A34A",
-      };
-
-    case "IN_PROGRESS":
-      return {
-        bgcolor: "#EFF6FF",
-        color: "#2563EB",
-      };
-
-    default:
-      return {
-        bgcolor: "#F3F4F6",
-        color: "#4B5563",
-      };
-  }
-};
-
-const getPriorityColor = (priority: string) => {
-  switch (priority.toUpperCase()) {
-    case "HIGH":
-      return {
-        bgcolor: "#FEF2F2",
-        color: "#DC2626",
-      };
-
-    case "MEDIUM":
-      return {
-        bgcolor: "#FFF7ED",
-        color: "#D97706",
-      };
-
-    case "LOW":
-      return {
-        bgcolor: "#ECFDF5",
-        color: "#16A34A",
-      };
-
-    case "CRITICAL":
-      return {
-        bgcolor: "#FEF2F2",
-        color: "#DC2626",
-      };
-  }
-};
 
 const formatDateTime = (value: string) => {
   const date = new Date(value);
+
   return Number.isNaN(date.getTime())
     ? value
     : date.toLocaleString(undefined, {
@@ -99,178 +30,151 @@ const formatDateTime = (value: string) => {
       });
 };
 
-const CustomerTicketTable = ({ tickets, loading, error, onDeleted }: CustomerTicketTableProps) => {
-  const navigate = useNavigate();
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
+const statusColor = (status: string) => {
+  switch (status) {
+    case "OPEN":
+      return "warning";
+    case "IN_PROGRESS":
+      return "info";
+    case "RESOLVED":
+      return "success";
+    case "CLOSED":
+      return "default";
+    default:
+      return "default";
+  }
+};
 
-  const handleDelete = (ticketId: string) => {
-    const confirmed = window.confirm(
-      `Are you sure you want to delete ${ticketId}?`
-    );
+const priorityColor = (priority: string) => {
+  switch (priority) {
+    case "HIGH":
+      return "error";
+    case "MEDIUM":
+      return "warning";
+    case "LOW":
+      return "success";
+    default:
+      return "default";
+  }
+};
 
-    if (!confirmed) return;
-
-    setDeletingId(ticketId);
-    setDeleteError(null);
-
-    deleteTicket(ticketId)
-      .then(() => onDeleted())
-      .catch((err) =>
-        setDeleteError(getTicketDeleteErrorMessage(err, "Couldn't delete ticket. Please try again."))
-      )
-      .finally(() => setDeletingId(null));
-  };
-
+const CustomerTicketTable = ({
+  tickets,
+}: CustomerTicketTableProps) => {
   return (
     <TableContainer
       component={Paper}
       sx={{
-        borderRadius: 3,
-        boxShadow: "0 2px 12px rgba(0,0,0,.06)",
+        borderRadius: "12px",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03)",
+        border: "1px solid",
+        borderColor: "divider",
       }}
     >
       <Typography
         sx={{
           px: 3,
-          pt: 3,
+          pt: 2.5,
           pb: 2,
-          fontSize: 18,
+          fontSize: 16,
           fontWeight: 600,
         }}
       >
         Customer Tickets
       </Typography>
 
-      {deleteError && (
-        <Typography
-          color="error"
-          sx={{ px: 3, pb: 2, fontSize: 13 }}
-        >
-          {deleteError}
-        </Typography>
-      )}
-
-      <Table>
+      <Table size="small">
         <TableHead>
           <TableRow sx={{ background: "#F8FAFC" }}>
-            <TableCell sx={{ fontWeight: 700 }}>Ticket No</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Issue</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Priority</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Department</TableCell>
-            <TableCell sx={{ fontWeight: 700 }}>Created At</TableCell>
-            <TableCell
-              align="center"
-              sx={{ fontWeight: 700 }}
-            >
-              Actions
+            <TableCell sx={{ fontWeight: 600, py: 1.5, color: "text.secondary" }}>
+              Ticket No
+            </TableCell>
+
+            <TableCell sx={{ fontWeight: 600, py: 1.5, color: "text.secondary" }}>
+              Issue
+            </TableCell>
+
+            <TableCell sx={{ fontWeight: 600, py: 1.5, color: "text.secondary" }}>
+              Status
+            </TableCell>
+
+            <TableCell sx={{ fontWeight: 600, py: 1.5, color: "text.secondary" }}>
+              Priority
+            </TableCell>
+
+            <TableCell sx={{ fontWeight: 600, py: 1.5, color: "text.secondary" }}>
+              Department
+            </TableCell>
+
+            <TableCell sx={{ fontWeight: 600, py: 1.5, color: "text.secondary" }}>
+              Created At
             </TableCell>
           </TableRow>
         </TableHead>
 
         <TableBody>
-          {loading && (
+          {tickets.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={7}
+                colSpan={6}
                 align="center"
-                sx={{ py: 4 }}
+                sx={{ py: 6 }}
               >
-                <CircularProgress size={28} />
+                <Typography
+                  color="text.secondary"
+                  variant="body2"
+                >
+                  No tickets found.
+                </Typography>
               </TableCell>
             </TableRow>
-          )}
-
-          {!loading && error && (
-            <TableRow>
-              <TableCell
-                colSpan={7}
-                align="center"
-                sx={{ py: 4 }}
-              >
-                <Typography color="error">{error}</Typography>
-              </TableCell>
-            </TableRow>
-          )}
-
-          {!loading && !error && tickets.length === 0 && (
-            <TableRow>
-              <TableCell
-                colSpan={7}
-                align="center"
-                sx={{ py: 4 }}
-              >
-                <Typography color="text.secondary">No tickets found.</Typography>
-              </TableCell>
-            </TableRow>
-          )}
-
-          {!loading &&
-            !error &&
+          ) : (
             tickets.map((ticket) => (
               <TableRow
                 key={ticket.id}
                 hover
+                sx={{
+                  "&:last-child td": {
+                    borderBottom: 0,
+                  },
+                }}
               >
-                <TableCell>{ticket.ticketNumber}</TableCell>
+                <TableCell sx={{ py: 1, fontWeight: 500 }}>
+                  {ticket.ticketNumber}
+                </TableCell>
 
-                <TableCell>{ticket.issueTopicName ?? "—"}</TableCell>
+                <TableCell sx={{ py: 1 }}>
+                  {ticket.issueTopicName ?? "—"}
+                </TableCell>
 
-                <TableCell>
+                <TableCell sx={{ py: 1 }}>
                   <Chip
                     label={ticket.status}
+                    color={statusColor(ticket.status)}
                     size="small"
-                    sx={{
-                      fontWeight: 600,
-                      ...getStatusColor(ticket.status),
-                    }}
+                    sx={{ fontWeight: 500 }}
                   />
                 </TableCell>
 
-                <TableCell>
+                <TableCell sx={{ py: 1 }}>
                   <Chip
                     label={ticket.priority}
+                    color={priorityColor(ticket.priority)}
                     size="small"
-                    sx={{
-                      fontWeight: 600,
-                      ...getPriorityColor(ticket.priority),
-                    }}
+                    sx={{ fontWeight: 500 }}
                   />
                 </TableCell>
 
-                <TableCell>{ticket.departmentName ?? "—"}</TableCell>
+                <TableCell sx={{ py: 1 }}>
+                  {ticket.departmentName ?? "—"}
+                </TableCell>
 
-                <TableCell>{formatDateTime(ticket.createdAt)}</TableCell>
-
-                <TableCell align="center">
-                  <IconButton
-                    size="small"
-                    onClick={() => navigate(`/tickets/${ticket.id}`)}
-                  >
-                    <VisibilityOutlinedIcon fontSize="small" />
-                  </IconButton>
-
-                  <IconButton
-                    size="small"
-                    onClick={() =>
-                      navigate(`/tickets/${ticket.id}/edit`)
-                    }
-                  >
-                    <EditOutlinedIcon fontSize="small" />
-                  </IconButton>
-
-                  <IconButton
-                    size="small"
-                    color="error"
-                    disabled={deletingId === ticket.id}
-                    onClick={() => handleDelete(ticket.id)}
-                  >
-                    <DeleteOutlineOutlinedIcon fontSize="small" />
-                  </IconButton>
+                <TableCell sx={{ py: 1 }}>
+                  {formatDateTime(ticket.createdAt)}
                 </TableCell>
               </TableRow>
-            ))}
+            ))
+          )}
         </TableBody>
       </Table>
     </TableContainer>

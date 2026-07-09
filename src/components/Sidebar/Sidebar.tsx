@@ -12,6 +12,7 @@ import { useAuth } from "../../auth/AuthContext";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import ConfirmationNumberOutlinedIcon from "@mui/icons-material/ConfirmationNumberOutlined";
+import AssignmentIndOutlinedIcon from "@mui/icons-material/AssignmentIndOutlined";
 import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
 import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
 import KeyboardArrowLeftOutlinedIcon from "@mui/icons-material/KeyboardArrowLeftOutlined";
@@ -34,6 +35,11 @@ const menuItems = [
     path: "/tickets",
   },
   {
+    title: "My Tickets",
+    icon: <AssignmentIndOutlinedIcon />,
+    path: "/my-tickets",
+  },
+  {
     title: "Agent Analytics",
     icon: <BarChartOutlinedIcon />,
     path: "/analytics",
@@ -51,10 +57,24 @@ const Sidebar = () => {
   const location = useLocation();
   const { user } = useAuth();
 
-  const visibleMenuItems =
-    user?.departmentCode === "FRONT"
-      ? menuItems.filter((item) => !FRONT_OFFICE_HIDDEN_PATHS.includes(item.path))
-      : menuItems;
+  const isNonFrontAgent = Boolean(user?.agentId) && user?.departmentCode !== "FRONT";
+  const isFrontOfficeAgent = user?.departmentCode === "FRONT";
+
+  const visibleMenuItems = menuItems.filter((item) => {
+    if (isNonFrontAgent) {
+      return item.path === "/my-tickets";
+    }
+
+    if (item.path === "/my-tickets") {
+      return isFrontOfficeAgent;
+    }
+
+    if (isFrontOfficeAgent) {
+      return !FRONT_OFFICE_HIDDEN_PATHS.includes(item.path);
+    }
+
+    return true;
+  });
 
   return (
     <Box
@@ -89,7 +109,7 @@ const Sidebar = () => {
                 lineHeight: 1.1,
               }}
             >
-              Telecom
+              Telco360
             </Typography>
 
             <Typography

@@ -11,6 +11,7 @@ import CustomerEditPage from "./pages/Customer/CustomerEditPage";
 import TicketPage from "./pages/Ticket/TicketPage";
 import Analytics from "./pages/Analytics/Analytics";
 import RegionalInsightsPage from "./pages/RegionalInsights/RegionalInsightsPage";
+import MyTicketsPage from "./pages/MyTickets/MyTicketsPage";
 
 function App() {
   return (
@@ -23,7 +24,7 @@ function App() {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute blockDepartmentCodes={["FRONT"]}>
+              <ProtectedRoute blockDepartmentCodes={["FRONT"]} blockOtherAgents>
                 <DashboardPage />
               </ProtectedRoute>
             }
@@ -31,8 +32,16 @@ function App() {
           <Route
             path="/tickets"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute blockOtherAgents>
                 <TicketPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-tickets"
+            element={
+              <ProtectedRoute>
+                <MyTicketsPage />
               </ProtectedRoute>
             }
           />
@@ -40,7 +49,7 @@ function App() {
           <Route
             path="/customers"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute blockOtherAgents>
                 <CustomerPage />
               </ProtectedRoute>
             }
@@ -48,7 +57,7 @@ function App() {
           <Route
             path="/customers/new"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute blockOtherAgents>
                 <CustomerCreatePage />
               </ProtectedRoute>
             }
@@ -56,7 +65,7 @@ function App() {
           <Route
             path="/customers/:id"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute blockOtherAgents>
                 <CustomerDetailPage />
               </ProtectedRoute>
             }
@@ -64,7 +73,7 @@ function App() {
           <Route
             path="/customers/:id/edit"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute blockOtherAgents>
                 <CustomerEditPage />
               </ProtectedRoute>
             }
@@ -73,7 +82,7 @@ function App() {
           <Route
             path="/regional-insights"
             element={
-              <ProtectedRoute blockDepartmentCodes={["FRONT"]}>
+              <ProtectedRoute blockDepartmentCodes={["FRONT"]} blockOtherAgents>
                 <RegionalInsightsPage />
               </ProtectedRoute>
             }
@@ -81,7 +90,7 @@ function App() {
           <Route
             path="/analytics"
             element={
-              <ProtectedRoute blockDepartmentCodes={["FRONT"]}>
+              <ProtectedRoute blockDepartmentCodes={["FRONT"]} blockOtherAgents>
                 <Analytics />
               </ProtectedRoute>
             }

@@ -28,6 +28,9 @@ export interface Ticket {
   createdAt: string;
   resolvedAt: string | null;
   creationSource: string | null;
+  slaTargetHours: number | null;
+  slaStatus: string | null;
+  slaHoursRemaining: number | null;
 }
 
 export interface DateRange {

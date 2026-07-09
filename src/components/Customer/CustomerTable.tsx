@@ -25,7 +25,6 @@ type CustomerTableProps = {
   customers: Customer[];
   loading: boolean;
   error: string | null;
-  segment: string;
   city: string;
   onEdit: (customer: Customer) => void;
   onDeleted: () => void;
@@ -38,7 +37,6 @@ const CustomerTable = ({
   customers,
   loading,
   error,
-  segment,
   city,
   onEdit,
   onDeleted,
@@ -47,10 +45,9 @@ const CustomerTable = ({
   const [deleteTarget, setDeleteTarget] = useState<Customer | null>(null);
 
   const filteredCustomers = customers.filter((customer) => {
-    const matchesSegment = segment === "All" || customer.segment === segment;
     const matchesCity = city === "All" || getCityFromAddress(customer.address) === city;
 
-    return matchesSegment && matchesCity;
+    return matchesCity;
   });
 
   return (

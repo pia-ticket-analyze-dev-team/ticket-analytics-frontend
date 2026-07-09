@@ -7,10 +7,11 @@ interface UseCustomersParams {
   page: number;
   size: number;
   search: string;
+  segment?: string;
   refreshKey?: number;
 }
 
-export function useCustomers({ page, size, search, refreshKey = 0 }: UseCustomersParams) {
+export function useCustomers({ page, size, search, segment = "", refreshKey = 0 }: UseCustomersParams) {
   const [data, setData] = useState<PagedResponse<Customer> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +19,7 @@ export function useCustomers({ page, size, search, refreshKey = 0 }: UseCustomer
   useEffect(() => {
     let cancelled = false;
 
-    fetchCustomers({ page, size, search })
+    fetchCustomers({ page, size, search, segment })
       .then((result: PagedResponse<Customer>) => {
         if (!cancelled) {
           setData(result);
@@ -35,7 +36,7 @@ export function useCustomers({ page, size, search, refreshKey = 0 }: UseCustomer
     return () => {
       cancelled = true;
     };
-  }, [page, size, search, refreshKey]);
+  }, [page, size, search, segment, refreshKey]);
 
   return { data, loading, error };
 }
